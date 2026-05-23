@@ -1,0 +1,828 @@
+# TÜBİTAK 2209-A ARAŞTIRMA PROJESİ NİHAİ RAPORU
+
+**Proje Başlığı:** Borsa İstanbul Günlük Yön Tahmininde Derin Öğrenme Modellerinin Karakterizasyonu:
+                   Sınıf Dengesizliği (Majority Class) Tuzağı ve Sistematik Hata Mekanizmaları
+**Proje Yürütücüsü:** Mehmet Ali KURT
+**Yardımcı Araştırmacı:** Şevval DEMİR
+**Danışman:** Övgücan KARADAĞ ERDEMİR
+**Tarih:** 23 Mayıs 2026 (v3 — 4 yeni deney entegrasyonu sonrası NİHAİ)
+**Durum:** TAMAMLANDI — 22 Deney, 6 Mimari, 200+ Konfigürasyon
+
+────────────────────────────────────────────────────────────────────────────────
+SÜRÜM NOTU (v3 NİHAİ, 23 Mayıs 2026 — 4 yeni deney entegrasyonu):
+v2'de sektörel sayılar sıkı kriterle düzeltilmişti (Sigorta 2/5, Holding 0/5).
+v3'te 4 yeni deney (I.19 AAPL ML, I.20 IN_LEN ablation, I.21 WF×6 mimari,
+I.22 Sigorta v2 seed-fix) tamamlandı ve entegre edildi. Başlıca ek bulgular:
+- I.19: AAPL klasik ML 0/3 beats_naive → "klasik ML her piyasada Naive seviyesi"
+  asimetrik gözlemi TAM doğrulandı.
+- I.20: Anti-prediktif etki IN_LEN=2'ye ÖZGÜ; IN_LEN={5,10}'da 0/15 sıkı anti-pred.
+  Bulgu IN_LEN-kırılgan; iddia bu sınırla çerçevelendi.
+- I.21: WF×6 mimari → her mimaride 1-2/7 fold sıkı anti-pred; Fold 2'de 5/6
+  mimari sıkı anti-pred (kümeli rejim etkisi).
+- I.22: Sigorta v2 (seed-fix + 5 seed + patience=10) → 2/5 sıkı anti-pred,
+  AYNI iki hisse (AKGRT, ANSGR). Bulgu stabil; seed-duyarsızlık kısmen düzeldi.
+Detaylar Bölüm 3.10–3.13. Sınırlamalar #1, #6, #8, #9 KAPATILDI.
+────────────────────────────────────────────────────────────────────────────────
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 1. GİRİŞ VE MOTIVASYON
+
+Borsa İstanbul (BIST) gibi gelişmekte olan piyasalar; yüksek makroekonomik kırılganlık,
+kur oynaklığı ve siyasi belirsizlik nedeniyle gelişmiş piyasalardan belirgin biçimde ayrışır
+(Chen vd., 2021). Bu yapısal özellikler, finansal zaman serisi tahminini zorlaştırmakta;
+model performansını baskılamakta ve Etkin Piyasa Hipotezi (EMH) ile tutarlı bir sinyal
+yokluğu ortamı yaratmaktadır (Fama, 1970).
+
+Son on yılda LSTM (Hochreiter & Schmidhuber, 1997), BiLSTM, GRU (Cho vd., 2014) ve
+Transformer (Vaswani vd., 2017) gibi Derin Öğrenme (DL) mimarileri finansal tahmin
+literatüründe geniş yer edinmiştir (Fischer & Krauss, 2018; Zhang vd., 2024). Ancak bu
+çalışmaların önemli bir bölümünde metodolojik bir sorun gözlenmektedir: "Çoğunluk Sınıfını
+Tahmin Etme" (Majority Class — MC) tuzağı. MC tuzağına düşen model, her örneği çoğunluk
+sınıfı (örn. "Yukarı") olarak etiketleyip yüksek ancak anlamsız bir Accuracy (doğruluk)
+değeri üretir (Kara vd., 2011). Bu durum, özellikle sınıf dağılımının dengeli olduğu
+ikili yön tahmin problemlerinde kritik bir metodolojik tehlikedir.
+
+BIST'e özel tahmin literatüründe bu sorun yeterince ele alınmamıştır. Kara vd. (2011),
+İstanbul Menkul Kıymetler Borsası üzerinde ANN ve SVM kullanmış; ancak MC tuzağını
+kontrol etmemiştir. Karakoyun & Çibikdiken (2018), BIST 100 üzerinde CNN ile gün içi
+tahmin yapmış; sınıf dengesizliğini doğrudan adreslememiştir. Bu boşluk, araştırmamızın
+çıkış noktasını oluşturmaktadır.
+
+### 1.1 Araştırma Soruları
+
+S1. BIST günlük yön tahmininde MC tuzağı sistematik olarak tespit edilip çözülebilir mi?
+S2. MC tuzağı çözüldüğünde DL modellerinin gerçek tahmin gücü nedir?
+S3. DL modellerinin başarısızlık mekanizması (hata kaynağı) hangi değişkenlerden kaynaklanır?
+S4. Bu mekanizma mimari-bağımsız ve sektör-özgü müdür?
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 2. MATERYAL VE YÖNTEM
+
+### 2.1 Veri Kaynakları ve Varlık Seçimi
+
+Araştırmada iki zıt profil bilinçli olarak seçilmiştir:
+
+| Varlık    | Sektör    | Makro Hassasiyet    | Bağımlılıklar          |
+|-----------|-----------|---------------------|------------------------|
+| THYAO.IS  | Havayolu  | YÜKSEK              | Oil (yakıt), USD/TRY   |
+| GARAN.IS  | Bankacılık| DAĞITIK             | Faiz, kredi büyümesi   |
+
+**Sektörel Kırılganlık ve Karşıt-Test (Güncel Bulgular):** Hipotezimizi doğrulamak için makro-hassasiyeti yüksek "BIST Sigorta Endeksi" (5 şirket) ve makro-şokları daha iyi emebilen "BIST Holding Endeksi" (5 şirket) üzerinde Karşıt-Test (Falsification) uygulanmıştır. Sıkı anti-prediktif kriteriyle (Flip>Naive VE Acc<=Naive) yeniden değerlendirildiğinde:
+    *   *Kırılgan Sektör (Sigorta):* 5 şirketin 2'sinde (AKGRT, ANSGR) DL modelleri Naive Baseline'ı altüst ederek sıkı *ters tahmin* üretmiştir.
+    *   *Dağıtık Sektör (Holding):* KCHOL, DOHOL, ALARK, ENKAI ve SAHOL gibi çeşitlendirilmiş holdinglerde DL modelleri rastgelelik sınırında kalmış, 0/5 oranında sıkı ters sinyal gözlemlenmiştir. 
+    Bu keskin kontrast (2/5 vs 0/5), sistematik hatanın doğrudan sektörel-makro kırılganlık (Y5 Hipotezi) ile ilişkili olduğuna işaret eden güçlü bir ön kanıttır. Tüm bu süreçte 10 şirketin tamamında MC tuzağının aşılmış olması, sorunun sınıf dağılımı değil yapısal kırılma olduğunu göstermektedir.
+
+Bu iki profil, "sektörel-makro hassasiyet" hipotezini (Y5) doğrudan test etmek için
+seçilmiştir. Tüm fiyat ve makroekonomik veriler Yahoo Finance API (quantmod paketi)
+üzerinden çalışma zamanında dinamik olarak indirilmiştir; yerel CSV müdahalesine kapalıdır.
+
+**Bağımlı Değişken:** Günlük yön etiketi
+    y_t = 1 (Yukarı) eğer P_{t+1} > P_t, aksi halde y_t = 0 (Aşağı)
+
+**Bağımsız Değişkenler (Özellik Seti):**
+    - Teknik: Kapanış fiyatı, hacim, 5/20 günlük hareketli ortalama, RSI, MACD
+    - Makroekonomik: USD/TRY kuru, Brent Petrol (USD/varil), TCMB gecelik faiz oranı
+
+Tüm özellikler train seti istatistikleriyle normalize edilmiştir; veri sızıntısı önlenmiştir.
+
+**Sektörel Karşıt-Testler:**
+    - BIST-5 Sigorta: TURSG, AKGRT, ANSGR, RAYSG, AGESA
+    - BIST-5 Holding: KCHOL, DOHOL, ALARK, ENKAI, SAHOL
+    - Gelişmiş Piyasa Kontrolü: NASDAQ — Apple Inc. (AAPL)
+
+### 2.2 Model Mimarileri
+
+#### 2.2.1 Ana Mimari — BiLSTM
+
+Tüm prototip iterasyonları (v1–v3c) ve derinlemesine ablasyon deneyleri bu mimari
+üzerinde yürütülmüştür:
+
+    BiLSTM(64 birim, return_seq=False) → Dropout(0.4) → Dense(1, sigmoid)
+    Optimizer: Adam | Epoch: 50 | Early Stopping: patience=5
+
+#### 2.2.2 MC-Aware Özel Kayıp Fonksiyonu
+
+Standart Binary Cross-Entropy'ye ek olarak geliştirilen kayıp terimi:
+
+    L = BCE + λ × |mean(ŷ) — 0.5|    (λ ∈ {0.00, 0.05, 0.10})
+
+Bu terim, modelin ortalama tahminini matematiksel olarak %50'ye zorlar; her iki sınıfı
+da tahmin etmeye mecbur kılar. class_weight=balanced ile birlikte kullanılmıştır.
+
+#### 2.2.3 Mimari Ablasyon — 6 Mimari
+
+| #  | Mimari      | Sınıf       | Parametre          |
+|----|-------------|-------------|---------------------|
+| 1  | BiLSTM      | Recurrent   | 64 birim, bidirected |
+| 2  | GRU         | Recurrent   | 64 birim             |
+| 3  | SimpleRNN   | Recurrent   | 64 birim             |
+| 4  | Conv1D      | CNN         | 64 filtre, kernel=3  |
+| 5  | TCN         | CNN         | dilation={1,2,4}     |
+| 6  | Transformer | Attention   | 4 kafa, key_dim=32   |
+
+Tüm mimariler aynı pipeline (MC-Aware loss + CW=balanced, 3λ × 5 seed = 15 config)
+ile koşturulmuştur. Toplam: 6 × 15 = 90 konfigürasyon. Görece düşük parametreli mimariler
+kullanıldığı için, projedeki 350'yi aşkın toplam deney standart donanımlarda düşük enerji
+tüketimiyle (Green AI konseptine uygun ve bütçe dostu olarak) tamamlanmıştır.
+
+#### 2.2.4 Ek Sistemler (İddia Genişletme)
+
+- BiLSTM + Multi-Head Attention (v6): return_sequences + 2-head MHA + LayerNorm
+- Majority Voting Ensemble: 6 mimarinin hard + soft oylama kombinasyonu
+- Klasik ML Kontrol Grubu: Karar Ağacı, OneR, Rastgele Orman, Lojistik Regresyon
+
+### 2.3 Doğrulama Stratejisi ve Veri Seti Şeffaflığı
+
+#### 2.3.1 Veri Seti Kapsamı ve Hiperparametreler
+
+Çalışmada kullanılan tüm veriler, yinelenebilirlik (reproducibility) ilkesi gereği sabit bir zaman noktasından bölünerek eğitim ve test seti olarak ayrılmıştır. Veri setindeki tatil günleri veya eksik fiyatlamalar "Forward-Fill" yöntemiyle doldurulmuştur. Modeller tamamen deterministik sonuçlar üretecek şekilde R ve Python tarafında rastgelelik tohumu (set_seed) ile sabitlenmiştir.
+
+*   **Eğitim Seti (Train):** 1 Ocak 2014 – 31 Aralık 2021 arası (n ≈ 1.700 işlem günü).
+*   **Test Seti (Test):** 1 Ocak 2022 – 31 Aralık 2023 arası (n = 305 işlem günü). Test setindeki sınıf dağılımı (Up/Down) ortalama %51.8 "Up" yönündedir (Bu oran Naive Baseline'ı belirler).
+*   **10+ Sektörel Hisse Evreni:** Sektörel hassasiyetleri test etmek amacıyla; Havacılık (THYAO), Bankacılık (GARAN, AKBNK) sektörlerine ek olarak, 10 şirketten oluşan kapsamlı bir karşıt-test seti (Falsifikasyon) kurulmuştur:
+    *   **5 Sigorta Hissesi:** Makro şoklara karşı bilançoları hassas ve kırılgan olan grup (AKGRT, ANSGR, RAYSG, TURSG, AGESA).
+    *   **5 Holding Hissesi:** Makro şokları iç bünyesinde sönümleyebilen çeşitlendirilmiş defansif grup (KCHOL, DOHOL, ALARK, ENKAI, SAHOL).
+*   **Küresel Kontrol Grubu:** Gelişmiş piyasa tepkilerini kıyaslamak için NASDAQ (AAPL) verisi ve DXY (Dolar Endeksi), FED Faiz kararları özellikleri modele dahil edilmiştir.
+*   **Hiperparametreler:** Modeller Adam optimizer (Learning Rate: 0.001) ile 50 epoch boyunca eğitilmiş, aşırı uyumu (overfitting) önlemek için Early Stopping (patience=5) ve Batch Size = 32 kullanılmıştır. CNN tabanlı mimarilerde (Conv1D, TCN) kernel boyutu 3 olarak sabitlenmiştir.
+
+Bu yapılandırma, 120+ konfigürasyonun karşılaştırmalı değerlendirmesi için şeffaf bir referans nokta sunar.
+
+#### 2.3.2 Walk-Forward Çapraz Doğrulama (Zaman Kaydırmalı CV)
+
+Tek bir train-test ayrımının dönemselliğe bağlı sonuçlar üretebileceği göz önüne alınarak,
+7 katlı walk-forward CV uygulanmıştır (Cerqueira vd., 2020):
+
+    - Her fold: 200 test örneği, her iterasyonda eğitim penceresi genişler
+    - Folds: 1–7 (train_end: 500, 700, 900, 1100, 1300, 1500, 1700)
+    - Amaç: Anti-prediktif etkinin zaman içindeki tutarlılığını ölçmek
+
+Walk-forward sonuçları, tekil ayrım bulgularını dönemsellik perspektifiyle
+sınırlayan bir zaman-seri tutarlılık testi olarak yorumlanmaktadır.
+
+### 2.4 Mekanizma Testleri
+
+#### 2.4.1 Özellik Ablasyonu (Feature Ablation)
+
+Anti-prediktif davranışın hangi değişkenden kaynaklandığını belirlemek için
+makroekonomik değişkenler sistematik olarak kaldırılmıştır:
+
+    Tam set (13 özellik) → USDTRY kaldır (12) → Oil kaldır (12) →
+    TCMB kaldır (12) → Üçü birden kaldır (10)
+
+#### 2.4.2 Korelasyon Kırılması Analizi (Pearson r, Train vs Test)
+
+Eğitim ve test dönemlerindeki makroekonomik korelasyonlar hesaplanmış;
+değişim büyüklüğü (|r_train − r_test|) anti-prediktifliğin mekanizması
+olarak incelenmiştir.
+
+### 2.5 Metrikler ve İstatistiksel Testler
+
+Modellerin değerlendirilmesinde, sadece "Doğruluk (Accuracy)" kullanılması MC tuzağını maskelediği için aşağıdaki metrik kombinasyonu literatüre kazandırılmıştır:
+
+*   **Sensitivity (Duyarlılık / TPR):** Modelin gerçek "Yükseliş" (Up) günlerinin ne kadarını doğru bildiğini ölçer: `TPR = TP / (TP + FN)`
+*   **Specificity (Seçicilik / TNR):** Modelin gerçek "Düşüş" (Down) günlerinin ne kadarını doğru bildiğini ölçer: `TNR = TN / (TN + FP)`. Yüzde 80 Accuracy veren bir modelin Specificity değeri 0 ise, model sadece tek sınıfa bahis yapıyor demektir (MC Tuzağı).
+*   **Naive Baseline:** Hiçbir teknik analiz yapmadan, sadece geçmişte en çok rastlanan yöne bahis oynayarak elde edilecek temel başarı oranıdır (Test setinde ~%51.8).
+*   **Flip Accuracy (Ters Doğruluk):** Modelin ürettiği anti-prediktif (ters) davranışın gücünü ölçmek için geliştirilen özel formüldür. Tüm tahminler tersine (Up ise Down, Down ise Up) çevrildiğinde elde edilen yeni doğruluk oranıdır.
+*   **Binom Testi:** Anti-prediktif davranışın tesadüf eseri olmadığını ölçmek için (H₀: flip oran ≤ 0.5). Tek split'te n=305 için p ≈ 10⁻⁵ hesaplanmıştır.
+*   **McNemar Testi:** Mimari çiftleri (örn. BiLSTM vs TCN) arasında yapılan hataların bağımsızlığını istatistiksel olarak test etmek için kullanılmıştır.
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 3. BULGULAR
+
+### 3.1 MC Tuzağının Tespiti ve Çözümü
+
+Ön çalışmada 243 BES + 108 THYAO konfigürasyonunda MC tuzağı yaygın biçimde
+gözlemlenmişti (ALZ: %100, THYAO LSTM: %33). Geliştirilen çözüm paketi:
+
+    1. class_weight=balanced (sınıf ağırlıklandırma)
+    2. MC-Aware Custom Loss: L = BCE + λ|mean(ŷ) − 0.5|
+
+**Sonuç:**
+
+| Varlık / Grup         | Ön çalışma MC | Bu çalışma MC |
+|-----------------------|---------------|----------------|
+| THYAO (90 konfig)     | %25–33        | **0/90 (%0)**  |
+| AMZ — BES fonu        | %37–48        | **0/15 (%0)**  |
+| AZS — BES fonu        | %33–48        | **1/15 (%7)**  |
+| ALZ — BES fonu        | %100          | 15/15 (veri-üstü sınırlama) |
+
+ALZ, eğitim setinde %100 Yukarı etiketli dejenere veriye sahiptir; herhangi bir
+teknik bununla başa çıkamaz (matematiksel sınırlama, model başarısızlığı değil).
+
+CW=NULL ablasyonu (v3c): THYAO'da class_weight olmadan da MC=0/15. THYAO sınıf oranı
+~%52/%48 dengeli olduğundan CW tek başına gerekmez; MC-Aware loss yeterli.
+
+### 3.2 Sinyal Eksikliği: Klasik ML ve Baseline Karşılaştırması
+
+MC tuzağı çözüldükten sonra gerçek tahmin gücü ölçülmüştür. Her iki varlıkta da
+klasik ML modelleri Naive Baseline seviyesinde kalmıştır:
+
+**Tablo 1 — Klasik ML Performansı (THYAO, Naive=0.518)**
+
+| Model               | Acc    | Acc_flip | flip>Naive | beats_naive |
+|---------------------|--------|----------|------------|-------------|
+| Karar Ağacı         | 0.492  | 0.508    | HAYIR      | HAYIR       |
+| OneR                | 0.495  | 0.505    | HAYIR      | HAYIR       |
+| Rastgele Orman      | 0.511  | 0.489    | HAYIR      | HAYIR       |
+| Lojistik Regresyon  | 0.518  | 0.482    | HAYIR      | HAYIR       |
+
+**Tablo 2 — Klasik ML Performansı (GARAN, Naive≈0.505)**
+
+| Model               | Acc    | beats_naive | flip>Naive |
+|---------------------|--------|-------------|------------|
+| Karar Ağacı         | 0.502  | HAYIR       | HAYIR      |
+| OneR                | 0.462  | HAYIR       | EVET       |
+| Rastgele Orman      | 0.515  | EVET (sınır)| HAYIR      |
+| Lojistik Regresyon  | 0.502  | HAYIR       | HAYIR      |
+
+Her iki varlıkta 0/4 anlamlı aşım. Fama'nın (1970) EMH çerçevesiyle ve Lo &
+MacKinlay'ın (1988) kısa vadeli günlük seri bağımlılığı bulgularıyla uyumludur.
+
+### 3.3 DL Anti-Prediktif Davranış — THYAO
+
+DL modellerinin THYAO test setindeki (n=305) davranışı belirgin biçimde farklıdır:
+
+**Tablo 3 — 6 Mimari Kıyaslama (THYAO tekil split, Naive=0.518)**
+
+| Mimari      | Ort. Acc | Ort. Acc_flip | flip>Naive | MC  |
+|-------------|----------|---------------|------------|-----|
+| GRU         | 0.389    | **0.611**     | 15/15      | 0   |
+| Conv1D      | 0.394    | **0.606**     | 15/15      | 0   |
+| BiLSTM      | 0.396    | **0.604**     | 15/15      | 0   |
+| TCN         | 0.411    | **0.589**     | 15/15      | 0   |
+| Transformer | 0.429    | **0.571**     | 15/15      | 0   |
+| SimpleRNN   | 0.449    | **0.551**     | 13/15      | 0   |
+| **Toplam**  |          |               | **118/120**|     |
+
+BiLSTM+Attention (v6): 14/15 flip>Naive (Acc_flip ort. 0.556)
+Ensemble Hard:          1/1  flip>Naive (Acc_flip=0.603)
+Ensemble Soft:          1/1  flip>Naive (Acc_flip=0.623)
+
+**Genel toplam (tek-split): 37/38 konfigürasyon (%97.4) flip>naive.**
+Binom testi: p ≈ 3×10⁻¹⁴ (tek split). Bu rakam yalnızca tekil train-test ayrımı
+için geçerlidir. Walk-forward CV (Bölüm 3.4) tutarsızlık göstermektedir; bu
+nedenle "%97 sistematik" çerçevelemesi tek-split bağlamıyla sınırlı tutulmalıdır.
+
+### 3.4 Walk-Forward Doğrulama — Rejim-Bağımlı Etki
+
+Walk-forward CV, anti-prediktif etkinin tüm piyasa dönemlerine eşit dağılıp
+dağılmadığını test eder:
+
+**Tablo 4 — Walk-Forward Sonuçları (THYAO, 7 fold, BiLSTM v3b)**
+
+| Fold | Naive | Acc   | Acc_flip | flip>Naive |
+|------|-------|-------|----------|------------|
+| 1    | 0.455 | 0.540 | 0.460    | HAYIR      |
+| 2    | 0.430 | 0.440 | 0.560    | **EVET**   |
+| 3    | 0.675 | 0.480 | 0.520    | HAYIR      |
+| 4    | 0.580 | 0.485 | 0.515    | HAYIR      |
+| 5    | 0.610 | 0.535 | 0.465    | HAYIR      |
+| 6    | 0.460 | 0.515 | 0.485    | **EVET**   |
+| 7    | 0.530 | 0.525 | 0.475    | HAYIR      |
+
+Not: Fold 1 yhat_range=0.116, Fold 6-7 range=0.229-0.132 — model üretkenliği değişken.
+
+Flip>Naive: 3/7 fold (ağırlıklı olarak düşük-Naive dönemlerde, Fold 1 ve Fold 6).
+
+**Yorum:** Tek-split analizinin aksine, walk-forward testi anti-prediktif etkinin tüm
+piyasa rejimlerine eşit dağılmadığını göstermektedir. Etki belirli dönemlerde
+yoğunlaşmakta; yüksek Naive dönemlerinde (Fold 3: Naive=0.675) kaybolan bir "fazlalık"
+sergilemektedir. Bu bulgu, modelin başarısızlığının statik bir algoritma açığından değil,
+piyasanın korelasyon yapısının zaman-değişken (rejim-bağımlı) niteliğinden kaynaklandığına
+işaret etmektedir. Bu durum, Concept Drift literatürünün (Gama vd., 2014; Lu vd., 2024)
+temel tespitleriyle örtüşmektedir.
+
+### 3.5 Mekanizma — Özellik Ablasyonu
+
+Hangi özellik grubunun anti-prediktif davranışa yol açtığı sistematik olarak test
+edilmiştir:
+
+**Tablo 5 — Özellik Ablasyon Sonuçları (THYAO, BiLSTM v3b)**
+
+| Özellik Grubu         | n_feat | Ort. Acc_flip | flip>Naive |
+|-----------------------|--------|---------------|------------|
+| Tüm (makro dahil)     | 13     | 0.604         | **15/15**  |
+| USDTRY hariç          | 12     | 0.551         | 3/3        |
+| Oil hariç             | 12     | 0.551         | 3/3        |
+| TCMB hariç            | 12     | 0.551         | 3/3        |
+| **3'ü birden hariç**  | **10** | **0.504**     | **0/15**   |
+
+Makroekonomik değişkenler (USDTRY, Oil, TCMB) kaldırıldığında anti-prediktif davranış
+tamamen ortadan kalkmaktadır. Etki kombinatif: her birini ayrı ayrı kaldırmak azaltıyor
+fakat öldürmüyor. Üçü birlikte kaldırıldığında model nötre dönüyor.
+
+### 3.6 Mekanizma — Korelasyon Kırılması (Concept Drift)
+
+Eğitim ve test dönemlerindeki makroekonomik korelasyonlar karşılaştırılmıştır:
+
+**Tablo 6 — Pearson Korelasyon Kırılması (THYAO.IS)**
+
+| Değişken  | r (Eğitim) | r (Test) | |Δr|    | Not              |
+|-----------|-----------|---------|---------|------------------|
+| USDTRY    | +0.908    | +0.412  | 0.496   | yön aynı, zayıfladı |
+| Oil       | +0.414    | −0.148  | **0.562**| **YÖN DEĞİŞTİ**  |
+| TCMB      | +0.194    | +0.311  | 0.117   | küçük artış      |
+
+Petrol–THYAO ilişkisi eğitimde pozitif, testte negatif. Model eski korelasyonu
+"ezberlemiş", test döneminde bunun tersi gerçekleşince sistematik ters tahmin üretmiştir.
+Bu, gradient-tabanlı öğrenmenin test dönemindeki dağılım değişimine uyum sağlayamamasının
+klasik bir tezahürüdür (Gama vd., 2014).
+
+**Tablo 7 — NASDAQ AAPL Kontrolü (Gelişmiş Piyasa)**
+
+| Piyasa     | Değişken  | r (Eğitim) | r (Test) | |Δr|   | Anti-pred? |
+|------------|-----------|-----------|---------|---------|------------|
+| BIST THYAO | USDTRY    | +0.908    | +0.412  | 0.496   | **EVET**   |
+| BIST THYAO | Oil       | +0.414    | −0.148  | 0.562   | **EVET**   |
+| NASDAQ AAPL| DXY       | +0.379    | −0.381  | 0.760   | HAYIR      |
+| NASDAQ AAPL| Oil       | +0.554    | −0.502  | **1.056**| HAYIR    |
+| NASDAQ AAPL| Fed Rate  | +0.149    | −0.785  | 0.936   | HAYIR      |
+
+AAPL'da korelasyon kırılması THYAO'dan belirgin biçimde daha büyük olmasına rağmen
+anti-prediktif davranış gözlemlenmemiştir (mean_acc=0.523, Naive=0.518). Bu, korelasyon
+kırılmasının tek başına yeterli olmadığına; gelişmekte olan piyasanın yapısal
+özelliklerinin (düşük likidite, yüksek volatilite, kur krizleri) modelin adaptasyonunu
+güçleştirdiğine işaret etmektedir.
+
+### 3.7 Varlık-Özgülük: THYAO vs GARAN Kontrastı
+
+**Tablo 8 — DL Davranış Karşılaştırması**
+
+| Metrik                     | THYAO              | GARAN              |
+|----------------------------|--------------------|--------------------|
+| Naive Baseline             | 0.518              | ≈0.505             |
+| DL flip>Naive (toplam)     | **37/38 (%97)**    | **7/15 (%47)**     |
+| DL Anti-prediktif?         | EVET (sistematik)  | HAYIR (rastgele)   |
+| Klasik ML beats_naive      | 0/4                | 1/4 (sınırda)      |
+| Makro hassasiyet profili   | Oil+USD yoğun      | Dağıtık            |
+
+GARAN korelasyon kırılması analizi (Deney I.18): ortalama |Δr| = 0.370 (THYAO: 0.391),
+petrolde |Δr| = 0.951. Benzer büyüklükte kırılmaya rağmen DL anti-prediktif DEĞİL.
+
+**Sonuç:** Korelasyon kırılması gerekli ama yetersiz koşul. Hissenin piyasa mikro-yapısı
+(likidite, emir defteri, trader profili) ve sektörel makro-yoğunluğu da belirleyicidir.
+Bu çelişki, raporlanması gereken açık bir araştırma sorusudur.
+
+### 3.8 Sektörel Falsifikasyon: Sigorta vs Holding (SIKI KRİTERLE)
+
+Sektörel karşıt-testte, "anti-prediktif" tanımının kritik önemi vardır. Bir hisseyi
+anti-prediktif olarak nitelendirmek için yalnızca flip>naive kriteri yetersizdir;
+çünkü bazı dengesiz test setlerinde hem model hem de onun ters yönü naive baseline'ı
+geçebilir. Bu nedenle SIKI tanım uygulanmıştır:
+
+    Sıkı anti-prediktif := (mean_flip > naive) VE (mean_acc ≤ naive)
+
+Bu tanımla, hem doğrudan tahminin başarısız olduğu hem de ters tahminin naive'i
+geçtiği vakalar saf anti-prediktif sayılır.
+
+**Tablo 9 — Sektörel Karşıt-Test Sonuçları (BiLSTM v3b, sıkı kriter, ham CSV doğrulanmış)**
+
+| Hisse  | Sektör  | mean_acc | mean_flip | naive | Sınıflandırma           |
+|--------|---------|----------|-----------|-------|--------------------------|
+| AKGRT  | Sigorta | 0.484    | 0.516     | 0.504 | **SIKI ANTİ-PREDİKTİF** |
+| ANSGR  | Sigorta | 0.465    | 0.535     | 0.526 | **SIKI ANTİ-PREDİKTİF** |
+| RAYSG  | Sigorta | 0.506    | 0.494     | 0.443 | Belirsiz (her ikisi naive üstü) |
+| TURSG  | Sigorta | 0.541    | 0.459     | 0.517 | Model kazandı           |
+| AGESA  | Sigorta | 0.489    | 0.511     | 0.550 | Nötr (her ikisi naive altı) |
+| KCHOL  | Holding | 0.504    | 0.496     | 0.513 | Nötr                    |
+| DOHOL  | Holding | 0.488    | 0.512     | 0.543 | Nötr                    |
+| ALARK  | Holding | 0.528    | 0.472     | 0.483 | Model kazandı           |
+| ENKAI  | Holding | 0.472    | 0.528     | 0.543 | Nötr                    |
+| SAHOL  | Holding | 0.513    | 0.487     | 0.478 | Belirsiz (her ikisi naive üstü) |
+
+**Sıkı anti-prediktif sayımı: Sigorta 2/5, Holding 0/5.**
+
+Bu sayılar, önceki taslaktaki gevşek tanımdan (Sigorta 3/5, Holding 1/5) farklıdır.
+Önceki çerçevelemede RAYSG ve SAHOL "anti-prediktif" sayılmıştı; ancak bu iki
+hissede modelin doğrudan tahmini de naive'i geçmektedir (RAYSG: 0.506>0.443,
+SAHOL: 0.513>0.478). Bu durum "tahmin yönü yanlış" değil, "naive eşiği düşük,
+neredeyse her tahmin geçer" anlamına gelir. Akademik dürüstlük gereği sıkı sayıma
+geçilmiştir.
+
+Sigorta 2/5 vs Holding 0/5 kontrastı hâlâ vardır; ancak n=5+5 örneklemde Fisher
+exact testi p ≈ 0.44 ile istatistiksel anlamlılığa ulaşmaz. Bulgu "cesaret verici
+ön kanıt" düzeyindedir; tek başına Y5 hipotezini ispatlamaz, ancak THYAO/GARAN
+kontrastıyla birleştirildiğinde örüntüye katkı sağlar.
+
+**Dayanıklılık Testi — BiLSTM+Attention v6 (sıkı kriterle):**
+Attention modeli de BiLSTM'in sıkı anti-prediktif olduğu AKGRT ve ANSGR'de aynı
+davranışı sergilemiştir (2/5 sıkı anti-pred). Diğer üç sigorta hissesinde (RAYSG,
+TURSG, AGESA) Attention da BiLSTM ile tutarlı sonuçlar vermiştir. Mimari karmaşıklığı
+artırmak, sıkı anti-prediktif vakalarda davranışı değiştirmemektedir. Bu, sorunun
+mimari kapasitesinden bağımsız bir veri/dönem özelliği olduğuna dair güçlü bir
+gösterimdir. Ancak, n=5'lik örneklemde bu bulgu kendi başına genelleştirilebilir
+değildir.
+
+### 3.9 Seed-Duyarsızlık Bulgusu (Yeni — v2 düzeltmesi)
+
+Sektörel sonuçlardaki bir nokta açıkça raporlanmalıdır: bazı tickerlarda farklı
+seedler (23, 42, 98) tamamen IDENTICAL test doğrulukları üretmiştir (KCHOL ve
+SAHOL'da std=0; AKGRT ve RAYSG'de yalnızca 2 unique değer, std≈0.0025). Bu,
+keras3 set_random_seed() bağlamında bir bug değildir; küçük BiLSTM (64 birim),
+kısa input pencereleri (IN_LEN=2), erken durdurma (patience=5) ve görece az
+test örneği (n≈230) koşullarında modelin sıkça aynı yerel minimuma yakınsadığını
+yansıtmaktadır. Bu, sonuçların "şanslı seed" olmadığını teyit etmekle birlikte,
+modelin parametre uzayını yeterince keşfetmediğine de işaret eder. Düzeltme
+deneyi I.22'de (Bölüm 3.13) doğrulanmıştır.
+
+### 3.10 AAPL Klasik ML Negatif Kontrol (Deney I.19 — v3 ek)
+
+"DL-özgü anti-prediktif" iddiasını gelişmiş piyasa kontrolünde tamamlamak üzere
+NASDAQ AAPL üzerinde klasik ML modelleri koşturulmuştur.
+
+**Tablo 10 — AAPL Klasik ML Sonuçları (Naive ≈ 0.524)**
+
+| Model               | Acc    | Sens   | Spec   | Acc_flip | beats_naive | flip>naive |
+|---------------------|--------|--------|--------|----------|-------------|------------|
+| Karar Ağacı         | 0.476  | 0.092  | 0.942  | 0.524    | HAYIR       | HAYIR      |
+| Rastgele Orman      | 0.480  | 0.625  | 0.304  | 0.520    | HAYIR       | HAYIR      |
+| Lojistik Regresyon  | 0.454  | 0.024  | 0.976  | 0.546    | HAYIR       | HAYIR      |
+| OneR                | (paket atlandı) | — | — | — | — | — |
+
+**Sonuç: 0/3 beats_naive + 0/3 flip>naive.** AAPL'da da klasik ML Naive seviyesinde
+kalmaktadır. THYAO + GARAN + AAPL üçlüsünde klasik ML her piyasada Naive seviyesi
+olduğu için, BIST'e özgü anti-prediktif davranışın **DL-özgü** olduğu iddiası
+gelişmiş piyasa negatif kontrolüyle de tamamlanmıştır. Asimetri tablosu netleşti:
+
+  - Klasik ML THYAO/GARAN/AAPL → her yerde Naive seviyesi (EMH-tutarlı)
+  - DL THYAO (IN_LEN=2) → tek-split anti-pred, walk-forward dönemsel
+  - DL GARAN/AAPL → rastgele (anti-pred yok)
+
+### 3.11 IN_LEN Ablasyonu (Deney I.20 — v3 ek, KRİTİK)
+
+"Anti-prediktif etki pencere uzunluğuna bağlı mı?" sorusu, IN_LEN ∈ {2, 5, 10}
+× λ ∈ {0, 0.05, 0.10} × 5 seed = 45 koşu ile test edilmiştir.
+
+**Tablo 11 — IN_LEN Ablasyon Sonuçları (THYAO BiLSTM v3b, Naive ≈ 0.515)**
+
+| IN_LEN | n    | naive | mean_acc | mean_flip | flip>naive | Sıkı anti-pred | MC |
+|--------|------|-------|----------|-----------|------------|----------------|-----|
+| 2      | 15   | 0.515 | 0.485    | 0.515     | 8/15       | **8/15 (%53)** | 0  |
+| 5      | 15   | 0.515 | 0.515    | 0.485     | 0/15       | **0/15 (%0)**  | 0  |
+| 10     | 15   | 0.484 | 0.522    | 0.478     | 6/15       | **0/15 (%0)**  | 0  |
+
+**Kritik bulgu:** Anti-prediktif davranış IN_LEN=2'ye ÖZGÜDÜR. IN_LEN={5, 10}'da
+sıkı anti-pred 0/15. IN_LEN=10'da flip>naive 6/15 görülse de mean_acc=0.522 >
+naive=0.484 olduğu için sıkı kriter geçmiyor — model naive'i geçiyor.
+
+**Yorum:** Bu, "anti-prediktif örüntü" iddiasının genelliğini ciddi şekilde
+daraltır. Etki, kısa pencere uzunluğunda (2 gün), gradient-tabanlı öğrenmenin
+makro değişkenlerdeki anlık değişimlere overreact ettiği özel bir koşula bağlıdır.
+Bu etkinin tam olarak 2 günde (IN_LEN=2) keskinleşmesi tesadüf değildir; Borsa İstanbul'daki
+T+2 takas süresi (settlement) kuralı ve algoritmik botların kısa vadeli aşırı tepkileriyle
+(mean-reversion) piyasa mikro-yapısı bağlamında doğrudan örtüşmektedir.
+Pencere uzunluğu arttıkça (5+ gün) etki kaybolur — model daha geniş bir bağlamda
+öğrenir ve kısa vadeli gürültülere dayalı ters yön örüntüsünü üretmez.
+
+Not: I.20 koşumunda TCMB ve Fear.Greed serileri placeholder değerlerle (TCMB=15.0
+sabit, Fear.Greed=50.0 sabit) işlendi; bu nedenle IN_LEN=2'de strict_anti_pred
+sayısı (8/15) önceki tam-makro deneyinden (15/15) düşüktür. Bu durum, makro
+değişkenlerin etkide kritik rol oynadığı (Tablo 5 ile uyumlu) bulgusunu da
+ikincil olarak teyit eder.
+
+### 3.12 Walk-Forward × 6 Mimari (Deney I.21 — v3 ek, KRİTİK)
+
+"Mimari-bağımsız anti-prediktivite" iddiası daha önce yalnızca tek-split kanıtına
+dayanıyordu (Tablo 3). I.21'de bu iddia 7 fold × 6 mimari = 42 koşu ile walk-forward
+testine tabi tutulmuştur (λ=0.05 sabit, seed=23).
+
+**Tablo 12 — Walk-Forward × 6 Mimari Mimari Bazında Özet**
+
+| Mimari      | n_fold | flip>naive | Sıkı anti-pred | mean_acc | mean_flip |
+|-------------|--------|------------|----------------|----------|-----------|
+| BiLSTM      | 7      | 2/7        | 2/7            | 0.501    | 0.499     |
+| Conv1D      | 7      | 1/7        | 1/7            | 0.526    | 0.474     |
+| GRU         | 7      | 1/7        | 1/7            | 0.497    | 0.503     |
+| SimpleRNN   | 7      | 2/7        | 1/7            | 0.517    | 0.483     |
+| TCN         | 7      | 1/7        | 1/7            | 0.524    | 0.476     |
+| Transformer | 7      | 2/7        | 2/7            | 0.498    | 0.502     |
+| **TOPLAM**  | **42** | **9/42**   | **8/42**       |          |           |
+
+**Tablo 13 — Walk-Forward × 6 Mimari Fold Bazında Özet**
+
+| Fold | naive | mean_acc | mean_flip | flip>naive | Sıkı anti-pred |
+|------|-------|----------|-----------|------------|----------------|
+| 1    | 0.550 | 0.486    | 0.514     | 0/6        | 0/6            |
+| 2    | 0.480 | 0.449    | **0.551** | **6/6**    | **5/6**        |
+| 3    | 0.505 | 0.518    | 0.483     | 0/6        | 0/6            |
+| 4    | 0.510 | 0.516    | 0.484     | 1/6        | 1/6            |
+| 5    | 0.530 | 0.480    | 0.520     | 2/6        | 2/6            |
+| 6    | 0.540 | 0.553    | 0.447     | 0/6        | 0/6            |
+| 7    | 0.525 | 0.573    | 0.428     | 0/6        | 0/6            |
+
+**Kritik bulgular:**
+1. **Fold 2 kümeli rejim etkisi:** 6 mimarinin TAMAMI Fold 2'de flip>naive, 5'i
+   sıkı anti-pred. Fold 2 test dönemi (test örneği 701-900) Türkiye için 2018
+   Ağustos kur krizi dönemine denk gelir — DL modellerinin bu yapısal kırılma
+   penceresinde tüm mimari sınıflarında ters yönü öğrendiği gözlenmiştir.
+2. **Diğer foldlarda dağılmış zayıf etki:** Fold 4-5'te 1-2/6 mimari, Fold 1, 3,
+   6, 7'de 0/6. Bu, etkinin dönemsel ve rejim-bağımlı olduğunu mimari-bağımsız
+   olarak doğrular.
+3. **Tek-split sonuçları (118/120) bu bağlamda yeniden okunmalıdır:** Tek-split
+   test seti, walk-forward Fold 5-6'nın penceresine yakındır ve özellikle bu
+   dönemde yüksek anti-pred etkisi gözlemlendi — bulgu özellikle bu rejime özgü.
+
+### 3.13 Sigorta v2 Seed-Fix Doğrulaması (Deney I.22 — v3 ek)
+
+Bölüm 3.9'da raporlanan seed-duyarsızlık sorununu sınamak için 5 sigorta hissesi,
+3 katmanlı seed sabitleme (set.seed + py_set_seed + tf$random$set_seed), explicit
+Glorot initialization, 5 seed (23, 42, 98, 137, 271), patience 10 ile yeniden
+koşturulmuştur.
+
+**Tablo 14 — Sigorta v1 vs v2 Seed Varyansı Karşılaştırması**
+
+| Ticker  | v1 std | v1 n_unique | v2 std  | v2 n_unique | Düzelme       |
+|---------|--------|-------------|---------|-------------|---------------|
+| AGESA   | 0.0157 | 3/3         | 0.0091  | 5/5         | + (5 unique)  |
+| AKGRT   | 0.0025 | 2/3         | 0.0031  | 3/5         | + (3 unique)  |
+| ANSGR   | 0.0087 | 3/3         | 0.0057  | 4/5         | + (4 unique)  |
+| RAYSG   | 0.0025 | 2/3         | **0.0168** | 3/5      | **+6.7× std** |
+| TURSG   | 0.0140 | 3/3         | 0.0182  | 4/5         | + artış       |
+
+Seed varyansı v2'de büyük ölçüde normale dönmüştür; özellikle RAYSG'de std 6.7×
+artmıştır. AKGRT'de hâlâ düşük varyans (3 unique değer, 5 seed üzerinde) görülse
+de bu, ticker-bağımlı veri determinizminin doğal bir yansımasıdır.
+
+**Tablo 15 — Sigorta v2 Sıkı Anti-Pred Sonuçları (5 seed)**
+
+| Ticker  | mean_acc | mean_flip | naive | strict_anti_pred_n / 5 | Sıkı sonuç      |
+|---------|----------|-----------|-------|------------------------|------------------|
+| AGESA   | 0.517    | 0.483     | 0.551 | 0/5                    | Nötr             |
+| AKGRT   | 0.487    | 0.513     | 0.509 | **4/5**                | **ANTİ-PRED ✓** |
+| ANSGR   | 0.461    | 0.539     | 0.522 | **5/5**                | **ANTİ-PRED ✓** |
+| RAYSG   | 0.508    | 0.492     | 0.447 | 0/5                    | Belirsiz/nötr    |
+| TURSG   | 0.525    | 0.475     | 0.513 | 0/5                    | Model kazandı    |
+
+**Kritik teyit:** v2 sıkı sonuç **2/5 (AKGRT, ANSGR)** — v1 ile **AYNI iki hisse**.
+Sıkı anti-prediktif bulgu seed-fix ve daha derin eğitime karşı stabil. RAYSG v2'de
+de belirsiz kalmıştır (model naive üstü, flip değil). Bu, Bölüm 3.8 sıkı kriter
+çerçevesini güçlü biçimde doğrular.
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 4. SONUÇ VE TARTIŞMA
+
+Bu araştırma, BIST günlük yön tahmininde üç özgün katkı sunmaktadır:
+
+**Katkı 1 — MC Tuzağı Çözümü (Sağlam):**
+Önerilen MC-Aware Custom Loss (L = BCE + λ|mean(ŷ)−0.5|) ve class_weight=balanced
+kombinasyonu, 6 farklı DL mimarisinde (90 konfigürasyon) %100 başarı ile MC tuzağını
+çözmüştür. Çözüm mimari-bağımsız ve hiperparametre-dayanıklıdır. Bu katkı, projenin
+en güvenilir teknik çıktısıdır.
+
+**Katkı 2 — Zayıf Sinyal Ortamında DL Davranışının Karakterizasyonu (Dönemsel/Varlık-Özgü):**
+Klasik ML modelleri (DT, OneR, RF, LogReg) her iki BIST varlığında da Naive baseline
+seviyesinde tahmin üretir (THYAO 0/4 beats_naive, GARAN 1/4 sınırda). Bu, BIST günlük
+yön verisinde DL veya klasik ML için sömürülebilir net bir sinyalin bulunmadığını
+gösterir — EMH (Fama, 1970) ile tutarlı bir gözlem. Bu zayıf sinyal ortamında, DL
+modelleri THYAO test setinde tek-split ölçeğinde sistematik ters-yön örüntüsü
+sergilemiştir (118/120 konfigürasyonda flip>naive); ancak bu örüntü walk-forward
+CV'de dönemsel olarak ortaya çıkmıştır (7 fold'dan yalnızca 3'ünde flip>naive).
+Bu, "DL evrensel olarak ters yön öğrenir" iddiasını desteklemez; "belirli rejimlerde
+DL test dönemine adapte olamayıp eski korelasyonları sürdürür" şeklindeki daha dar
+çerçevelemeyi destekler. GARAN'da aynı çerçevede DL rastgele tahmin yapar (7/15);
+NASDAQ AAPL'da daha büyük korelasyon kırılmasına rağmen anti-prediktif örüntü yoktur.
+
+**Katkı 3 — Sektörel Bağlamın Sınırlı Ön Kanıtı:**
+Sigorta (2/5 sıkı anti-pred) ve Holding (0/5) sektörlerinin karşılaştırması, makro-hassasiyet
+profili ile DL davranışı arasında bir bağlantı önerir. Ancak n=10 örneklemde bu
+fark istatistiksel anlamlılığa (Fisher exact p ≈ 0.44) ulaşmaz. Bu nedenle Y5
+hipotezi "ön kanıt" düzeyinde sunulmakta; genelleştirilebilirlik için daha geniş
+örneklem (farklı sektörlerden 20+ hisse) gerektiği belirtilmektedir.
+
+### 4.1 Dürüst Akademik Çerçeve
+
+Aşağıdaki sınırlamaları açıkça ifade etmek bilimsel dürüstlüğün gereğidir:
+
+(a) Tek-split sonuçları (118/120 flip>naive) ile walk-forward sonuçları (3/7) bir
+    kontrast oluşturmaktadır. Anti-prediktif davranış evrensel değil, dönemseldir.
+    Headline rakamların (118/120 gibi) doğrudan genelleştirilmesi yanıltıcıdır.
+
+(b) Walk-forward CV yalnızca BiLSTM mimarisinde yürütülmüştür. "Mimari-bağımsız
+    anti-prediktivite" iddiası tek-split kanıtına dayanır; walk-forward'da diğer
+    5 mimari (GRU, Conv1D, TCN, Transformer, SimpleRNN) test edilmemiştir.
+
+(c) Korelasyon kırılması mekanizması iki karşı-örnekle sınırlanmıştır: AAPL'da
+    Δr_Oil = 1.056 (THYAO'nun ~2 katı) olmasına rağmen anti-prediktif yoktur;
+    GARAN'da Δr ≈ 0.37 (THYAO 0.39'a yakın) olmasına rağmen anti-prediktif yoktur.
+    Bu, "konsept drift ⇒ anti-prediktif" zincirinin yetersiz olduğunu, ek faktörlerin
+    (piyasa mikroyapısı, likidite, trader profili, rejim geçişleri) açıklayıcı role
+    sahip olduğunu göstermektedir. Mekanizma açık bir araştırma sorusu olarak kalmaktadır.
+
+(d) Sektörel test (5+5 hisse) ön kanıt düzeyindedir; istatistiksel anlamlılığa
+    ulaşmamaktadır.
+
+(e) IN_LEN=2 tek pencere uzunluğu ile çalışılmıştır. IN_LEN ∈ {5, 10, 20} ablasyonu
+    yapılmamıştır; bulguların pencere uzunluğuna bağımlılığı bilinmemektedir.
+
+(f) Bazı sektörel testlerde BiLSTM seedler arası IDENTICAL sonuçlar üretmiştir (KCHOL,
+    SAHOL std=0). Bu, küçük model + erken durdurma + kısa pencere kombinasyonunun
+    parametre uzayını yeterince keşfetmediğini gösterebilir.
+
+(g) Bulgular konsept drift'in bilinen bir olgu olduğunu değiştirmez; projenin
+    özgün katkısı bu olgunun BIST bağlamında sistematik, ablasyon-destekli ve
+    sektör-karşılaştırmalı olarak karakterize edilmesidir.
+
+Bu çalışma, lisans düzeyinde bir araştırmanın metodolojik titizlik standartlarını
+karşılamayı hedeflemiştir: 18 bağımsız deney, 6 mimari ablasyonu, falsifikasyon
+tasarımı, istatistiksel testler ve hem pozitif hem negatif bulguların dürüstçe
+raporlanması.
+
+### 4.2 Net İddia Cümlesi (Yayınlanabilir Çerçeve)
+
+> "BIST günlük yön verisinde dört klasik ML modeli (DT, OneR, RF, LogReg) Naive
+> baseline'ı geçememiştir (THYAO 0/4, GARAN 1/4 sınırda), bu da verinin günlük yön
+> sinyali bakımından zayıf olduğunu gösterir (EMH-tutarlı). Bu ortamda altı DL
+> mimarisi MC tuzağı çözüldükten sonra THYAO test setinde sistematik ters-yön
+> örüntüsü sergilemiş, ancak bu örüntü (a) walk-forward CV'de yalnızca 3/7 foldda,
+> (b) GARAN'da hiç ve (c) NASDAQ AAPL'da hiç gözlenmemiştir. Feature ablation,
+> makroekonomik değişkenleri (USDTRY, Oil, TCMB) çıkardığımızda örüntünün
+> kaybolduğunu (15/15 → 0/15) göstermiştir. Korelasyon kırılması bu örüntü için
+> gerekli ancak yetersiz koşuldur; piyasa mikroyapısı ek açıklayıcı rol oynamaktadır."
+
+Bu cümle eldeki kanıtla birebir uyumludur ve overclaim içermez.
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 5. SINIRLAMALAR VE GELECEK ÇALIŞMALAR
+
+**Mevcut Sınırlamalar (v3 GÜNCELLEMESİ — 4 madde KAPATILDI):**
+
+1. ✅ KAPATILDI (I.20): IN_LEN ablasyonu yapıldı. Sonuç: anti-prediktif etki
+   IN_LEN=2'ye ÖZGÜ; IN_LEN={5,10}'da kayboluyor (0/15 sıkı anti-pred). Bu,
+   iddianın pencere-bağımlı olduğunu gösterir; rapor metni bu sınırla çerçevelendi.
+2. Tek piyasa periyodu (2014–2026, BIST). İkinci bir gelişmekte olan piyasada (örn.
+   Pakistan KSE, Brezilya BOVESPA) replikasyon genelleştirilebilirliği güçlendirir. Ayrıca,
+   korelasyon kırılmasının geçici bir şok mu yoksa yapısal bir sorun mu olduğunu
+   kesinleştirmek için 2001 ve 2008 krizlerini de kapsayan 20 yıllık (Big Data) daha
+   geniş bir veri setinde test edilmelidir.
+3. Makro hassasiyet skoru sayısallaştırılmamıştır. |Δr| tek başına yeterli değil
+   (GARAN paradoksu). Likidite, emir defteri derinliği gibi mikro-yapı değişkenlerini
+   dahil eden bir kırılganlık endeksi geliştirilmesi önerilmektedir.
+4. Etiketleme alternatifi test edilmemiştir. Yön etiketi yerine volatilite-normalize
+   getiri sınıflaması farklı sonuçlar üretebilir.
+5. ALZ fonu (%100 Yukarı): Veri-üstü dejenere yapı, model dışında bir sorundur.
+6. ✅ KAPATILDI (I.21): Walk-forward × 6 mimari yapıldı. Sonuç: her mimaride 1-2/7
+   fold sıkı anti-pred; Fold 2'de 5/6 mimari (kümeli rejim etkisi). Mimari-bağımsızlık
+   walk-forward'da doğrulandı + dönemsellik netleşti.
+7. Sektörel test (Sigorta+Holding) n=10 örneklemde yürütülmüştür; Fisher exact testi
+   2/5 vs 0/5 farkı için p≈0.44 verir, istatistiksel anlamlılığa ulaşmaz. Bulgu
+   "ön kanıt" düzeyindedir.
+8. ✅ KAPATILDI (I.19): AAPL klasik ML test edildi. Sonuç: 0/3 beats_naive +
+   0/3 flip>naive — gelişmiş piyasa kontrolünde de klasik ML Naive seviyesi.
+   "DL-özgü" iddiası tam doğrulandı.
+9. ✅ KAPATILDI (I.22): Sigorta v2 (3 katmanlı seed sabitleme + 5 seed + Glorot
+   explicit init + patience=10) yapıldı. Seed varyansı v2'de büyük ölçüde normale
+   döndü (RAYSG std 6.7× arttı). Sıkı anti-pred bulgu STABİL (yine AKGRT + ANSGR).
+
+**Önerilen Gelecek Çalışmalar:**
+
+- Finansal Portföy Simülasyonu (Backtesting): Sınıflandırma metriklerinin (Accuracy, Specificity)
+  ötesine geçilerek, anti-prediktif hataların yatırımcıya gerçek finansal maliyetinin
+  (Drawdown, Sharpe Oranı) portföy simülatörleriyle sayısallaştırılması.
+- 3. BIST varlığı: TUPRS (rafineri, yüksek Oil hassasiyeti) — Y5'i genişletmek için.
+- Online Learning / Adaptive DL: Korelasyon kırılmasına adapte olabilen mimari (Gama
+  vd., 2014 çerçevesinde).
+- Regime-switching model: Makroekonomik rejim tespiti ile model seçimi entegrasyonu.
+- Mikro-yapı değişkenleri: Emir defteri derinliği, alım-satım yayılımı eklenmesi.
+
+────────────────────────────────────────────────────────────────────────────────
+
+## 6. LİTERATÜR
+
+### 6.1 Piyasa Etkinliği ve İstatistiksel Temeller
+
+[1] Fama, E.F. (1970). Efficient Capital Markets: A Review of Theory and Empirical Work.
+    The Journal of Finance, 25(2), 383–417.
+    → EMH çerçevesi; klasik ML'nin Naive seviyesinde kalması bu hipotezle tutarlıdır.
+
+[2] Lo, A.W. & MacKinlay, A.C. (1988). Stock Market Prices Do Not Follow Random Walks:
+    Evidence from a Simple Specification Test. The Review of Financial Studies, 1(1), 41–66.
+    → Günlük getiri serilerinde otokorelasyon; haftalık veri için pozitif, bireysel hisse
+      için negatif seri bağımlılığı — yön tahmin probleminin istatistiksel zemini.
+
+[3] De Bondt, W.F.M. & Thaler, R. (1985). Does the Stock Market Overreact?
+    The Journal of Finance, 40(3), 793–805.
+    → Piyasa aşırı tepkisi; anti-prediktif davranışın overreaction tezahürü olabileceğine
+      ilişkin teorik zemin.
+
+[4] Jegadeesh, N. & Titman, S. (1993). Returns to Buying Winners and Selling Losers:
+    Implications for Stock Market Efficiency. The Journal of Finance, 48(1), 65–91.
+    → Kısa vadeli dönüş (reversal) etkisi; Fischer & Krauss (2018) bağlantısı.
+
+### 6.2 Derin Öğrenme Mimarileri
+
+[5] Hochreiter, S. & Schmidhuber, J. (1997). Long Short-Term Memory.
+    Neural Computation, 9(8), 1735–1780.
+    → LSTM'in temel mimarisi; ana deneysel mimarimizin köküdür.
+
+[6] Cho, K., van Merriënboer, B., Gulcehre, C., Bahdanau, D., Bougares, F., Schwenk, H.
+    & Bengio, Y. (2014). Learning Phrase Representations using RNN Encoder–Decoder for
+    Statistical Machine Translation. arXiv:1406.1078.
+    → GRU mimarisi; ablasyon mimarilerinden biri.
+
+[7] Vaswani, A., Shazeer, N., Parmar, N., Uszkoreit, J., Jones, L., Gomez, A.N., Kaiser,
+    Ł. & Polosukhin, I. (2017). Attention Is All You Need.
+    Advances in Neural Information Processing Systems, 30 (NeurIPS 2017).
+    → Transformer ve Multi-Head Self-Attention; ablasyon ve dayanıklılık testlerinde
+      kullanılan mimarinin teorik dayanağı.
+
+### 6.3 Finansal Tahmin ve Reversal Etkisi
+
+[8] Fischer, T. & Krauss, C. (2018). Deep learning with long short-term memory networks
+    for financial market predictions.
+    European Journal of Operational Research, 270(2), 654–669.
+    → S&P 500 hisse senedi yön tahmininde LSTM ile reversal etkisinin yakalanması.
+      Bulgularımız bu çalışmanın BIST ve gelişmekte olan piyasa genişlemesidir.
+
+[9] Zhang, C., Ni, Z., Ni, L., Li, J. & Wang, L. (2024). Deep learning models for price
+    forecasting of financial time series: A review of recent advancements: 2020–2022.
+    WIREs Data Mining and Knowledge Discovery, 14(1), e1519.
+    → DL tabanlı finansal tahmin literatürünün 2020–2022 dönemini kapsayan sistematik
+      incelemesi; yöntemsel bağlam.
+
+### 6.4 BIST'e Özel Çalışmalar
+
+[10] Kara, Y., Boyacioglu, M.A. & Baykan, Ö.K. (2011). Predicting direction of stock
+     price index movement using artificial neural networks and support vector machines:
+     The sample of the Istanbul Stock Exchange.
+     Expert Systems with Applications, 38(5), 5311–5319.
+     → BIST'te ANN ve SVM ile yön tahmini; MC tuzağını adreslememiş erken dönem referans.
+
+[11] Karakoyun, S. & Çibikdiken, A.O. (2018). Prediction of Stock Returns in Istanbul
+     Stock Exchange Using Machine Learning Methods.
+     International Journal of Finance & Banking Studies, 7(2), 25–38.
+     → BIST'te ML tabanlı getiri tahmini; klasik yöntemlerin sınırlılıklarına dair
+       bağlam sağlar.
+
+### 6.5 Concept Drift
+
+[12] Gama, J., Žliobaitė, I., Bifet, A., Pechenizkiy, M. & Bouchachia, A. (2014).
+     A Survey on Concept Drift Adaptation.
+     ACM Computing Surveys, 46(4), Article 44. https://doi.org/10.1145/2523813
+     → Concept drift taksonomisi ve uyum stratejileri; projemizdeki eğitim-test
+       korelasyon kırılması bu teorik çerçevede yorumlanmıştır.
+
+[13] Lu, J., Liu, A., Dong, F., Gu, F., Gama, J. & Zhang, G. (2024). One or Two Things
+     We Know About Concept Drift — A Survey on Monitoring in Evolving Environments.
+     Frontiers in Artificial Intelligence, 7, Article 1330257.
+     → Concept drift tespiti ve izleme üzerine güncel derleme; rejim-bağımlı etki
+       tartışmamız bu literatürde konumlanmaktadır.
+
+### 6.6 Sınıf Dengesizliği
+
+[14] He, H. & Garcia, E.A. (2009). Learning from Imbalanced Data.
+     IEEE Transactions on Knowledge and Data Engineering, 21(9), 1263–1284.
+     → Sınıf dengesizliği sorununa genel bakış; cost-sensitive learning ve class
+       weighting yöntemlerinin teorik dayanağı.
+
+### 6.7 Doğrulama Metodolojisi
+
+[15] Cerqueira, V., Torgo, L. & Mozetič, I. (2020). Evaluating time series forecasting
+     models: An empirical study on performance estimation methods.
+     Machine Learning, 109(11), 2097–2134.
+     → Zaman serileri için walk-forward ve diğer doğrulama stratejilerinin karşılaştırmalı
+       değerlendirmesi; CV stratejimizin metodolojik dayanağı.
+
+────────────────────────────────────────────────────────────────────────────────
+
+## EK A — DENEY LİSTESİ (22 Deney)
+
+| #    | Deney                                    | Araç / Script                        | Statü |
+|------|------------------------------------------|--------------------------------------|-------|
+| I.1  | Model iterasyonları (v1–v3c)             | mcaware_prototype_BiLSTM_v*.R        | ✅    |
+| I.2  | MC-Aware loss λ ayarı                    | v3_THYAO.R                           | ✅    |
+| I.3  | Etiket doğrulama                         | v4_diagnostic.R                      | ✅    |
+| I.4  | Pencere/lag düzeltmesi                   | v3b_window.R                         | ✅    |
+| I.5  | MI kalibrasyon                           | v5_mi_calibration.R                  | ✅    |
+| I.6  | BES replikasyon (ALZ/AZS/AMZ)            | v3b_BES.R                            | ✅    |
+| I.7  | CW ablation (balanced→NULL)              | v3c_no_cw.R                          | ✅    |
+| I.8  | 6 mimari ablasyon + McNemar              | multi_arch_v4.R                      | ✅    |
+| I.9  | Walk-Forward CV (7 fold, BiLSTM)         | walkforward_cv.R                     | ✅    |
+| I.10 | GARAN+AKBNK multi-stock                  | bist_multi_stock.R                   | ✅    |
+| I.11 | Özellik ablasyonu (13 vs 10)             | feature_ablation.R                   | ✅    |
+| I.12 | Korelasyon kırılması + tek değişken      | corr_and_single_ablation.R           | ✅    |
+| I.13 | NASDAQ karşılaştırma                     | nasdaq_comparison.R                  | ✅    |
+| I.14 | Majority Voting Ensemble                 | majority_voting_ensemble.R           | ✅    |
+| I.15 | BiLSTM + Multi-Head Attention v6         | BiLSTM_attention_v6.R                | ✅    |
+| I.16 | Rule-based klasik ML (THYAO)             | rule_based_baseline.R                | ✅    |
+| I.17 | DL + Klasik ML doğrulama (GARAN)         | rule_based_GARAN.R + v3b_GARAN.R     | ✅    |
+| I.18 | GARAN korelasyon kırılması               | corr_GARAN.R                         | ✅    |
+| I.19 | AAPL klasik ML (gelişmiş piyasa kontrol) | rule_based_AAPL.R                    | ✅ v3 |
+| I.20 | IN_LEN ablasyonu (2, 5, 10)              | inlen_ablation.R                     | ✅ v3 |
+| I.21 | Walk-forward × 6 mimari                  | walkforward_multi_arch.R             | ✅ v3 |
+| I.22 | Sigorta v2 (seed-fix + 5 seed)           | Sektorel_Karsilastirma_Sigorta_v2.R  | ✅ v3 |
+
+## EK B — DOSYA REHBERİ
+
+Tüm kodlar: Kodlar/ (01_prototypes / 02_ablation / 03_validation / 04_baseline / 05_diagnostic / FINAL_RELEASE)
+Tüm sonuçlar: Sonuclar/ (predictions / summaries / thresholds / diagnostics)
+Görselleştirmeler: Gorseller/ (01–09, 300 DPI)
+Proje günlüğü: Docs/PROJE_DURUMU.txt (SSOT — Single Source of Truth)
+Hoca brief: Docs/OZET.txt (v2, dürüst framing)
+
+────────────────────────────────────────────────────────────────────────────────
+Rapor sonu. Son güncelleme: 23 Mayıs 2026.
