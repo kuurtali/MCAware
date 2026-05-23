@@ -592,10 +592,14 @@ Bulguların çoğu (MC tuzağı, concept drift, EMH tutarlılığı) literatürd
 
 > "BIST günlük yön tahmininde DL modellerini sistematik olarak değerlendirdik. MC tuzağını tespit edip çözdük. 6 farklı DL mimarisi ve 120 konfigürasyonun hiçbiri Naive baseline'ı tutarlı şekilde yenemedi. Başarısızlık mekanizmasını ablasyon testleriyle karakterize ettik: makroekonomik değişkenlerdeki yapısal kırılma (concept drift). Sonuçlar EMH ile tutarlıdır."
 
-### 10.6 Aksiyon Planı
+### 10.6 Proje Kapanış Durumu (NİHAİ)
 
-Sıra: **E** (GARAN korelasyon) → **D** (Kod org.) → **B** (Görselleştirme) → **G** (Dashboard) → **A** (Brief güncelleme) → **C** (TÜBİTAK raporu)
+TÜM AKSİYONLAR TAMAMLANMIŞTIR:
+- 17 Adet yüksek çözünürlüklü görsel oluşturuldu.
+- İnteraktif Dashboard (index.html) tek dosya halinde tamamlandı.
+- Proje Açık Bilim (Open Science) standartlarında GitHub'a aktarıldı (https://github.com/kuurtali/Tubitak-2209A-MCAware).
+- GitHub Pages ile Dashboard tüm dünyaya canlı yayına alındı (https://kuurtali.github.io/Tubitak-2209A-MCAware/Docs/Dashboard/index.html).
 
 ---
 
-*Brief sonu (10.40 dürüst framing versiyonu). Toplantı sonrası KARAR-10 PROJE_DURUMU.txt Bölüm 7'ye eklenecek.*
+*Brief sonu (10.40 dürüst framing versiyonu).*

@@ -822,7 +822,7 @@ Tüm kodlar: Kodlar/ (01_prototypes / 02_ablation / 03_validation / 04_baseline 
 Tüm sonuçlar: Sonuclar/ (predictions / summaries / thresholds / diagnostics)
 Görselleştirmeler: Gorseller/ (01–09, 300 DPI)
 Proje günlüğü: Docs/PROJE_DURUMU.txt (SSOT — Single Source of Truth)
-Hoca brief: Docs/OZET.txt (v2, dürüst framing)
+Hoca brief: Docs/OZET.txt (v3 NİHAİ)\nCanlı Dashboard: https://kuurtali.github.io/Tubitak-2209A-MCAware/Docs/Dashboard/index.html\nGitHub Repo: https://github.com/kuurtali/Tubitak-2209A-MCAware
 
 ────────────────────────────────────────────────────────────────────────────────
 Rapor sonu. Son güncelleme: 23 Mayıs 2026.
