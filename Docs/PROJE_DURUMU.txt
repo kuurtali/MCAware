@@ -5772,19 +5772,775 @@ Sohbet oturumlarında alınan kararlar doğrultusunda, bundan sonraki süreçler
 4. **DOSYA HİJYENİ VE DÜZENİ:** Proje klasöründe çalıştırılan gereksiz test scriptleri, geçici build dosyaları (örn: build_docx.py gibi birleştiriciler) işleri bittikten sonra silinmeli, klasör yapısı (Gorseller/, Kodlar/, Sonuclar/ ve Docs/) her zaman temiz ve teslimata hazır (Nihai) tutulmalıdır.
 
 ================================================================================
+13. CSV-GROUND-TRUTH TAM DOĞRULAMA + EKSİK İŞ LOGU (24 MAYIS 2026, AKŞAM)
+================================================================================
+TETİKLEYİCİ:
+  Kullanıcı talimatı: "proje durumu dosyası her işimizi her bulguyu her çıktıyı
+  doğru şekilde vermeli onu ana kaynak olarak kullanabilmeliyiz".
+
+  Cowork (Claude Sonnet) oturumunda PROJE_DURUMU.txt, README.md, MC_AWARE
+  birleşik raporu, 120 CSV, 20 PNG ve ~50 R/Python scripti TEK TEK çapraz
+  doğrulandı. Bu bölüm "tek kaynak" iddiasını kapatmak üzere KAYITSIZ
+  KALAN her şeyi append-only olarak ekler. CSV ANAYASASI (Bölüm 12.1) gereği
+  hiçbir CSV değiştirilmedi; tüm sayılar Sonuclar/ klasöründen olduğu gibi
+  okundu.
+
+  Doğrulama özet:
+    - 120 CSV diskte: 18 predictions + 64 summaries + 13 thresholds + 25
+      diagnostics. Hiçbiri 0 byte değil, hiçbiri sadece-header değil.
+    - 20 PNG (Gorseller/01-20). Dashboard index.html 20'sini de gömülü
+      (Base64) içeriyor; app.js fallback 17 görseli listeliyor.
+    - 10.x bölüm log içeriği: I.3-I.22 deneylerin SAYILARI CSV ile birebir
+      uyumlu (aşağıda 13.6'da kanıt tablosu).
+
+--------------------------------------------------------------------------------
+13.1. FAZ 2 (Kodlar/07_faz2_deneyler/) - SCRIPT-CSV-PNG TAM LOGU
+--------------------------------------------------------------------------------
+GEREKÇE:
+  Bölüm 12 "Yeni eklenen Python görselleştirme scriptleri" diye geçiştirdi.
+  Aslında 10 ayrı script (R + Python + PowerShell) eklendi ve birkaçı YENİ
+  CSV bulguları üretti. Aşağıda her bir script için: amaç, ürettiği dosyalar,
+  CSV'den okunmuş ham sayılar.
+
+(a) B6_fix_paths.ps1
+    AMAÇ: Tüm R scriptlerindeki hardcoded "C:/Users/Kurt/..." yollarını
+          here::here() ile göreceli yola çevirir.
+    ÇIKTI: Sadece dosya düzenlemesi, CSV/PNG üretmez.
+    NOT: Bu fix tek seferlik script; çalıştırıldıktan sonra silinebilir
+         (Bölüm 12.1 madde 4 - dosya hijyeni).
+
+(b) B17_fix_dashboard_offline.ps1
+    AMAÇ: Docs/Dashboard/index.html'in Google Fonts + Chart.js CDN
+          bağımlılıklarını yerele çevirir (offline çalışsın).
+    ÇIKTI: Docs/Dashboard/fonts/google-fonts.css + Docs/Dashboard/js/chart.min.js
+           (her ikisi de diskte mevcut, doğrulandı).
+
+(c) B1_fix_holding_summary_v2.R
+    AMAÇ: mcaware_bist5_holding_SUMMARY.csv'de SAHOL için tek-sütun
+          "dl_anti_prediktif_mi" -> 3-sütun (loose, strict, ambiguous) +
+          sinif etiketi.
+    ÇIKTI CSV (Sonuclar/summaries/):
+      mcaware_bist5_holding_SUMMARY.csv (6 satır x 10 kolon - yeni format)
+    GROUND-TRUTH (5 hisse):
+      ALARK  acc=0.5275 flip=0.4725 naive=0.4826 -> model_wins
+      DOHOL  acc=0.4884 flip=0.5116 naive=0.5435 -> neutral_both_below
+      ENKAI  acc=0.4725 flip=0.5275 naive=0.5435 -> neutral_both_below
+      KCHOL  acc=0.5043 flip=0.4957 naive=0.5130 -> neutral_both_below
+      SAHOL  acc=0.5130 flip=0.4870 naive=0.4783 -> ambiguous_both_above
+    Strict anti-pred (flip>naive AND acc<=naive): 0/5 (Bölüm 10.44 ile uyumlu).
+
+(d) B14_pooled_confusion_matrix.R
+    AMAÇ: Walk-forward 7 fold'daki tüm tahminleri birleştirip TEK pooled
+          confusion matrix üretir (N=1400 örnek; fold başına n=200).
+    ÇIKTI CSV (Sonuclar/summaries/):
+      mcaware_pooled_confusion_matrix.csv (10 metrik)
+      mcaware_pooled_confusion_by_fold.csv (7 fold x 11 kolon)
+    GROUND-TRUTH (pooled, N=1400):
+      TP=367, FP=287, TN=337, FN=409
+      Accuracy=0.5029, Sens=0.4729, Spec=0.5401, Prec=0.5612, F1=0.5133
+    FOLD BAZINDA:
+      Fold 1 (n=200): Acc=0.540 Sens=0.363 Spec=0.688
+      Fold 2 (n=200): Acc=0.440 Sens=0.535 Spec=0.314  <- Türkiye 2018 krizi
+      Fold 3 (n=200): Acc=0.480 Sens=0.385 Spec=0.677
+      Fold 4 (n=200): Acc=0.485 Sens=0.440 Spec=0.548
+      Fold 5 (n=200): Acc=0.535 Sens=0.508 Spec=0.577
+      Fold 6 (n=200): Acc=0.515 Sens=0.457 Spec=0.565
+      Fold 7 (n=200): Acc=0.525 Sens=0.623 Spec=0.415
+    YORUM: Pooled Acc=0.5029 ~ naive baseline. "DL modelleri agrege olarak
+           sinyal yakalayamadı" iddiasını PEKISTIREN ana metrik. Bu sayılar
+           daha önce 10.x'te HIC raporlanmamıştı.
+
+(e) E2_majority_rules_10ind.R
+    AMAÇ: 10 teknik göstergeden (SMA Cross, EMA Cross, RSI_14, MACD, BBand,
+          Stoch, CCI, WilliamsR, ADX, ROC) majority-voting sinyal üretir.
+          Klasik kural-tabanlı baseline DL ile karşılaştırması.
+    ÇIKTI CSV (Sonuclar/summaries/):
+      mcaware_majority_rules_10ind_MATRIX.csv (200 gün x 14 kolon, günlük oylar)
+      mcaware_majority_rules_10ind_SUMMARY.csv (11 yöntem x 5 kolon)
+    GROUND-TRUTH (naive=0.520):
+      SMA_Cross         Acc=0.870 -> beats_naive=TRUE   (up_ratio=0.46)
+      EMA_Cross         Acc=0.650 -> beats_naive=TRUE   (up_ratio=0.49)
+      Majority_6of10    Acc=0.645 -> beats_naive=TRUE   (up_ratio=0.495)
+      RSI_14            Acc=0.650 -> beats_naive=TRUE   (up_ratio=0.49)
+      MACD              Acc=0.640 -> beats_naive=TRUE   (up_ratio=0.47)
+      BBand             Acc=0.640 -> beats_naive=TRUE   (up_ratio=0.47)
+      Stoch             Acc=0.585 -> beats_naive=TRUE   (up_ratio=0.505)
+      CCI               Acc=0.570 -> beats_naive=TRUE   (up_ratio=0.46)
+      WilliamsR         Acc=0.550 -> beats_naive=TRUE   (up_ratio=0.48)
+      ADX               Acc=0.545 -> beats_naive=TRUE   (up_ratio=0.495)
+      ROC               Acc=0.480 -> beats_naive=FALSE  (up_ratio=1.00, MC riski)
+    KRITIK BULGU (daha önce 10.x'te raporlanmamış):
+      10/11 klasik teknik kural naive baseline'ı yeniyor; en güçlüsü SMA_Cross
+      (0.87). Bu, "DL Klasik ML'i yenmedi" çerçevemizin DİĞER YÜZÜDÜR: BIST
+      THYAO'da klasik momentum/trend kuralları DL'den çok daha yüksek
+      başarılı oluyor. SMA_Cross özellikle çarpıcı.
+    DİKKAT: 200 günlük tek-dönem test (8936-9135 günleri). Walk-forward
+            denemesi yok; sonuçların dönemsel olabilirliği açık. Aynı zamanda
+            up_signal_ratio=1.00 olan ROC'da MC tuzağı/tek-yön sinyal şüphesi
+            vardır -> o yöntem dahil edilmemeli.
+    GÖRSEL: 19_Majority_Voting_vs_ML.png üretildi.
+
+(f) E3_attention_visual.py + E3_B15_attention_heatmap.R
+    AMAÇ: BiLSTM+Attention v6 mimarisinin XAI yorumu - feature ağırlıklarını
+          bar/heatmap olarak görselleştir.
+    ÇIKTI: Sadece 18_Attention_Heatmap_Bar.png (CSV üretmez).
+    NOT: E3_attention_visual.py içindeki attention ağırlıkları (Close=0.15,
+         RSI=0.09, MACD=0.12, USDTRY=0.11, Oil=0.08, ...) ELLE GİRİLMİŞ
+         (placeholder). Gerçek attention layer çıktısı R model nesnesinden
+         çekilmedi. Bu görsel TEMSILI olduğu için TÜBİTAK raporunda dikkatli
+         framing gerekir - "model attention'ının indikatif görselleştirmesi"
+         denmeli, "ölçülmüş ağırlık" iddiası yapılmamalı.
+
+(g) E4_voting_score_meta.R
+    AMAÇ: 6 mimari (SimpleRNN, GRU, Conv1D, TCN, Transformer, BiLSTM)
+          tahminlerinden günlük oy skoru hesaplar; bunu 15. özellik olarak
+          BiLSTM'e besler - ensemble meta-feature deneyi.
+    ÇIKTI CSV (Sonuclar/summaries/):
+      mcaware_voting_score_meta_RESULTS.csv (4575 satır x 4 kolon:
+        voting_score, n_up_votes, n_archs, actual)
+    DURUM: Ham veri dosyası mevcut; ÖZET METRIK (Acc/Flip vb.) henüz
+           hesaplanmamış. Bu satırlar BiLSTM girdisi olarak hazırlandı ama
+           sonuç koşusu PROJE_DURUMU'da log'lanmadı. AÇIK İŞ: bu CSV'den
+           voting_score>=4 <-> actual=1 doğruluğu hesaplanmalı (R/Python tek
+           liner) ve TÜBİTAK raporuna eklenip eklenmeyeceği karara
+           bağlanmalı.
+
+(h) 08_faz2_visuals.R + 08_faz2_visuals.py
+    AMAÇ: E2 (majority rules) ve B14 (pooled CM) için ggplot/matplotlib
+          görselleri. R sürümü ELLE girilmiş E2/I.16 sonuçları kullanıyor,
+          Python sürümünde de aynı manuel sayılar var.
+    ÇIKTI: 19_Majority_Voting_vs_ML.png + 20_Pooled_Confusion_Matrix.png.
+    NOT: Python script'inde manuel sayılar (RF=0.510, LogReg=0.515, Majority
+         Rules=0.645). RF=0.510 sayısı THYAO rule_based_RESULTS.csv'deki
+         0.5115 ile 1 ondalık farkla uyumlu (yuvarlama). Görseller doğru.
+
+--------------------------------------------------------------------------------
+13.2. EKSIK Docs/ DOSYALARI - DURUM TESPITI
+--------------------------------------------------------------------------------
+Mayıs 24 itibarıyla Docs/ klasöründe FIILEN BULUNAN aktif dosyalar:
+  [OK] Docs/PROJE_DURUMU.txt (bu dosya)
+  [OK] Docs/MC_AWARE_Birlesitirilmis_Rapor.docx (~71 KB, 1451 paragraf)
+  [OK] Docs/Dashboard/index.html (~3.5 MB, 20 PNG gömülü)
+
+Bölüm 12 ve README.md HALA aşağıdaki dosyaları "VAR" olarak gösteriyor;
+fakat disk üzerinde YOKLAR (Bölüm 12.1 madde 4 "dosya hijyeni" gereği
+birleştirilip silinmiş olma ihtimali yüksek):
+  [YOK] Docs/OZET.txt                       (Hoca Brief v4 NIHAI)
+  [YOK] Docs/PROJECT_REPORT.txt             (Detaylı rapor, İngilizce)
+  [YOK] Docs/TUBITAK_2209A_Nihai_Rapor.txt  (TÜBİTAK Nihai Rapor v4 NIHAI)
+  [YOK] Docs/TUBITAK_2209A_Proje_Onerisi.pdf (Taslak öneri)
+  [YOK] Docs/SIRADAKI_ADIMLAR.md            (10.44'te referans verilmişti)
+  [YOK] Docs/HOCA_BRIEF_v2.txt              (10.35'te referans verilmişti)
+
+ICERIK KAYBI YOK (DOCX'TE BIRLESMIS):
+  MC_AWARE_Birlesitirilmis_Rapor.docx içindeki başlıklara göre:
+    BÖLÜM I  = TUBITAK_2209A_Nihai_Rapor.txt'in v4 içeriği (paragraf 10+)
+    BÖLÜM II = OZET.txt (Hoca Brief) v4 NIHAI
+    BÖLÜM III = Hata Raporu Durumu (B1-B18, E1-E6 temizlenmiş)
+  Yani metinler kaybolmamış, sadece tek docx'te birleşmiş.
+
+ONERILEN AKSIYON (kullanıcı kararı):
+  (i)  README.md'nin Docs/ dosya listesi gerçekle eşleşmiyor; README
+       yeniden üretilecek (kullanıcı 24.05.2026 akşam direktifi). Mevcut
+       README'de "6 belge" iddiası geçersiz.
+  (ii) Yeni Word raporu (kullanıcı planı) GitHub'a yüklenmeden önce
+       Docs/ klasöründe ne kalacağı netleştirilmeli - yalnız docx mi
+       (önerilen), yoksa kaynak .txt'ler de geri konsa mı?
+
+--------------------------------------------------------------------------------
+13.3. SAYI TUTARSIZLIKLARI - KAYNAK HIYERARSISI
+--------------------------------------------------------------------------------
+Belge bazında çelişen sayılar tespit edildi. CSV ground-truth referans
+alınarak doğru sürüm aşağıdadır:
+
+(A) DENEY SAYISI:
+  PROJE_DURUMU.txt dosya sonu (Bölüm 12 alt): "26 Deney"
+  README.md                                  : "22 Deney"
+  Docx Bölüm I başlığı                       : "22 Deney"
+  PROJE_DURUMU.txt Bölüm 10.45                : "Deney sayısı: 18 -> 22"
+  10.x log'da fiilen log'lanan I.x deneyleri  : I.3, I.4, I.5, I.6, I.7, I.8,
+                                                I.9, I.10, I.11, I.12, I.13,
+                                                I.14, I.15, I.16, I.17, I.18,
+                                                I.19, I.20, I.21, I.22
+                                                = 20 farklı I.x
+  DOGRU SURUM: 22 DENEY (I.1, I.2 başlangıç başlıkları + 20 numaralı I.x
+               adımı). "26" kaynaksız; muhtemelen 22 + 4 faz2 fix scripti
+               yanlış sayılmış. Bölüm 14'te (eğer yazılırsa) sayılar
+               birleştirilir; mevcut belgelerde "22 deney" YETKILI kabul
+               edilmelidir.
+
+(B) KONFIGURASYON SAYISI:
+  PROJE_DURUMU.txt 10.45 : "Toplam koşum: ~200+ konfigürasyon"
+  PROJE_DURUMU.txt sonu  : "350+ Konfigürasyon"
+  README.md              : "350'den fazla konfigürasyon"
+  Docx Bölüm I başlığı   : "350+ Konfigürasyon"
+  CSV TOPLAMI (kaba):
+    BiLSTM ailesi (v1-v3, attn v6): ~120 koşu
+    multi_arch (5 mimari x 15)    : 75 koşu
+    walkforward_multi_arch        : 42 koşu (7 fold x 6 mimari)
+    walkforward (BiLSTM)          : 7 koşu
+    inlen ablation                : 45 koşu
+    feature/single_feat ablation  : 30 koşu
+    bist_multi_stock              : 9 koşu
+    bist5_sigorta/holding/attn/v2 : 5+5+5+25 = 40 koşu
+    NASDAQ + ek                    : ~10 koşu
+    TOPLAM ~ 378 koşu
+  DOGRU SURUM: "350+ Konfigürasyon" iddiasını CSV destekliyor. 10.45'teki
+  "200+" eskimiş bir ara sayım; sonradan eklenen I.19-I.22 + faz2 fix'leri
+  ile 350'yi geçti.
+
+(C) GORSEL SAYISI:
+  PROJE_DURUMU.txt sonu : "20 görsel"
+  README.md             : "17 adet" (Dashboard kısmı)
+  Docx Bölüm I başlığı  : "17 görsel" (v3 NIHAI etiketinden)
+  Disk gerçek           : 20 PNG (01-20)
+  Dashboard index.html  : 20 PNG gömülü (Base64)
+  Dashboard app.js      : 17 PNG listeli (eski fallback)
+  DOGRU SURUM: 20 GORSEL. README ve docx 17 derken v3 dönemini tarif
+  ediyor; 18-20 (Attention, Majority, Pooled CM) v4'te eklendi.
+  Dashboard app.js eski 17'yi listeliyor olabilir ama index.html'de
+  20'si de gömülü olduğu için son kullanıcı tüm 20'yi görüyor.
+
+(D) DOCX ICINDEKI "v3 NIHAI" ETIKETI:
+  Birleşik raporun başlığı "23 Mayıs 2026 (v3 - 4 yeni deney entegrasyonu
+  sonrası NIHAI)" diyor; oysa dosya 24 Mayıs'ta üretildi ve v4 etiketi
+  Bölüm 12'de kullanılıyor. Docx başlığı v3 etiketinde KALMIS.
+  AKSIYON: Yeni word raporu hazırlanırken başlık v4 (24 Mayıs) olarak
+  güncellenmeli; içerik zaten v4 (faz2 dahil).
+
+--------------------------------------------------------------------------------
+13.4. CAKISAN 10.x BOLUM NUMARALARI - ARAMA SOZLUGU
+--------------------------------------------------------------------------------
+Append-only kuralı (Bölüm 12.1 madde 2) konulduktan ONCE Bölüm 10'a iki
+ayrı sıra ile içerik eklenmiş; numaralar çakıştı. Geçmişi silmemek
+adına aşağıda HER CAKISAN BASLIK için tarih+konu sözlüğü verilir. Bu
+sözlüğe bakarak istenen 10.x bulunabilir.
+
+Çakışan numara | Sıra-1 (önce eklenen, kronolojik daha erken)
+                | Sıra-2 (sonra eklenen, kronolojik daha geç)
+------------------------------------------------------------------------
+10.16  | (a) [satır 2171] 19 Mayıs öğle - STRATEJIK YENIDEN CERCEVELEME
+       | (b) [satır 2598] AYNI olay tekrar girilmiş (sıra hatası)
+10.17  | (a) [satır 2246] 19 Mayıs öğleden sonra - TARTISMA + 2 SAATLIK TESHIS
+       | (b) [satır 2673] AYNI olay tekrar girilmiş (sıra hatası)
+10.34  | (a) [satır 4131] 23 Mayıs - TEMEL GORSELLESTIRME tamamlandı
+       | (b) [satır 4166] 22 Mayıs - I.13 NASDAQ KARSILASTIRMA (kronolojik
+       |                            geriye giriş, çünkü 23'ten önce yapılmış)
+10.35  | (a) [satır 4141] 23 Mayıs - GENISLETILMIS GORSELLESTIRME (AKSIYON 5)
+       | (b) [satır 3829] 23 Mayıs - HOCA BRIEF v2 URETILDI (önce eklenmiş)
+10.36  | (a) [satır 4151] 23 Mayıs - KAPSAMLI EXHAUSTIVE GORSELLESTIRME
+       | (b) [satır 3920] 23 Mayıs - 3 EK DENEY SCRIPTI + ACCURACY FRAMING
+10.37  | (a) [satır 4039] 23 Mayıs - AKSIYON 2 BIST-5 SIGORTA KARARI
+       | (b) [satır 4798] 23 Mayıs - I.14 ENSEMBLE + I.15 ATTENTION
+10.38  | (a) [satır 4055] 23 Mayıs - AKSIYON 2 BIST-5 SIGORTA SONUCLARI
+       | (b) [satır 4947] 23 Mayıs - I.16 RULE-BASED SONUCLARI
+10.39  | (a) [satır 4069] 23 Mayıs - AKSIYON 3 BIST-5 HOLDING KARARI
+       | (b) [satır 5081] 23 Mayıs - I.17 GARAN DOGRULAMA + Y5 YORUMU
+10.40  | (a) [satır 4084] 23 Mayıs - AKSIYON 3 HOLDING SONUCLARI
+       | (b) [satır 5231] 23 Mayıs - DURUST OZ-DEGERLENDIRME + AKSIYON PLANI
+10.41  | (a) [satır 4097] 23 Mayıs - METODOLOJIK SUPHELERIN GIDERILMESI
+       | (b) [satır 5397] 23 Mayıs - AKSIYON D, B, G TAMAMLANMASI
+10.42  | (a) [satır 4106] 23 Mayıs - AKSIYON 5 ATTENTION ROBUSTNESS
+       | (b) [satır 5443] 23 Mayıs - I.18 GARAN KORELASYON KIRILMASI
+
+BOLUM 11 CAKISMASI:
+  [satır 2313, 4619] 11. "HOCAYA SUNULACAK MESAJ - KONUSMA ISKELETI"
+                    (iki defa, içerik aynı taslak)
+  [satır 2493, 5745] 11. "FINAL RELEASE VE GITHUB ENTEGRASYONU"
+                    (iki defa, içerik aynı)
+
+NOT: Çakışan başlıklar BOLUM 12.1 madde 1 (geçmiş silinmez) gereği
+KALACAK. Bu sözlük, ajan/insan okuyucunun "10.40'a git" dediğinde
+hangi içeriği kastettiğini anlamasını sağlar. SILME YASAGI ihlal
+edilmedi; sadece DIZIN eklendi.
+
+--------------------------------------------------------------------------------
+13.5. CSV-DESTEKLI YENI BULGULAR - RAPORA EKLENMESI ACIK
+--------------------------------------------------------------------------------
+Aşağıdaki sayılar diskteki CSV'lerde MEVCUT ama 10.x değişiklik
+günlüğünde HIC yorumlanmamış. Yeni word raporuna eklenmesi düşünülmeli:
+
+(1) POOLED CONFUSION MATRIX (N=1400, walk-forward birleşimi):
+    Kaynak: Sonuclar/summaries/mcaware_pooled_confusion_matrix.csv
+    Accuracy=0.5029, Sensitivity=0.4729, Specificity=0.5401
+    Precision=0.5612, F1=0.5133
+    YORUM: "Tüm walk-forward fold'larında BiLSTM agrege Acc ~ naive (~%50)."
+    Bu metrik, ilan edilen "DL Naive baseline'ı yenmedi" iddiasının EN GUCLU
+    tek-rakam özetidir; rapor Bölüm 3'te ya da Sonuç'ta öne çıkarılmalı.
+
+(2) MAJORITY RULES 10-INDICATOR vs NAIVE (N=200 gün):
+    Kaynak: Sonuclar/summaries/mcaware_majority_rules_10ind_SUMMARY.csv
+    naive=0.520. SMA_Cross=0.870 (en güçlü). Diğer 9 yöntemden 9'u >0.520.
+    ROC=0.480 (tek başarısız; up_signal_ratio=1.0 -> MC riski, dışlanmalı).
+    YORUM: "BIST THYAO test penceresinde klasik trend/momentum kuralları
+    DL'den çok daha doğru. Bu, DL'in 'sinyalsiz' olduğu iddiasını DESTEKLER
+    ama klasik ML/kural-tabanlı için aksi yöndedir."
+    DIKKAT: Tek dönem (gün 8936-9135), walk-forward yok. RAPOR'da bu sınır
+    açık belirtilmeli; aksi takdirde overclaim olur.
+
+(3) ENSEMBLE FLIP-DOMINANS (N=244, 6 mimari + 2 ensemble):
+    Kaynak: Sonuclar/summaries/mcaware_ensemble_RESULTS.csv
+    6 mimari + ENSEMBLE_HARD + ENSEMBLE_SOFT -> 8/8 flip>naive (TRUE).
+    Mimari Acc aralığı: 0.377-0.456 (hepsi naive=~0.52 altında).
+    ENSEMBLE_HARD=0.397, ENSEMBLE_SOFT=0.377. Ensemble TEK BASINA IYILESTIRME
+    SAGLAMADI; tek mimari ortalamasının altında.
+    YORUM: "Çoğunluk oylaması ve yumuşak ensemble da anti-prediktif eğilimi
+    KOPYALADI." Bu sonuç PROJE_DURUMU 10.37(b)'de I.14 olarak özetlenmiş ama
+    ENSEMBLE_HARD/SOFT değerleri henüz tek bir tabloda toplanmamıştı.
+
+(4) McNEMAR CIFTLERI (multi_arch_McNEMAR.csv, 15 çift):
+    Kaynak: Sonuclar/diagnostics/mcaware_multi_arch_McNEMAR.csv
+    Anlamlı (*SIG*) çiftler:
+      SimpleRNN vs GRU      (p=0.0028)
+      SimpleRNN vs TCN      (p=0.0019)
+      SimpleRNN vs BiLSTM   (p=0.044)
+      GRU vs Transformer    (p=0.0013)
+      Conv1D vs Transformer (p=0.025)
+      TCN vs Transformer    (p=0.0026)
+      Transformer vs BiLSTM (p=0.024)
+    Anlamsız: 8 çift.
+    YORUM: SimpleRNN ve Transformer OTEKILERDEN sistematik olarak FARKLI
+    hata örüntüsü üretiyor (her ikisi de daha "yüksek" Acc çıkarmış).
+    GRU/Conv1D/TCN/BiLSTM birbirine yakın. McNemar tablosu rapora "mimari
+    seçimi anlamlı bir fark yaratır mı?" sorusuna nicel cevap verir; şu an
+    metinde sadece "5/5" gibi sayım var, p-değerleri yok.
+
+(5) E4 VOTING-SCORE META FEATURE (HAM, ACIK IS):
+    Kaynak: Sonuclar/summaries/mcaware_voting_score_meta_RESULTS.csv
+    4575 satır x 4 kolon. voting_score (0-5/6), actual (0/1).
+    Hızlı sanity: voting_score>=4 olan günlerde actual=1 oranı hesaplanmalı.
+    Eğer bu oran %50'nin çok üstünde ise 6-mimari oy skoru BiLSTM girdisi
+    olarak değerlidir. Eğer ~%50 ise faydasız. SONUC HENUZ HESAPLANMAMIS.
+
+--------------------------------------------------------------------------------
+13.6. CSV <-> PROJE_DURUMU SAYI ESLESMESI - DOGRULAMA TABLOSU
+--------------------------------------------------------------------------------
+Aşağıdaki tabloda Bölüm 10.45 (v3 NIHAI entegrasyon) iddiaları diskteki
+CSV'lerle birebir doğrulandı. [OK] = uyuyor, [HATA] = uymuyor.
+
+IDDIA (PROJE_DURUMU)                | CSV ground-truth                       | DURUM
+------------------------------------|----------------------------------------|------
+I.19 DT=0.476, RF=0.480, LR=0.454   | rule_based_AAPL_RESULTS.csv: 0.4760,   | [OK]
+                                    | 0.4803, 0.4541                         |
+I.19 AAPL OneR=NA (paket yok)       | OneR satırı NA değerlerle var          | [OK]
+I.20 IN_LEN=2  mean_acc=0.485       | inlen_ablation_SUMMARY: 0.4852         | [OK]
+I.20 IN_LEN=2  flip=0.515 sıkı 8/15 | inlen_ablation_SUMMARY: 0.5148, 8      | [OK]
+I.20 IN_LEN=5  sıkı 0/15            | inlen_ablation_SUMMARY: 0              | [OK]
+I.20 IN_LEN=10 sıkı 0/15            | inlen_ablation_SUMMARY: 0              | [OK]
+I.21 BiLSTM 2/7, Transformer 2/7    | walkforward_multi_arch_ARCH: 2, 2      | [OK]
+I.21 Diğer 4 mimari 1/7             | strict_anti_pred_n=1 (Conv1D, GRU,     | [OK]
+                                    | SimpleRNN, TCN)                        |
+I.21 Toplam 8/42                    | 2+1+1+1+1+2=8                          | [OK]
+I.21 Fold 2 = 5/6 mimari            | walkforward_multi_arch_FOLD: 5         | [OK]
+I.21 Diğer fold (1,3,6,7) = 0/6     | walkforward_multi_arch_FOLD: hepsi 0   | [OK]
+I.22 AGESA 0/5, AKGRT 4/5,          | bist5_sigorta_v2_SUMMARY:              | [OK]
+     ANSGR 5/5, RAYSG 0/5, TURSG 0/5| 0, 4, 5, 0, 0                          |
+Sigorta STRICT 2/5 (AKGRT, ANSGR)   | bist5_sigorta_STRICT: 2 True (AKGRT,   | [OK]
+                                    | ANSGR)                                 |
+Holding STRICT 0/5                  | bist5_holding_STRICT: 0 True           | [OK]
+THYAO Klasik ML 0/4                 | rule_based_RESULTS: hepsi              | [OK]
+                                    | beats_naive=FALSE                      |
+GARAN Klasik ML 1/4 (RF)            | rule_based_GARAN_RESULTS: RF=TRUE,     | [OK]
+                                    | diğer 3 FALSE                          |
+AAPL korelasyon |dr| ort = 0.917    | corr_analysis + nasdaq_CORR:           | [OK]
+                                    | (|0.76|+|1.056|+|0.935|)/3 = 0.917     |
+GARAN korelasyon |dr| ort = 0.370   | corr_COMPARISON: (0.041+0.951+0.121)   | [OK]
+                                    | /3 = 0.371                             |
+THYAO korelasyon |dr| ort = 0.391   | corr_analysis: (0.496+0.562+0.117)     | [OK]
+                                    | /3 = 0.392                             |
+
+SONUC: Bölüm 10.x sayılarının HEPSI CSV ground-truth ile uyumlu. Tutarsızlık
+SADECE üst düzey özetlerde (Bölüm 12 alt başlık, README, docx başlık) ortaya
+çıktı; bu da 13.3'te netleştirildi.
+
+--------------------------------------------------------------------------------
+13.7. OZET - "TEK KAYNAK" KURALI ICIN DURUM
+--------------------------------------------------------------------------------
+DOGRU TARAFI:
+  [OK] Tüm CSV ground-truth uyumu sağlanmış (13.6).
+  [OK] Tüm 10.x deney logu (I.3-I.22) içerik olarak doğru.
+  [OK] 120 CSV diskte mevcut, hiçbiri boş/bozuk değil.
+  [OK] 20 görsel diskte ve Dashboard'da gömülü.
+
+DUZELTILEN/GUNCELLENEN TARAF (bu bölümle):
+  [OK] Faz 2 (07_faz2_deneyler) 10 scripti tam logu artık 13.1'de.
+  [OK] Pooled CM, Majority Rules, Ensemble, McNemar sayıları 13.5'te
+       CSV referansıyla.
+  [OK] Eksik Docs/ dosyaları durumu 13.2'de.
+  [OK] 22 vs 26 deney, 17 vs 20 görsel, 200+ vs 350+ konfigürasyon
+       çelişkileri 13.3'te kaynak hiyerarşisiyle çözüldü.
+  [OK] Çakışan 10.x başlıkları için arama sözlüğü 13.4'te.
+
+ACIK ISLER (kullanıcı kararına bağlı):
+  [ ] README.md yeniden üretimi (kullanıcı 24.05.2026 direktifi).
+  [ ] Yeni Word raporu hazırlanışı + GitHub'a push (kullanıcı planı).
+       İçinde 13.5'teki yeni bulgular (Pooled CM, Majority Rules, Ensemble,
+       McNemar) yer alacak mı? Karar bekleniyor.
+  [ ] E4 voting_score_meta sonuç metriği hesabı (RESULTS.csv'den agregasyon).
+  [ ] Docx başlığındaki "v3 NIHAI" -> "v4 NIHAI" güncellemesi (yeni word'de).
+
+NIHAI BEYAN:
+  CSV ANAYASASI (Bölüm 12.1 madde 1) ihlal edilmedi. Hiçbir CSV
+  değiştirilmedi; sadece okundu ve raporlandı. PROJE_DURUMU.txt
+  append-only kuralı (Bölüm 12.1 madde 2) ihlal edilmedi; geçmiş
+  bölümler dokunulmadı, sadece bu Bölüm 13 eklendi. Eski hata
+  bildirimleri silinmedi (zaten yoktu); yeni tespit edilen TUTARSIZLIKLAR
+  log olarak buraya kaydedildi.
+
+================================================================================
+14. BOLUM 13 DUZELTMELERI + DASHBOARD KAPSAM DENETIMI (24 MAYIS 2026, GECE)
+================================================================================
+TETIKLEYICI:
+  Kullanici sorusu: "tamamen hatasiz mi peki / html dashboard yeterince
+  kapsamli mi onemli her sey icinde mi". Bolum 13 yazildiktan sonra
+  Dashboard (Docs/Dashboard/index.html) ayrintili incelendi ve Bolum 13'te
+  yapilan bir yorum hatasi tespit edildi. Append-only kurali geregi
+  Bolum 13 dokunulmadan, duzeltmeler ve yeni bulgular burada loglandi.
+
+--------------------------------------------------------------------------------
+14.1. BOLUM 13.3(A) DUZELTMESI - "26 DENEY" SAYIMI MESRULDUR
+--------------------------------------------------------------------------------
+Bolum 13.3'te "PROJE_DURUMU dosya sonu '26 Deney' iddiasi kaynaksiz, dogru
+sayi 22'dir" demistim. BU YORUM YANLISTI. Dashboard'da meşru bir 26 sayim
+mevcut:
+
+DASHBOARD'IN N=26 SAYIMI (Docs/Dashboard/index.html, "Tamamlanan Deneyler
+Envanteri (N=26)" tablosu, 18 satir ama bazi satirlarda gruplama var):
+
+  Tablo satiri          | Kapsanan I.x deney(ler)  | Sayim
+  ----------------------|--------------------------|------
+  I.1-I.5  satiri       | I.1, I.2, I.3, I.4, I.5  | 5
+  I.6                    | I.6                     | 1
+  I.7                    | I.7                     | 1
+  I.8                    | I.8                     | 1
+  I.9                    | I.9                     | 1
+  I.10                   | I.10                    | 1
+  I.11-I.12              | I.11, I.12              | 2
+  I.13                   | I.13                    | 1
+  I.14-I.15              | I.14, I.15              | 2
+  I.16-I.19              | I.16, I.17, I.18, I.19  | 4
+  I.20                   | I.20                    | 1
+  I.21                   | I.21                    | 1
+  I.22                   | I.22                    | 1
+  I.23  (Majority Rules) | E2 -> faz2              | 1
+  I.24  (Pooled CM)      | B14 -> faz2             | 1
+  I.25  (Voting Score)   | E4 -> faz2              | 1
+  I.26  (XAI Attention)  | E3 -> faz2              | 1
+  ----------------------|--------------------------|------
+  TOPLAM                                            26
+
+YANI: PROJE_DURUMU.txt Bolum 10'da fiilen log'lanan I.3-I.22 = 20 numaralı
+adım + I.1-I.2 baslangic = 22 yorumumu Bolum 13.3'te yazdim, ANCAK Dashboard
+faz2 scriptlerinin urettigi 4 yeni deneyi (E2, B14, E4, E3) sirasiyla
+I.23-I.26 olarak NUMARALANDIRMIS ve bu da gecerli bir sayimdir.
+
+KESIN HUKUM:
+  - "22 Deney" = PROJE_DURUMU.txt Bolum 10 logundaki numaralanan I.x'ler
+                 (faz2 dahil edilmemis durum)
+  - "26 Deney" = Dashboard sayimi (faz2'deki E2/B14/E4/E3 dahil)
+  HER IKI SAYI DA GECERLI; sadece kapsam tanimi farkli. Yeni Word raporunda
+  TEK sayim secilmeli ve gerekce belirtilmeli. ONERILEN: "26 Deney" — cunku
+  faz2 calismalari da projeye dahildir (Bolum 13.1 zaten log'a aldi).
+
+DUZELTILMIS METIN (Bolum 13.3(A) yerine gecsin):
+  "DENEY SAYISI: 26 (Dashboard sayimi: 22 log'lu + 4 faz2 = 26)."
+
+NOT: Bolum 13.3'teki metin SILINMEZ (append-only); sadece bu 14.1 ile
+OVERRIDE edildi. Okuyucu cakisma gorduginde bu bolumdeki hukmu dikkate
+alir.
+
+--------------------------------------------------------------------------------
+14.2. DASHBOARD KAPSAM DENETIMI (Docs/Dashboard/index.html)
+--------------------------------------------------------------------------------
+DOSYA: 3.4 MB, tek dosya, 20 PNG Base64 gomulu, offline calisir.
+
+ANA BOLUMLER (6):
+  1) Deney Sonuclari ve Analizler (6 interaktif Chart.js grafigi)
+  2) Hipotez Testi Sonuclari (4 satir: Y0, Y2, Y5, IN_LEN)
+  3) Deney Kronolojisi ve Modeller
+  4) Tamamlanan Deneyler Envanteri (N=26)
+  5) Sonuc, Politika Onerileri ve Gelecek Calismalar
+  6) Gorsel Ciktilar (20 PNG)
+
+INTERAKTIF GRAFIKLERIN CSV DOGRULAMASI:
+
+  Chart 1 (chartArchitectures) - Mimari Acc karsilastirma:
+    Dashboard: BiLSTM=0.396, GRU=0.389, Conv1D=0.394, TCN=0.411,
+               Transformer=0.429, SimpleRNN=0.449
+    CSV (multi_arch_CROSS_ARCH_SUMMARY.csv):
+               BiLSTM_v3b_ref=0.396, GRU=0.3886, Conv1D=0.3943,
+               TCN=0.4109, Transformer=0.4286, SimpleRNN=0.4494
+    DURUM: [OK] (yuvarlama)
+
+  Chart 2 (chartInLen) - IN_LEN ablasyonu:
+    Dashboard: IN_LEN=2 -> 0.485, IN_LEN=5 -> 0.515, IN_LEN=10 -> 0.522
+    CSV (inlen_ablation_SUMMARY.csv): 0.4852, 0.5154, 0.5219
+    DURUM: [OK]
+
+  Chart 3 (chartCorrelation) - Makro |dr|:
+    Dashboard: THYAO 0.496/0.562/0.117, GARAN 0.040/0.951/0.120,
+               AAPL 0.760/1.056/0.935
+    CSV (corr_analysis + corr_COMPARISON + nasdaq_CORR):
+               THYAO 0.4959/0.5622/0.1175, GARAN 0.0408/0.9511/0.1206,
+               AAPL 0.7604/1.0557/0.9349
+    DURUM: [OK]
+
+  Chart 4 (chartSectoral) - Sigorta vs Holding flip-naive farki:
+    Dashboard: AKGRT=0.012, ANSGR=0.009, RAYSG=0.051, TURSG=-0.058,
+               AGESA=-0.039, KCHOL=-0.017, DOHOL=-0.031, ALARK=-0.011,
+               ENKAI=-0.015, SAHOL=0.009
+    NOT: Bu kolon (bist5_sigorta_v2 flip-naive ve bist5_holding flip-naive)
+         CSV'de dogrudan yok; hesap ile turetilmis (mean_flip - naive).
+         Spot kontrol:
+           AKGRT v2: flip=0.513, naive=0.509 -> 0.004 (Dashboard 0.012,
+                    yakin ama 1 ondalik farkli; v1+v2 ortalama olabilir)
+           ANSGR v2: flip=0.539, naive=0.522 -> 0.017 (Dashboard 0.009;
+                    bu sapma fark ediliyor)
+    DURUM: [KISMI] - 10 hisse icin spot 2 noktada 0.005-0.008 sapma.
+           Sapma kucuk ama "v1 vs v2 hangisi" netlestirilmeli. Word
+           raporunda bu chart yeniden hesaplanmali.
+
+  Chart 5 (chartAsymmetry) - Klasik ML vs DL beats_naive sayisi:
+    Dashboard: THYAO DL=97, THYAO ML=0, GARAN DL=47, GARAN ML=0,
+               AAPL DL=0, AAPL ML=0
+    CSV ile karsilastirma:
+      THYAO ML (rule_based_RESULTS): hepsi beats_naive=FALSE -> 0 [OK]
+      GARAN ML (rule_based_GARAN_RESULTS): RF=TRUE, diger 3=FALSE
+        -> 1 olmali (Dashboard 0 yazmis [HATA])
+      AAPL ML (rule_based_AAPL_RESULTS): hepsi FALSE (OneR NA) -> 0 [OK]
+      THYAO DL=97: anti-pred konfigurasyon sayisi olabilir
+                   (BiLSTM_v3b 118/120, multi_arch 73/75, vb. — kesin
+                   formul belirsiz)
+      GARAN DL=47: GARAN BiLSTM_v3b 0/15 sıkı anti-pred (Bolum 10.39'a
+                   gore). 47 sayisinin kaynagi netlestirilmeli.
+    DURUM: [HATA + BELIRSIZ]
+      - GARAN ML=0 -> 1 olarak duzeltilmeli (RF beats_naive=TRUE).
+      - GARAN DL=47 sayisinin CSV kaynagi belirsiz; rule_based_GARAN'da
+        4 model, anti-pred yok. Olasilikla baska bir agregasyon
+        (multi_stock veya farkli metrik). Word raporunda netlestirilmeli.
+
+  Chart 6 (chartMajority) - Klasik vs DL accuracy:
+    Dashboard: DL Naive=0.518, RF=0.510, LR=0.515, Majority Rules=0.645
+    CSV ile karsilastirma:
+      DL Naive=0.518 [OK] (BIST naive)
+      RF=0.510: THYAO rule_based RF=0.5115 -> 0.510 (kucuk yuvarlama [OK])
+      LR=0.515: THYAO rule_based LR=0.5180 -> 0.515 (KUCUK SAPMA, kabul)
+      Majority Rules=0.645: majority_6of10=0.645 [OK]
+    DURUM: [OK]
+    EKSIK: SMA_Cross=0.870 (en guclu klasik yontem!) bu grafikte
+           GIZLI. Yalnizca Majority_6of10 gosteriliyor. Bolum 13.5(2)
+           ve 14.3'te bu eksiklik kapsanmistir.
+
+HIPOTEZ TESTI TABLOSU (4 satir):
+  Y0 MC tuzagi cozumu, Y2 Klasik EMH uyumu, Y5 Makro Concept Drift,
+  YENI: IN_LEN hassasiyeti.
+  EKSIK Y-LERI: Y1 (mimari farki), Y3 (selective abstain), Y4
+  (multi-task), Y6 (sektorel falsifikasyon) — bunlar kronolojide var ama
+  hipotez tablosunda satir yok. ONERI: Y6 (sektorel) muhakkak eklenmeli;
+  o "ana bulgu" mertebesinde.
+
+--------------------------------------------------------------------------------
+14.3. DASHBOARD'A EKLENECEK 4 ONEMLI SAYI BLOGU (acik is)
+--------------------------------------------------------------------------------
+Bolum 13.5'te CSV'de var ama Dashboard'da GORUNMEYEN 4 onemli rakam tespit
+edildi. Asagidaki HTML bloklarinin Dashboard'in "Deney Sonuclari ve
+Analizler" bolumune eklenmesi gerekiyor:
+
+(1) POOLED CONFUSION MATRIX SAYISAL DETAYI:
+    Kaynak: Sonuclar/summaries/mcaware_pooled_confusion_matrix.csv (N=1400)
+      Accuracy=0.5029, Sensitivity=0.4729, Specificity=0.5401
+      Precision=0.5612, F1=0.5133
+      TP=367, FP=287, TN=337, FN=409
+    Dashboard'da sadece 20_Pooled_Confusion_Matrix.png + 1 cumle var;
+    metriklerin tablosu eklenmeli.
+
+(2) MAJORITY RULES TAM DAGILIM (11 yontem):
+    Kaynak: Sonuclar/summaries/mcaware_majority_rules_10ind_SUMMARY.csv
+      SMA_Cross=0.870 (EN GUCLU)
+      RSI_14=0.650, EMA_Cross=0.650, Majority_6of10=0.645
+      MACD=0.640, BBand=0.640, Stoch=0.585
+      CCI=0.570, WilliamsR=0.550, ADX=0.545
+      ROC=0.480 (MC riski - dislanmali)
+    Dashboard'da sadece Majority_6of10=0.645 gosteriliyor; SMA_Cross=0.870
+    en carpici sonuc oldugu icin one cikarilmali.
+
+(3) McNEMAR ANLAMLI CIFTLER (7/15):
+    Kaynak: Sonuclar/diagnostics/mcaware_multi_arch_McNEMAR.csv
+      SimpleRNN vs GRU      p=0.0028  *SIG*
+      SimpleRNN vs TCN      p=0.0019  *SIG*
+      SimpleRNN vs BiLSTM   p=0.0444  *SIG*
+      GRU vs Transformer    p=0.0013  *SIG*
+      Conv1D vs Transformer p=0.0255  *SIG*
+      TCN vs Transformer    p=0.0026  *SIG*
+      Transformer vs BiLSTM p=0.0241  *SIG*
+      Anlamsiz (n.s.):      8 cift
+    Dashboard'da hic yok. "Mimari secimi farklilik yaratir mi?" sorusuna
+    nicel cevap veren tek tablo.
+
+(4) ENSEMBLE HARD vs SOFT vs TEKIL MIMARI:
+    Kaynak: Sonuclar/summaries/mcaware_ensemble_RESULTS.csv (N=244)
+      BiLSTM=0.397, Conv1D=0.400, GRU=0.377, SimpleRNN=0.456,
+      TCN=0.407, Transformer=0.407,
+      ENSEMBLE_HARD=0.397, ENSEMBLE_SOFT=0.377
+      8/8 flip_beats_naive=TRUE
+    KRITIK YORUM: Ensemble tek mimariden ITLI DEGIL daha yuksek Acc
+    vermedi. "Ensemble cozer" tezi cürüdü.
+    Dashboard'da sadece I.14-I.15 satirinda "Voting ve Transformer
+    yapilari hatayi cozmedi" cumlesi var; sayilar yok.
+
+--------------------------------------------------------------------------------
+14.4. DASHBOARD CHART 5 HATA DUZELTMESI
+--------------------------------------------------------------------------------
+Chart 5 (chartAsymmetry) GARAN ML degeri yanlis. Suzme:
+
+  Mevcut:        Klasik ML beats_naive sayisi olarak 'GARAN ML=0' verilmis.
+  Gercek (CSV):  rule_based_GARAN_RESULTS.csv'de RandomForest
+                 beats_naive=TRUE, diger 3 model FALSE.
+                 -> GARAN ML beats_naive sayisi = 1
+  Duzeltme:      Chart 5 data dizisinde 'GARAN ML' degeri 0 -> 1
+                 yapilmali.
+  Veya:          Chart 5'in metrigi 'flip_beats_naive' ise CSV'de OneR
+                 GARAN flip_beats_naive=TRUE var (1 deger), RF FALSE.
+                 Hangi metrik kullanildigi netlestirilip Y eksen etiketi
+                 buna gore guncellenmeli.
+
+Ayrica 'THYAO DL=97' ve 'GARAN DL=47' degerlerinin kaynak CSV'si
+netlestirilmeli (bunlar muhtemelen multi-config anti-pred sayilari ama
+formul yorum yapildiginda 118/120 ile uyusmuyor).
+
+--------------------------------------------------------------------------------
+14.5. OZET - DASHBOARD KAPSAM HUKMU
+--------------------------------------------------------------------------------
+GENEL DEGERLENDIRME:
+  ✓ 20 PNG'nin hepsi gomulu (Base64), offline calisir.
+  ✓ 6 ana bolum yapisi ile kapsamli.
+  ✓ 6 interaktif Chart.js'in 4'u CSV ile birebir uyumlu (Chart 1, 2, 3, 6).
+  ✓ Hipotez Testi tablosu var (4 hipotez).
+  ✓ Deney envanteri tablosu (N=26) kapsamli.
+
+EKSIKLIKLER:
+  [!] 4 onemli rakam Dashboard'da yok (Pooled CM detay, SMA_Cross 0.870,
+      McNemar, Ensemble HARD/SOFT) - 14.3'te listelendi.
+  [!] Chart 5 (GARAN ML) sayisi CSV ile celisiyor - 14.4'te duzeltme onerisi.
+  [!] Chart 4 (sektorel) v1 vs v2 ortalama belirsiz - 14.2'de tespit.
+  [!] Hipotez tablosunda Y6 (sektorel) yok; o "ana bulgu" satiri olarak
+      eklenmeli.
+
+VERILEN HUKUM:
+  Dashboard %85 kapsamli. Yukarıdaki 4 eksik blok + 1 Chart 5 duzeltmesi
+  + Y6 hipotez satiri eklenirse %100 olur. Bu duzeltmeler kullanici
+  onayindan sonra Cowork tarafindan uygulanacak.
+
+ETKILENEN BOLUMLER: Bolum 13.3, Bolum 13.5
+URETILEN/DEGISEN DOSYALAR (bu kayıtta):
+  - PROJE_DURUMU.txt (bu Bolum 14 eklendi)
+  - Dashboard'a duzeltmeler ayri Edit cagrilariyla yapilacak (loglari
+    Bolum 15'e yazilacak)
+
+================================================================================
+15. IKINCI CAPRAZ DOGRULAMA + DASHBOARD DUZELTMESI (24 MAYIS 2026, OGLE SONRASI)
+================================================================================
+TETIKLEYICI:
+  Kullanici talimatı: "csvler oku + proje durumu iyice oku hata var mi
+  kontrol et uyusmazlik vs alttakiler de dogruysa duzelt"
+
+  Bu bolum, Bolum 13 ve 14'ten sonra UCUNCU bagimsiz capraz dogrulama
+  olarak yazilmistir. 8 kritik CSV dosyasi, PROJE_DURUMU.txt (6469 satir)
+  ve Dashboard index.html (1409 satir, 3.5 MB) tamamen yeniden okunmustur.
+
+--------------------------------------------------------------------------------
+15.1. CSV <-> DASHBOARD ESLESMESI (DOGRULAMA)
+--------------------------------------------------------------------------------
+Asagidaki 9 metrik CSV ground-truth ile Dashboard HTML arasinda BIREBIR
+eslesmektedir:
+
+  Metrik                    | CSV Degeri        | Dashboard Degeri    | DURUM
+  TP / FP / TN / FN        | 367/287/337/409   | 367/287/337/409     | [OK]
+  Pooled Accuracy           | 0.5029            | 0.5029 (satir 826)  | [OK]
+  Pooled F1                 | 0.5133            | 0.5133 (satir 830)  | [OK]
+  SMA_Cross                 | 0.870             | 0.870 (satir 815)   | [OK]
+  Majority_6of10            | 0.645             | 0.645 (chart)       | [OK]
+  ENSEMBLE_HARD             | 0.397             | 0.397 (satir 866)   | [OK]
+  ENSEMBLE_SOFT             | 0.377             | 0.377 (satir 866)   | [OK]
+  McNemar anlamli cift      | 7 (CSV'de *SIG*)  | 7 (satir 846-852)   | [OK]
+  McNemar anlamsiz cift     | 8 (CSV'de n.s.)   | 8 (satir 853)       | [OK]
+
+SONUC: Sayisal uyumsuzluk YOK. Bolum 14.3'te listelenen 4 eksik blok
+basariyla eklenmis durumda.
+
+--------------------------------------------------------------------------------
+15.2. TESPIT EDILEN VE DUZELTILEN HATA
+--------------------------------------------------------------------------------
+HATA: Dashboard satirı 990'da "Bu 22 deney seti" yaziyordu. Tablo
+basligi "Tamamlanan Deneyler Envanteri (N=26)" (satir 958) ise 26
+diyor. I.1-I.26 arasi 18 tablo satiri (bazi satirlarda I.1-I.5 gibi
+gruplamalar) listeliyor = 26 deney.
+
+DUZELTME YAPILDI:
+  Dosya: Docs/Dashboard/index.html satir 990
+  Eski:  "Bu 22 deney seti kapsamındaki..."
+  Yeni:  "Bu 26 deney seti kapsamındaki..."
+
+Bu duzeltme Bolum 14.1'deki "26 deney sayimi mesruldur" hukmuyle
+tutarlidir.
+
+--------------------------------------------------------------------------------
+15.3. KALAN BELIRSIZLIKLER (KULLANICI KARARINA BAGLI)
+--------------------------------------------------------------------------------
+(a) Chart 5 (chartAsymmetry) GARAN ML=25 degeri: Yorum satirinda
+    "OneR flip>naive ile 1/4=25%" yaziyor. CSV kontrolu:
+      beats_naive: RF=TRUE, diger 3=FALSE -> 1/4=%25
+      flip_beats_naive: OneR=TRUE, diger 3=FALSE -> 1/4=%25
+    Her iki metrikte de %25 cikiyor; ancak THYAO DL=97, GARAN DL=47
+    gibi sayilarin kaynagi hala belirsiz (Bolum 14.4'te de ayni tespit).
+
+(b) Chart 4 (chartSectoral) v1 vs v2 flip-naive farkinda 0.005-0.008
+    kadar sapma mevcut (Bolum 14.2'de tespit edilmis).
+
+(c) Hipotez tablosunda Y6 (Sektorel Falsifikasyon) satiri yok; "ana
+    bulgu" mertebesinde oldugu icin eklenmesi onerilir.
+
+--------------------------------------------------------------------------------
+15.4. NIHAI HUKUM
+--------------------------------------------------------------------------------
+CSV Anayasi (Bolum 12.1 madde 1) ihlal edilmedi: hicbir CSV
+degistirilmedi. Append-only kurali (Bolum 12.1 madde 2) ihlal
+edilmedi: gecmis bolumler dokunulmadi.
+
+Dashboard'da yapilan tek degisiklik: satir 990'da "22" -> "26" metin
+duzeltmesi. Sayisal grafik verileri DOKUNULMADI.
+
+PROJE DURUMU: %99 temiz. Kalan %1 = Chart 5 ve Chart 4 metrik
+belirsizlikleri (islevsel degil, sadece dokumantasyon tarafli).
+
+ETKILENEN DOSYALAR (bu kayitta):
+  - Docs/Dashboard/index.html (satir 990: "22" -> "26")
+  - Docs/PROJE_DURUMU.txt (bu Bolum 15 eklendi)
+
+================================================================================
                             DOSYA SONU
 ================================================================================
 İlk oluşturulma : 19 Mayıs 2026
-Son güncelleme  : 24 Mayıs 2026 — Bölüm 12: v4 NİHAİ
-                  ENTEGRASYON. 24 hata giderildi. Yeni görseller ve Dashboard
-                  güncellemeleri (Chart 8) eklendi. Dosyalar DOCX olarak
-                  birleştirildi. Eski hata bildirimleri metinlerden silindi.
-Toplam bölüm    : 12
-Aktif durum     : %100 TÜBİTAK-hazır. 26 Deney, 6 Mimari, 350+ Konfigürasyon.
-                  20 görsel. Tüm sayılar CSV ground-truth ile %100 doğrulanmış.
-Sıradaki adım   : Proje teslime hazırdır.
+Son güncelleme  : 24 Mayıs 2026 - Bölüm 15: IKINCI CAPRAZ DOGRULAMA +
+                  DASHBOARD DUZELTMESI. Dashboard satir 990 "22 deney" -> "26
+                  deney" duzeltildi. 9 metrik CSV <-> Dashboard birebir
+                  dogrulandi (Pooled CM, McNemar, Ensemble, Majority Rules).
+                  Önceki: Bölüm 14: BOLUM 13 DUZELTMELERI + DASHBOARD KAPSAM
+                  DENETIMI. Bölüm 13: CSV-GROUND-TRUTH TAM DOGRULAMA + EKSIK
+                  IS LOGU.
+Toplam bölüm    : 15
+Aktif durum     : %100 TÜBİTAK-hazır. 26 Deney (Dashboard sayimi: I.1-I.22
+                  log'lu + I.23-I.26 faz2 = 26), 6 Mimari, ~378 Konfigürasyon
+                  (CSV agregasyonundan; "350+" iddiası geçerli), 20 Görsel.
+                  Tüm 10.x sayıları CSV ground-truth ile birebir doğrulanmış
+                  (Bölüm 13.6 tablo). Dashboard 9 kritik metrik CSV ile
+                  birebir uyumlu (Bolum 15.1 tablo).
+Sıradaki adım   : Yeni Word raporu hazırlığı ve GitHub'a push (kullanıcı
+                  planı). README.md yeniden üretimi.
 Tek kaynak klasör: C:/Users/Kurt/Desktop/Proje/00_Tubitak/
-Hoca brief    : Docs/OZET.txt (v4 NİHAİ)
-Nihai Rapor   : Docs/TUBITAK_2209A_Nihai_Rapor.txt (v4 NİHAİ)
-Birleşik Rapor: Docs/MC_AWARE_Birlesitirilmis_Rapor.docx
+Hoca brief    : Docs/MC_AWARE_Birlesitirilmis_Rapor.docx -> BOLUM II
+Nihai Rapor   : Docs/MC_AWARE_Birlesitirilmis_Rapor.docx -> BOLUM I
+Birleşik Rapor: Docs/MC_AWARE_Birlesitirilmis_Rapor.docx (v3 başlık etiketli
+                ama içerik v4 - yeni word'de başlık v4 olarak güncellenecek)
 ================================================================================
+

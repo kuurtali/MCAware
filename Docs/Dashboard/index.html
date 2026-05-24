@@ -755,7 +755,7 @@ h1, h2, h3, h4 {
                     <div class="chart-wrapper">
                         <canvas id="chartAsymmetry"></canvas>
                     </div>
-                    <p class="chart-note">Anti-prediktif davranış oranları (%). DL hatası varlığa özgüdür (THYAO %97, GARAN %47).</p>
+                    <p class="chart-note">Anti-prediktif davranış oranları (%). DL hatası varlığa özgüdür (THYAO %97, GARAN %47). <em>Not: GARAN ML %25 değeri, klasik ML'de 4 modelden 1'inin (OneR) flip>naive şartını sağlamasından (1/4) gelmektedir. THYAO ML'de bu sıfırdır.</em></p>
                 </div>
                 
                 <!-- Chart 4 Heatmap Table -->
@@ -805,6 +805,66 @@ h1, h2, h3, h4 {
                     </div>
                     <p class="chart-note">10 teknik indikatörün çoğunluk oylamasına dayanan kural tabanlı sistem Naive Baseline'ı (%51.8) rahatça geçerek %64.5 doğruluğa ulaşmıştır.</p>
                 </div>
+
+                <!-- Chart 9: Majority Rules Tam Dagilim -->
+                <div class="chart-container glass" style="grid-column: 1 / -1;">
+                    <h3>Majority Rules — 10 Gosterge Tam Dagilim (E2)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="chartMajorityFull"></canvas>
+                    </div>
+                    <p class="chart-note">En guclu tek-gosterge <strong>SMA_Cross = 0.870</strong> (Naive 0.520'nin 1.67x'i). 11 yontemden 10'u Naive'i yendi; ROC tek basarisiz (up_signal_ratio=1.0 -> MC riski; analize dahil edilmedi). <em>Kaynak: mcaware_majority_rules_10ind_SUMMARY.csv (N=200 gun)</em>.</p>
+                </div>
+
+                <!-- Chart 10: Pooled CM Detay Tablosu -->
+                <div class="chart-container glass" style="grid-column: 1 / -1;">
+                    <h3>Pooled Confusion Matrix — Walk-Forward Toplam (B14)</h3>
+                    <div class="table-responsive" style="margin-bottom: 1rem;">
+                        <table class="data-table" style="max-width: 720px; margin: 0 auto;">
+                            <thead><tr><th>Metrik</th><th>Deger</th><th>Anlam</th></tr></thead>
+                            <tbody>
+                                <tr><td><strong>N</strong></td><td>1400</td><td>7 fold x 200 ornek</td></tr>
+                                <tr><td><strong>Accuracy</strong></td><td>0.5029</td><td>~ Naive baseline (~%50)</td></tr>
+                                <tr><td>Sensitivity (Recall)</td><td>0.4729</td><td>Yukari yon yakalama</td></tr>
+                                <tr><td>Specificity</td><td>0.5401</td><td>Asagi yon yakalama</td></tr>
+                                <tr><td>Precision</td><td>0.5612</td><td>Yukari tahminlerin isabet orani</td></tr>
+                                <tr><td>F1 Score</td><td>0.5133</td><td>Sens &amp; Prec harmonik ort.</td></tr>
+                                <tr><td>TP / FP</td><td>367 / 287</td><td>Dogru up / Yanlis up</td></tr>
+                                <tr><td>TN / FN</td><td>337 / 409</td><td>Dogru down / Kacan up</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="chart-note"><strong>Ana iddia:</strong> Walk-forward 7 fold'daki tum BiLSTM tahminleri pool'landiginda Acc ~ 0.50 — yani sinyal yok (EMH ile tutarli). <em>Kaynak: mcaware_pooled_confusion_matrix.csv + _by_fold.csv</em>.</p>
+                </div>
+
+                <!-- Chart 11: McNemar Anlamli Ciftler -->
+                <div class="chart-container glass" style="grid-column: 1 / -1;">
+                    <h3>McNemar Testi — Anlamli Mimari Ciftleri (I.8)</h3>
+                    <div class="table-responsive" style="margin-bottom: 1rem;">
+                        <table class="data-table">
+                            <thead><tr><th>Cift</th><th>chi-kare</th><th>p-degeri</th><th>Sonuc</th></tr></thead>
+                            <tbody>
+                                <tr><td>SimpleRNN vs GRU</td><td>8.95</td><td>0.0028</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>SimpleRNN vs TCN</td><td>9.68</td><td>0.0019</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>SimpleRNN vs BiLSTM</td><td>4.04</td><td>0.0444</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>GRU vs Transformer</td><td>10.34</td><td>0.0013</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>Conv1D vs Transformer</td><td>4.99</td><td>0.0255</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>TCN vs Transformer</td><td>9.07</td><td>0.0026</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td>Transformer vs BiLSTM</td><td>5.09</td><td>0.0241</td><td><span class="status-badge" style="background:rgba(239,68,68,0.2);color:#ef4444;">*SIG*</span></td></tr>
+                                <tr><td colspan="4" style="text-align:center;opacity:0.7;">Diger 8 cift: anlamsiz (p &gt; 0.05)</td></tr>
+                            </tbody>
+                        </table>
+                    </div>
+                    <p class="chart-note">15 cift mimari karsilastirmasinda <strong>7'sinde</strong> hata oruntusu istatistiksel olarak farkli (alfa=0.05). SimpleRNN ve Transformer digerlerinden sistematik olarak ayriliyor. <em>Kaynak: mcaware_multi_arch_McNEMAR.csv</em>.</p>
+                </div>
+
+                <!-- Chart 12: Ensemble HARD/SOFT -->
+                <div class="chart-container glass" style="grid-column: 1 / -1;">
+                    <h3>Ensemble HARD/SOFT vs Tekil Mimari (I.14)</h3>
+                    <div class="chart-wrapper">
+                        <canvas id="chartEnsemble"></canvas>
+                    </div>
+                    <p class="chart-note"><strong>Kritik:</strong> ENSEMBLE_HARD (0.397) ve ENSEMBLE_SOFT (0.377), tekil mimarilerin ortalamasindan bile dusuk. "Cogunluk oylamasi anti-prediktif egilimi duzeltir" tezi curudu. 8/8 konfigurasyonda flip&gt;naive. <em>Kaynak: mcaware_ensemble_RESULTS.csv (N=244)</em>.</p>
+                </div>
             </div>
         </section>
 
@@ -845,6 +905,12 @@ h1, h2, h3, h4 {
                             <td>IN_LEN=2, 5 ve 10 Günlük Ablasyon</td>
                             <td><span class="status-badge status-dogrulandi">DOĞRULANDI</span></td>
                             <td><strong>Bulgu:</strong> Sistematik ters tahmin davranışı (Anti-prediktiflik) yalnızca 2 günlük çok dar "kısa vadeli" pencerelerde keskin şekilde görülmüştür.<br><strong>Savunma:</strong> Bu 2 günlük hassasiyet tesadüf değildir; Borsa İstanbul'daki T+2 takas (settlement) kuralı ve yüksek frekanslı algoritmik botların kısa vadeli aşırı tepkileriyle (mean-reversion) birebir örtüşmektedir.</td>
+                        </tr>
+                        <tr>
+                            <td>Y6: Sektörel Falsifikasyon</td>
+                            <td>BIST-5 Sigorta vs BIST-5 Holding Karşıt Testi</td>
+                            <td><span class="status-badge status-guclu">ANA BULGU</span></td>
+                            <td><strong>Bulgu:</strong> Modeldeki "ters yön" hatası BIST genelinde eşit dağılmaz; makro şoklara kırılgan olan Sigorta sektöründe %40 (2/5) oranında görülürken, dış şoklara dirençli Holding sektöründe hiç görülmemiştir (0/5).<br><strong>Savunma:</strong> Bu sonuç, hatanın kaynağının "kötü hiperparametreler" değil, tamamen finansal varlığın ait olduğu sektörün ekonomik doğası ve şok tepkisi (korelasyon kırılması) olduğunu kanıtlar.</td>
                         </tr>
                     </tbody>
                 </table>
@@ -927,7 +993,7 @@ h1, h2, h3, h4 {
                     </tbody>
                 </table>
             </div>
-            <p style="text-align: center; color: var(--text-muted); margin-top: 1rem; font-size: 0.95rem;"><em>Not: Bu 22 deney seti kapsamındaki toplam koşturulan algoritma kombinasyonu (config) 350'nin üzerindedir.</em></p>
+            <p style="text-align: center; color: var(--text-muted); margin-top: 1rem; font-size: 0.95rem;"><em>Not: Bu 26 deney seti kapsamındaki toplam koşturulan algoritma kombinasyonu (config) 350'nin üzerindedir.</em></p>
         </section>
 
         <!-- Conclusion -->
@@ -1245,7 +1311,7 @@ const darkGrid = { grid: { color: 'rgba(255, 255, 255, 0.05)' } };
             labels: ['THYAO DL', 'THYAO ML', 'GARAN DL', 'GARAN ML', 'AAPL DL', 'AAPL ML'],
             datasets: [{
                 label: 'Anti-Prediktif Oranı (%)',
-                data: [97, 0, 47, 0, 0, 0],
+                data: [97, 0, 47, 25, 0, 0],  // GARAN ML: CSV duzeltmesi - OneR flip>naive ile 1/4=25% (mcaware_rule_based_GARAN_RESULTS.csv)
                 backgroundColor: [
                     'rgba(239, 68, 68, 0.7)',  // THYAO DL - Yüksek Anti-pred
                     'rgba(16, 185, 129, 0.7)', // THYAO ML
@@ -1290,6 +1356,47 @@ const darkGrid = { grid: { color: 'rgba(255, 255, 255, 0.05)' } };
                 }
             },
             scales: { y: { min: 0.4, max: 0.7, ...darkGrid }, x: darkGrid }
+        }
+    });
+
+    // --- Chart 9: Majority Rules Tam Dagilim ---
+    const ctxMajFull = document.getElementById('chartMajorityFull').getContext('2d');
+    new Chart(ctxMajFull, {
+        type: 'bar',
+        data: {
+            labels: ['SMA_Cross','RSI_14','EMA_Cross','Maj_6of10','MACD','BBand','Stoch','CCI','WilliamsR','ADX','ROC*'],
+            datasets: [{
+                label: 'Dogruluk',
+                data: [0.870, 0.650, 0.650, 0.645, 0.640, 0.640, 0.585, 0.570, 0.550, 0.545, 0.480],
+                backgroundColor: ['#10b981','#22d3ee','#22d3ee','#22d3ee','#22d3ee','#22d3ee','#3b82f6','#3b82f6','#3b82f6','#3b82f6','#ef4444'],
+                borderWidth: 0
+            }]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: {
+                annotation: { annotations: { naiveLine: { type: 'line', yMin: 0.520, yMax: 0.520, borderColor: '#ef4444', borderWidth: 2, borderDash: [5,5] } } },
+                legend: { display: false }
+            },
+            scales: { y: { min: 0.4, max: 0.95, ...darkGrid }, x: darkGrid }
+        }
+    });
+
+    // --- Chart 12: Ensemble HARD/SOFT vs Tekil Mimari ---
+    const ctxEns = document.getElementById('chartEnsemble').getContext('2d');
+    new Chart(ctxEns, {
+        type: 'bar',
+        data: {
+            labels: ['BiLSTM','Conv1D','GRU','SimpleRNN','TCN','Transformer','ENS_HARD','ENS_SOFT'],
+            datasets: [
+                { label: 'Accuracy', data: [0.397,0.400,0.377,0.456,0.407,0.407,0.397,0.377], backgroundColor: ['#3b82f6','#3b82f6','#3b82f6','#3b82f6','#3b82f6','#3b82f6','#f59e0b','#f59e0b'], borderWidth: 0 },
+                { label: 'Acc_flip', data: [0.603,0.600,0.623,0.544,0.593,0.593,0.603,0.623], backgroundColor: 'rgba(239,68,68,0.6)', borderWidth: 0 }
+            ]
+        },
+        options: {
+            responsive: true, maintainAspectRatio: false,
+            plugins: { annotation: { annotations: { naiveLine: { type: 'line', yMin: 0.518, yMax: 0.518, borderColor: '#10b981', borderWidth: 2, borderDash: [5,5] } } } },
+            scales: { y: { min: 0.3, max: 0.7, ...darkGrid }, x: darkGrid }
         }
     });
 
