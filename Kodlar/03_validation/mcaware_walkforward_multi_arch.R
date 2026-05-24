@@ -1,12 +1,12 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” WALK-FORWARD CV Ã— 6 MÄ°MARÄ° (DENEY I.21)
-# TUBITAK 2209-A â€” Yurutucu: Mehmet Ali KURT
+# ===========================================================================
+# MC-AWARE — WALK-FORWARD CV × 6 MÝMARÝ (DENEY I.21)
+# TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
 # ---------------------------------------------------------------------------
 # AMACI:
 #   "Mimari-bagimsiz anti-prediktivite" iddiasi tek-split kanitina dayaniyor.
 #   Walk-forward sadece BiLSTM'de yapildi (3/7 fold flip>naive).
-#   Bu deneyde 7 fold x 6 mimari = 42 koÅŸu yapilir. Sonuc:
+#   Bu deneyde 7 fold x 6 mimari = 42 koþu yapilir. Sonuc:
 #     - Mimari-bagimsiz "donemsel anti-pred" gercekten gozleniyor mu?
 #     - Hangi foldlar/mimariler tutarli?
 #   beklenir.
@@ -22,7 +22,7 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

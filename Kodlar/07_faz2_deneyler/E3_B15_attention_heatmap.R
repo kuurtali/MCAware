@@ -1,6 +1,6 @@
-ï»¿################################################################################
-# E3/B15 â€” XAI Attention Heatmap GÃ¶rselleÅŸtirmesi
-# BiLSTM+Attention v6'daki attention aÄŸÄ±rlÄ±klarÄ±nÄ± heatmap olarak Ã§iz
+################################################################################
+# E3/B15 — XAI Attention Heatmap Görselleþtirmesi
+# BiLSTM+Attention v6'daki attention aðýrlýklarýný heatmap olarak çiz
 ################################################################################
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
@@ -11,7 +11,7 @@ cat("\n========== E3/B15: XAI Attention Heatmap ==========\n")
 
 WORKDIR <- here::here()
 OUTDIR <- here::here("Sonuclar")
-IMGDIR  <- "here::here()/Gorseller"
+IMGDIR  <- file.path(here::here(), "Gorseller")
 setwd(WORKDIR)
 
 # --- Gerekli paketler ---
@@ -22,7 +22,7 @@ library(ggplot2)
 library(reshape2)
 library(viridis)
 
-# --- Attention PREDICTIONS CSV'den attention weights Ã§ek ---
+# --- Attention PREDICTIONS CSV'den attention weights çek ---
 pred_path <- file.path(OUTDIR, "predictions/mcaware_BiLSTM_attn_v6_PREDICTIONS.csv")
 if (!file.exists(pred_path)) {
   stop("HATA: mcaware_BiLSTM_attn_v6_PREDICTIONS.csv bulunamadi!")
@@ -32,10 +32,10 @@ pred_df <- read.csv(pred_path, stringsAsFactors = FALSE)
 cat("Toplam tahmin:", nrow(pred_df), "\n")
 cat("Sutunlar:", paste(names(pred_df), collapse=", "), "\n\n")
 
-# --- Attention aÄŸÄ±rlÄ±k sÃ¼tunlarÄ±nÄ± bul ---
+# --- Attention aðýrlýk sütunlarýný bul ---
 attn_cols <- grep("^attn_", names(pred_df), value = TRUE)
 if (length(attn_cols) == 0) {
-  # Alternatif: weight sÃ¼tunlarÄ±
+  # Alternatif: weight sütunlarý
   attn_cols <- grep("^weight_|^attention_|^head_", names(pred_df), value = TRUE)
 }
 
@@ -43,14 +43,14 @@ if (length(attn_cols) > 0) {
   cat("Attention sutunlari bulundu:", length(attn_cols), "\n")
   cat("Sutun isimleri:", paste(attn_cols, collapse=", "), "\n\n")
   
-  # --- Ortalama attention aÄŸÄ±rlÄ±klarÄ±nÄ± hesapla ---
+  # --- Ortalama attention aðýrlýklarýný hesapla ---
   attn_matrix <- pred_df[, attn_cols, drop=FALSE]
   mean_attn <- colMeans(attn_matrix, na.rm = TRUE)
   
   cat("Ortalama attention agirliklari:\n")
   print(round(mean_attn, 4))
   
-  # --- Heatmap 1: Ortalama attention aÄŸÄ±rlÄ±klarÄ± bar chart ---
+  # --- Heatmap 1: Ortalama attention aðýrlýklarý bar chart ---
   attn_bar_df <- data.frame(
     feature = gsub("^attn_|^weight_|^attention_", "", attn_cols),
     weight = mean_attn
@@ -79,7 +79,7 @@ if (length(attn_cols) > 0) {
   ggsave(img_path1, p1, width = 10, height = 6, dpi = 300)
   cat("\n[OK] Gorsel:", img_path1, "\n")
   
-  # --- Heatmap 2: Lambda x Seed attention deÄŸiÅŸimi ---
+  # --- Heatmap 2: Lambda x Seed attention deðiþimi ---
   if ("lambda" %in% names(pred_df) && "seed" %in% names(pred_df)) {
     attn_by_config <- pred_df %>%
       group_by(lambda, seed) %>%
@@ -116,7 +116,7 @@ if (length(attn_cols) > 0) {
   cat("[OK] CSV:", attn_csv_path, "\n")
   
 } else {
-  cat("UYARI: Attention agirlÄ±k sutunlari bulunamadi!\n")
+  cat("UYARI: Attention agirlýk sutunlari bulunamadi!\n")
   cat("Mevcut sutunlar:", paste(names(pred_df), collapse=", "), "\n")
   cat("\nAlternatif: Predictions CSV'de attention agirliklari yok.\n")
   cat("Bu durumda attention v6 scriptinin attention_weights ciktisi\n")

@@ -1,13 +1,13 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” GENÄ°ÅžLETÄ°LMÄ°Åž GÃ–RSELLEÅžTÄ°RME (AKSIYON 5)
-# AmaÃ§: TÃœBÄ°TAK JÃ¼ri raporunu destekleyecek 3 geliÅŸmiÅŸ grafiÄŸin Ã§izilmesi
+# ===========================================================================
+# MC-AWARE — GENÝÞLETÝLMÝÞ GÖRSELLEÞTÝRME (AKSIYON 5)
+# Amaç: TÜBÝTAK Jüri raporunu destekleyecek 3 geliþmiþ grafiðin çizilmesi
 # ===========================================================================
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
 library(here)
 
 
-WORKDIR <- "here::here()"
+WORKDIR <- here::here()
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({
@@ -16,23 +16,23 @@ suppressPackageStartupMessages({
   library(tidyr)
 })
 
-# Ã‡Ä±ktÄ± klasÃ¶rÃ¼nÃ¼n olduÄŸundan emin ol
+# Çýktý klasörünün olduðundan emin ol
 if (!dir.exists("Gorseller")) { dir.create("Gorseller", recursive = TRUE) }
 
 # ---------------------------------------------------------------------------
-# GRAFÄ°K 3: KORELASYON KIRILMASI (CONCEPT DRIFT) SLOPE CHART
+# GRAFÝK 3: KORELASYON KIRILMASI (CONCEPT DRIFT) SLOPE CHART
 # ---------------------------------------------------------------------------
-# Veriler: OZET.txt BÃ¶lÃ¼m 4.2'den (THYAO Korelasyon KÄ±rÄ±lmasÄ±)
+# Veriler: OZET.txt Bölüm 4.2'den (THYAO Korelasyon Kýrýlmasý)
 corr_data <- data.frame(
   Variable = c("USDTRY", "Oil (Petrol)", "TCMB Faizi"),
   Train_Cor = c(0.908, 0.414, 0.194),
   Test_Cor = c(0.412, -0.148, 0.311)
 )
 
-# Plot iÃ§in uzun formata Ã§evir
+# Plot için uzun formata çevir
 corr_long <- corr_data %>%
   pivot_longer(cols = c("Train_Cor", "Test_Cor"), names_to = "Period", values_to = "Correlation") %>%
-  mutate(Period = factor(Period, levels = c("Train_Cor", "Test_Cor"), labels = c("EÄŸitim DÃ¶nemi (Train)", "Test DÃ¶nemi (Test)")))
+  mutate(Period = factor(Period, levels = c("Train_Cor", "Test_Cor"), labels = c("Eðitim Dönemi (Train)", "Test Dönemi (Test)")))
 
 p_slope <- ggplot(corr_long, aes(x = Period, y = Correlation, group = Variable, color = Variable)) +
   geom_line(linewidth = 2, alpha = 0.8) +
@@ -41,10 +41,10 @@ p_slope <- ggplot(corr_long, aes(x = Period, y = Correlation, group = Variable, 
   theme_minimal(base_size = 14) +
   scale_color_manual(values = c("USDTRY" = "#1b9e77", "Oil (Petrol)" = "#d95f02", "TCMB Faizi" = "#7570b3")) +
   labs(
-    title = "Makroekonomik Korelasyon KÄ±rÄ±lmasÄ± (Concept Drift)",
-    subtitle = "Ã–zellikle Petrol'Ã¼n yÃ¶n deÄŸiÅŸtirmesi ve Dolar'Ä±n korelasyon yitirmesi model ezberini bozmuÅŸtur.",
+    title = "Makroekonomik Korelasyon Kýrýlmasý (Concept Drift)",
+    subtitle = "Özellikle Petrol'ün yön deðiþtirmesi ve Dolar'ýn korelasyon yitirmesi model ezberini bozmuþtur.",
     x = "",
-    y = "Korelasyon KatsayÄ±sÄ± (r)"
+    y = "Korelasyon Katsayýsý (r)"
   ) +
   theme(
     plot.title = element_text(face = "bold", size = 16),
@@ -53,17 +53,17 @@ p_slope <- ggplot(corr_long, aes(x = Period, y = Correlation, group = Variable, 
   )
 
 ggsave("Gorseller/03_Correlation_Drift_Slope.png", p_slope, width = 9, height = 7, dpi = 300)
-cat("Grafik 3 oluÅŸturuldu: Gorseller/03_Correlation_Drift_Slope.png\n")
+cat("Grafik 3 oluþturuldu: Gorseller/03_Correlation_Drift_Slope.png\n")
 
 
 # ---------------------------------------------------------------------------
-# GRAFÄ°K 4: FEATURE ABLATION (DEÄžÄ°ÅžKEN Ã‡IKARMA) BAR GRAFÄ°ÄžÄ°
+# GRAFÝK 4: FEATURE ABLATION (DEÐÝÞKEN ÇIKARMA) BAR GRAFÝÐÝ
 # ---------------------------------------------------------------------------
-# Veriler: OZET.txt BÃ¶lÃ¼m 4.1'den
+# Veriler: OZET.txt Bölüm 4.1'den
 ablation_data <- data.frame(
   Feature_Set = factor(
-    c("Tam Set (13 DeÄŸiÅŸken)", "USDTRY Ã‡Ä±karÄ±ldÄ±", "Petrol Ã‡Ä±karÄ±ldÄ±", "TCMB Faizi Ã‡Ä±karÄ±ldÄ±", "Makro DeÄŸiÅŸkenler Ã‡Ä±karÄ±ldÄ± (10 DeÄŸiÅŸken)"),
-    levels = c("Tam Set (13 DeÄŸiÅŸken)", "USDTRY Ã‡Ä±karÄ±ldÄ±", "Petrol Ã‡Ä±karÄ±ldÄ±", "TCMB Faizi Ã‡Ä±karÄ±ldÄ±", "Makro DeÄŸiÅŸkenler Ã‡Ä±karÄ±ldÄ± (10 DeÄŸiÅŸken)")
+    c("Tam Set (13 Deðiþken)", "USDTRY Çýkarýldý", "Petrol Çýkarýldý", "TCMB Faizi Çýkarýldý", "Makro Deðiþkenler Çýkarýldý (10 Deðiþken)"),
+    levels = c("Tam Set (13 Deðiþken)", "USDTRY Çýkarýldý", "Petrol Çýkarýldý", "TCMB Faizi Çýkarýldý", "Makro Deðiþkenler Çýkarýldý (10 Deðiþken)")
   ),
   Flip_Wins = c(15, 3, 3, 3, 0),
   Total_Configs = c(15, 3, 3, 3, 15)
@@ -78,10 +78,10 @@ p_ablation <- ggplot(ablation_data, aes(x = Feature_Set, y = Ratio, fill = Ratio
   coord_flip() +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Feature Ablation: Makro ÅžoklarÄ±n Hata Ãœzerindeki Etkisi",
-    subtitle = "TÃ¼m makro-kÄ±rÄ±lgan deÄŸiÅŸkenler silindiÄŸinde Ters Tahmin (Anti-Prediktif) hatasÄ± SIFIRLANMAKTADIR.",
+    title = "Feature Ablation: Makro Þoklarýn Hata Üzerindeki Etkisi",
+    subtitle = "Tüm makro-kýrýlgan deðiþkenler silindiðinde Ters Tahmin (Anti-Prediktif) hatasý SIFIRLANMAKTADIR.",
     x = "",
-    y = "Ters Tahmin Yapan Model OranÄ± (%)"
+    y = "Ters Tahmin Yapan Model Oraný (%)"
   ) +
   theme(
     plot.title = element_text(face = "bold", size = 16),
@@ -89,16 +89,16 @@ p_ablation <- ggplot(ablation_data, aes(x = Feature_Set, y = Ratio, fill = Ratio
   )
 
 ggsave("Gorseller/04_Feature_Ablation_Bar.png", p_ablation, width = 10, height = 6, dpi = 300)
-cat("Grafik 4 oluÅŸturuldu: Gorseller/04_Feature_Ablation_Bar.png\n")
+cat("Grafik 4 oluþturuldu: Gorseller/04_Feature_Ablation_Bar.png\n")
 
 
 # ---------------------------------------------------------------------------
-# GRAFÄ°K 5: MC TUZAÄžI Ã‡Ã–ZÃœM BULGUSU (SENSITIVITY VS SPECIFICITY)
+# GRAFÝK 5: MC TUZAÐI ÇÖZÜM BULGUSU (SENSITIVITY VS SPECIFICITY)
 # ---------------------------------------------------------------------------
-# Normalde MC tuzaÄŸÄ±na dÃ¼ÅŸen bir modelde Sensitivity (Sens) veya Specificity (Spec) 0 olur.
-# Bizim Ã§Ã¶zdÃ¼ÄŸÃ¼mÃ¼z mimarilerde ikisi de 0'dan bÃ¼yÃ¼ktÃ¼r (gerÃ§ek karar vericilerdir).
+# Normalde MC tuzaðýna düþen bir modelde Sensitivity (Sens) veya Specificity (Spec) 0 olur.
+# Bizim çözdüðümüz mimarilerde ikisi de 0'dan büyüktür (gerçek karar vericilerdir).
 mc_data <- data.frame(
-  Model_Tipi = c("Eski YÃ¶ntem (MC TuzaÄŸÄ±)", "Yeni YÃ¶ntem (MC-Aware Custom Loss)"),
+  Model_Tipi = c("Eski Yöntem (MC Tuzaðý)", "Yeni Yöntem (MC-Aware Custom Loss)"),
   Sensitivite = c(1.00, 0.45),
   Spesifisite = c(0.00, 0.35)
 )
@@ -112,8 +112,8 @@ p_mc <- ggplot(mc_long, aes(x = Model_Tipi, y = Score, fill = Metric)) +
   geom_hline(yintercept = 0, color = "black", linewidth = 1) +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Majority Class (SÄ±nÄ±f DengesizliÄŸi) TuzaÄŸÄ±nÄ±n AÅŸÄ±lmasÄ±",
-    subtitle = "Eski yÃ¶ntemde model sadece tek sÄ±nÄ±fÄ± bilirken (Spec=0); yeni yÃ¶ntemde model her iki sÄ±nÄ±fa da karar Ã¼retebilmektedir.",
+    title = "Majority Class (Sýnýf Dengesizliði) Tuzaðýnýn Aþýlmasý",
+    subtitle = "Eski yöntemde model sadece tek sýnýfý bilirken (Spec=0); yeni yöntemde model her iki sýnýfa da karar üretebilmektedir.",
     x = "",
     y = "Metrik Skoru"
   ) +
@@ -124,6 +124,6 @@ p_mc <- ggplot(mc_long, aes(x = Model_Tipi, y = Score, fill = Metric)) +
   )
 
 ggsave("Gorseller/05_MC_Tuzagi_Cozumu.png", p_mc, width = 9, height = 6, dpi = 300)
-cat("Grafik 5 oluÅŸturuldu: Gorseller/05_MC_Tuzagi_Cozumu.png\n")
+cat("Grafik 5 oluþturuldu: Gorseller/05_MC_Tuzagi_Cozumu.png\n")
 
-cat("\nGENÄ°ÅžLETÄ°LMÄ°Åž GÃ–RSELLEÅžTÄ°RME PAKETÄ° (AKSIYON 5) BAÅžARIYLA TAMAMLANDI.\n")
+cat("\nGENÝÞLETÝLMÝÞ GÖRSELLEÞTÝRME PAKETÝ (AKSIYON 5) BAÞARIYLA TAMAMLANDI.\n")

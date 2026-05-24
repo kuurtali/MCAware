@@ -1,6 +1,6 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” MAJORITY VOTING ENSEMBLE (ADIM I.14)
-# TÃœBÄ°TAK 2209-A â€” YÃ¼rÃ¼tÃ¼cÃ¼: Mehmet Ali KURT
+# ===========================================================================
+# MC-AWARE — MAJORITY VOTING ENSEMBLE (ADIM I.14)
+# TÜBÝTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
 # ---------------------------------------------------------------------------
 # AMACI:
@@ -13,28 +13,28 @@
 # NEDEN ANLAMLI:
 #   McNemar testi 6 mimarinin COGUNLUKLA AYNI hatalari yaptigini gosterdi
 #   (n.s. cogunlukta). Eger gercekten ayni yondeyse, ensemble da ayni
-#   sekilde anti-prediktif olur â†’ hipotezimizi GUCLENDIRIR.
-#   Eger ensemble Naive'i geciyorsa â†’ mimari cesitliligi sinyali yakaliyor
-#   demek â†’ Yorum 3'u ZAYIFLATIR ama operasyonel kazanc.
+#   sekilde anti-prediktif olur › hipotezimizi GUCLENDIRIR.
+#   Eger ensemble Naive'i geciyorsa › mimari cesitliligi sinyali yakaliyor
+#   demek › Yorum 3'u ZAYIFLATIR ama operasyonel kazanc.
 #
 # YONTEM:
 #   1. 6 mimari PREDICTIONS.csv'lerini yukle
 #   2. Her test sample'i icin: 6 modelin (lambda x seed = 15 config'in
-#      ortalamasi) tahmin olasiligi â†’ cogunluk yonu
+#      ortalamasi) tahmin olasiligi › cogunluk yonu
 #   3. Aynileri Acc/Spec/Sens/MC/flip metrikleri
 #   4. Iki strateji:
 #      (a) HARD VOTING: her model thr=0.5 ile sinif, sonra cogunluk
 #      (b) SOFT VOTING: 6 modelin yhat ortalamasi, sonra thr=0.5
 #
-# YENI MODEL EGITIMI YOK â€” sadece mevcut CSV'leri okuyor.
-# Calistirma: RStudio â†’ Ctrl+Shift+S â†’ ~30 saniye â†’ 3 CSV
+# YENI MODEL EGITIMI YOK — sadece mevcut CSV'leri okuyor.
+# Calistirma: RStudio › Ctrl+Shift+S › ~30 saniye › 3 CSV
 # ===========================================================================
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
 library(here)
 
 
-WORKDIR <- "here::here()"
+WORKDIR <- here::here()
 OUTDIR  <- WORKDIR
 setwd(WORKDIR)
 
@@ -43,7 +43,7 @@ suppressPackageStartupMessages({
 })
 
 cat("\n========================================================================\n")
-cat("MC-AWARE â€” MAJORITY VOTING ENSEMBLE (ADIM I.14)\n")
+cat("MC-AWARE — MAJORITY VOTING ENSEMBLE (ADIM I.14)\n")
 cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
 cat("Mimariler: BiLSTM (v3b), GRU, SimpleRNN, Conv1D, TCN, Transformer\n")
 cat("========================================================================\n\n")
@@ -185,21 +185,21 @@ cat(strrep("=", 80), "\n", sep = "")
 if (m_soft$Acc > naive_acc) {
   cat("[A] ENSEMBLE NAIVE'I GECTI:\n")
   cat(sprintf("    Soft Acc=%.3f > Naive=%.3f\n", m_soft$Acc, naive_acc))
-  cat("    Mimari cesitliligi anti-prediktif egilimi nÃ¶trledi.\n")
+  cat("    Mimari cesitliligi anti-prediktif egilimi nötrledi.\n")
   cat("    BU SURPRIZ - hipotezimizi REVIZE etmek gerekir.\n")
 } else if (m_soft$Acc_flip > naive_acc) {
   cat("[B] ENSEMBLE TERS-PREDIKTIF (BEKLENEN):\n")
   cat(sprintf("    Soft Acc=%.3f < Naive=%.3f, ama Acc_flip=%.3f > Naive\n",
               m_soft$Acc, naive_acc, m_soft$Acc_flip))
-  cat("    6 mimari ayni yonde yaniliyor â†’ ensemble da anti-prediktif.\n")
-  cat("    Bu MIMARI-BAGIMSIZLIK iddiamizi GUCLENDIRIR (118/120 â†’ 119/121).\n")
-  cat("    Majority Rules baseline anti-prediktif â†’ TUBITAK iddiasÄ± icin\n")
+  cat("    6 mimari ayni yonde yaniliyor › ensemble da anti-prediktif.\n")
+  cat("    Bu MIMARI-BAGIMSIZLIK iddiamizi GUCLENDIRIR (118/120 › 119/121).\n")
+  cat("    Majority Rules baseline anti-prediktif › TUBITAK iddiasý icin\n")
   cat("    pozitif kanit.\n")
 } else {
   cat("[C] NOTR:\n")
   cat(sprintf("    Ensemble Acc=%.3f, flip=%.3f, Naive=%.3f\n",
               m_soft$Acc, m_soft$Acc_flip, naive_acc))
-  cat("    Voting nÃ¶tr kaldi - mimariler birbirini iptal ediyor.\n")
+  cat("    Voting nötr kaldi - mimariler birbirini iptal ediyor.\n")
 }
 
 # --- 8. CSV cikti ---

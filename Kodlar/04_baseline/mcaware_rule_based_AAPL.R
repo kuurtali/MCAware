@@ -1,6 +1,6 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” NASDAQ AAPL KLASIK ML BASELINE (DENEY I.19)
-# TUBITAK 2209-A â€” Yurutucu: Mehmet Ali KURT
+# ===========================================================================
+# MC-AWARE — NASDAQ AAPL KLASIK ML BASELINE (DENEY I.19)
+# TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
 # ---------------------------------------------------------------------------
 # AMACI:
@@ -22,7 +22,7 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({
@@ -38,7 +38,7 @@ has_rf <- requireNamespace("randomForest", quietly = TRUE)
 has_oner <- requireNamespace("OneR", quietly = TRUE)
 
 cat("\n========================================================================\n")
-cat("MC-AWARE â€” NASDAQ AAPL KLASIK ML BASELINE (I.19)\n")
+cat("MC-AWARE — NASDAQ AAPL KLASIK ML BASELINE (I.19)\n")
 cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
 cat("========================================================================\n\n")
 
@@ -189,12 +189,12 @@ write.csv(res_df, out_file, row.names = FALSE)
 cat(sprintf("\nKaydedildi: %s\n", out_file))
 
 cat("\n========================================================================\n")
-cat("OZET â€” AAPL Klasik ML\n")
+cat("OZET — AAPL Klasik ML\n")
 cat("========================================================================\n")
 cat(sprintf("Naive: %.3f\n", naive_acc))
 cat(sprintf("beats_naive sayisi: %d/%d\n",
             sum(res_df$beats_naive), nrow(res_df)))
 cat(sprintf("flip_beats_naive sayisi: %d/%d\n",
             sum(res_df$flip_beats_naive), nrow(res_df)))
-cat("\nBEKLEME: 0/4 beats_naive + 0/4 flip_beats_naive â†’ DL anti-pred BIST'e ozgu\n")
+cat("\nBEKLEME: 0/4 beats_naive + 0/4 flip_beats_naive › DL anti-pred BIST'e ozgu\n")
 cat("AAPL KLASIK ML BASELINE TAMAMLANDI.\n")

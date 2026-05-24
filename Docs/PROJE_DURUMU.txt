@@ -6521,14 +6521,15 @@ ETKILENEN DOSYALAR (bu kayitta):
                             DOSYA SONU
 ================================================================================
 İlk oluşturulma : 19 Mayıs 2026
-Son güncelleme  : 24 Mayıs 2026 - Bölüm 15: IKINCI CAPRAZ DOGRULAMA +
+Son güncelleme  : 24 Mayıs 2026 - Bölüm 16: GELECEK İTERASYONLAR İÇİN METODOLOJİK ÖNERİLER EKLENDİ.
+                  Önceki: Bölüm 15: IKINCI CAPRAZ DOGRULAMA +
                   DASHBOARD DUZELTMESI. Dashboard satir 990 "22 deney" -> "26
                   deney" duzeltildi. 9 metrik CSV <-> Dashboard birebir
                   dogrulandi (Pooled CM, McNemar, Ensemble, Majority Rules).
                   Önceki: Bölüm 14: BOLUM 13 DUZELTMELERI + DASHBOARD KAPSAM
                   DENETIMI. Bölüm 13: CSV-GROUND-TRUTH TAM DOGRULAMA + EKSIK
                   IS LOGU.
-Toplam bölüm    : 15
+Toplam bölüm    : 16
 Aktif durum     : %100 TÜBİTAK-hazır. 26 Deney (Dashboard sayimi: I.1-I.22
                   log'lu + I.23-I.26 faz2 = 26), 6 Mimari, ~378 Konfigürasyon
                   (CSV agregasyonundan; "350+" iddiası geçerli), 20 Görsel.
@@ -6542,5 +6543,41 @@ Hoca brief    : Docs/MC_AWARE_Birlesitirilmis_Rapor.docx -> BOLUM II
 Nihai Rapor   : Docs/MC_AWARE_Birlesitirilmis_Rapor.docx -> BOLUM I
 Birleşik Rapor: Docs/MC_AWARE_Birlesitirilmis_Rapor.docx (v3 başlık etiketli
                 ama içerik v4 - yeni word'de başlık v4 olarak güncellenecek)
+================================================================================
+
+
+--------------------------------------------------------------------------------
+16. GELECEK İTERASYONLAR İÇİN METODOLOJİK ÖNERİLER (KOD TARAMASI BULGULARI)
+--------------------------------------------------------------------------------
+Tüm kod tabanında yapılan otomatik taramalar sonucunda, bazı deney scriptleri arasında
+karşılaştırılabilirliği zedeleyebilecek parametre tutarsızlıkları bulunmuştur. Mevcut
+CSV'leri bozmamak adına bu parametreler değiştirilmemiş, ancak bir sonraki faz veya
+hakem revizyonu aşamasında (re-run edileceğinde) aşağıdaki noktaların scriptlerde
+eşitlenmesi ÖNERİLMEKTEDİR:
+
+  1. OUT_LEN (Tahmin Ufku) Uyuşmazlığı:
+     - mcaware_inlen_ablation.R ve mcaware_walkforward_multi_arch.R "OUT_LEN=1"
+       kullanırken, diğer ana scriptler (özellikle validation ve feature ablation)
+       "OUT_LEN=3" kullanıyor. Karşılaştırılabilirlik için hepsi eşitlenmelidir.
+
+  2. Veri Seti Başlangıç Tarihi Uyuşmazlığı:
+     - Çoğu model "2018-01-01" başlangıç tarihli veri kullanırken, inlen_ablation
+       ve multi_arch scriptleri "2014-01-01" kullanıyor (4 yıl fazla veri).
+
+  3. Makro Değişken (Feature) Eksiklikleri:
+     - mcaware_inlen_ablation.R ve mcaware_walkforward_multi_arch.R içinde
+       TCMB_Rate yerine sabit (varyansız) df$Fear.Greed = 50.0 atanmış.
+     - mcaware_bist_multi_stock.R testinde makro değişkenler (USDTRY, Oil, TCMB)
+       tamamen dışarıda bırakılmış, sadece 10 teknik indikatör kullanılmış.
+
+  4. Aşırı Öğrenme (Overfitting) Riski:
+     - mcaware_walkforward_multi_arch.R içinde validation_data sağlanmadan
+       monitor = "accuracy" (train set) ile early stopping yapılmış.
+
+Bu hususlar, ileride makale veya tez yazımına geçilirken "yeniden eğitim" (re-run)
+yapılacağı zaman dikkate alınmalıdır.
+
+================================================================================
+                            DOSYA SONU
 ================================================================================
 

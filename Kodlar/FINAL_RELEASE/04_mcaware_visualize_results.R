@@ -1,12 +1,12 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” GÃ–RSELLEÅžTÄ°RME VE RAPORLAMA SCRÄ°PTÄ°
+# ===========================================================================
+# MC-AWARE — GÖRSELLEÞTÝRME VE RAPORLAMA SCRÝPTÝ
 # ===========================================================================
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
 library(here)
 
 
-WORKDIR <- "here::here()"
+WORKDIR <- here::here()
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({
@@ -14,7 +14,7 @@ suppressPackageStartupMessages({
   library(ggplot2)
 })
 
-# 1. Verilerin YÃ¼klenmesi
+# 1. Verilerin Yüklenmesi
 sigorta <- read.csv("Sonuclar/mcaware_bist5_sigorta_SUMMARY.csv")
 sigorta$Sector <- "Sigorta (Kirilgan)"
 
@@ -23,11 +23,11 @@ holding$Sector <- "Holding (Dagitik)"
 
 df <- dplyr::bind_rows(sigorta, holding)
 
-# Ters Sinyal GÃ¼cÃ¼: (Modelin Ters Tahmin BaÅŸarÄ±sÄ± - Rastgele Tahmin BaÅŸarÄ±sÄ±)
-# EÄŸer bu deÄŸer 0'dan bÃ¼yÃ¼kse, model RASTGELELÄ°KTEN SAPIP SÄ°STEMATÄ°K HATA (Ters Sinyal) veriyor demektir.
+# Ters Sinyal Gücü: (Modelin Ters Tahmin Baþarýsý - Rastgele Tahmin Baþarýsý)
+# Eðer bu deðer 0'dan büyükse, model RASTGELELÝKTEN SAPIP SÝSTEMATÝK HATA (Ters Sinyal) veriyor demektir.
 df$Anti_Predictive_Gap <- df$mean_flip - df$naive
 
-# 2. Grafik 1: SektÃ¶rel KÄ±rÄ±lganlÄ±k KÄ±yaslamasÄ±
+# 2. Grafik 1: Sektörel Kýrýlganlýk Kýyaslamasý
 p1 <- ggplot(df, aes(x = reorder(ticker, Anti_Predictive_Gap), y = Anti_Predictive_Gap, fill = Sector)) +
   geom_bar(stat = "identity", color = "black", alpha = 0.8) +
   coord_flip() +
@@ -35,10 +35,10 @@ p1 <- ggplot(df, aes(x = reorder(ticker, Anti_Predictive_Gap), y = Anti_Predicti
   geom_hline(yintercept = 0, linetype = "dashed", color = "black", linewidth = 1.2) +
   theme_minimal(base_size = 14) +
   labs(
-    title = "SektÃ¶rel Makro-KÄ±rÄ±lganlÄ±ÄŸÄ±n Yapay Zeka HatalarÄ±na Etkisi (Y5 Hipotezi)",
-    subtitle = "DeÄŸer > 0: Sistematik Ters Tahmin (Anti-Prediktiflik). DeÄŸer < 0: Rastgelelik",
+    title = "Sektörel Makro-Kýrýlganlýðýn Yapay Zeka Hatalarýna Etkisi (Y5 Hipotezi)",
+    subtitle = "Deðer > 0: Sistematik Ters Tahmin (Anti-Prediktiflik). Deðer < 0: Rastgelelik",
     x = "Hisseler",
-    y = "Ters Sinyal GÃ¼cÃ¼ (Flip Acc - Naive Acc)"
+    y = "Ters Sinyal Gücü (Flip Acc - Naive Acc)"
   ) +
   theme(
     plot.title = element_text(face = "bold", size = 16),
@@ -49,7 +49,7 @@ p1 <- ggplot(df, aes(x = reorder(ticker, Anti_Predictive_Gap), y = Anti_Predicti
 ggsave("Gorseller/01_Sektorel_Kiyaslama_Bar.png", p1, width = 11, height = 7, dpi = 300)
 cat("Grafik 1 olusturuldu: Gorseller/01_Sektorel_Kiyaslama_Bar.png\n")
 
-# 3. Grafik 2: MC TuzaÄŸÄ±nÄ±n Ã‡Ã¶zÃ¼ldÃ¼ÄŸÃ¼nÃ¼ GÃ¶steren DaÄŸÄ±lÄ±m
+# 3. Grafik 2: MC Tuzaðýnýn Çözüldüðünü Gösteren Daðýlým
 # Sens ve Spec 0 ise MC'dir. Bizde MC'nin asildigini gostermek icin 
 # Hisselerin cogunluk sinifi secme bias'i (Acc vs Flip Acc) cizilebilir.
 p2 <- ggplot(df, aes(x = naive, y = mean_flip, color = Sector, label = ticker)) +
@@ -59,10 +59,10 @@ p2 <- ggplot(df, aes(x = naive, y = mean_flip, color = Sector, label = ticker)) 
   scale_color_manual(values = c("Sigorta (Kirilgan)" = "#d73027", "Holding (Dagitik)" = "#4575b4")) +
   theme_minimal(base_size = 14) +
   labs(
-    title = "Model Tahmin GÃ¼cÃ¼ vs Rastgele Tahmin (Naive)",
-    subtitle = "KÄ±rmÄ±zÄ± Ã§izginin ÃœSTÃœNDE kalanlar rastgelelikten sapÄ±p SÄ°STEMATÄ°K YANILANLARDIR.",
-    x = "Rastgele Tahmin DoÄŸruluÄŸu (Naive Baseline)",
-    y = "Ters Ã‡evrilmiÅŸ Tahmin DoÄŸruluÄŸu (Flip Accuracy)"
+    title = "Model Tahmin Gücü vs Rastgele Tahmin (Naive)",
+    subtitle = "Kýrmýzý çizginin ÜSTÜNDE kalanlar rastgelelikten sapýp SÝSTEMATÝK YANILANLARDIR.",
+    x = "Rastgele Tahmin Doðruluðu (Naive Baseline)",
+    y = "Ters Çevrilmiþ Tahmin Doðruluðu (Flip Accuracy)"
   ) +
   theme(
     plot.title = element_text(face = "bold", size = 16),
@@ -73,4 +73,4 @@ p2 <- ggplot(df, aes(x = naive, y = mean_flip, color = Sector, label = ticker)) 
 ggsave("Gorseller/02_Anti_Prediktif_Scatter.png", p2, width = 10, height = 7, dpi = 300)
 cat("Grafik 2 olusturuldu: Gorseller/02_Anti_Prediktif_Scatter.png\n")
 
-cat("\nGÃ–RSELLEÅžTÄ°RME BAÅžARIYLA TAMAMLANDI.\n")
+cat("\nGÖRSELLEÞTÝRME BAÞARIYLA TAMAMLANDI.\n")

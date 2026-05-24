@@ -1,6 +1,6 @@
-ï»¿################################################################################
-# B14 â€” Pooled Confusion Matrix (N=96 walk-forward)
-# Walk-forward 7 fold'daki tÃ¼m tahminleri birleÅŸtirerek tek confusion matrix
+################################################################################
+# B14 — Pooled Confusion Matrix (N=96 walk-forward)
+# Walk-forward 7 fold'daki tüm tahminleri birleþtirerek tek confusion matrix
 ################################################################################
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
@@ -10,11 +10,11 @@ library(here)
 cat("\n========== B14: Pooled Confusion Matrix ==========\n")
 
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
-PRED_DIR <- "here::here("Sonuclar")/predictions"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
+PRED_DIR <- file.path(here::here("Sonuclar"), "predictions")
 setwd(WORKDIR)
 
-# --- Walk-forward RESULTS CSV'den fold bazÄ±nda naive ve acc bilgisini oku ---
+# --- Walk-forward RESULTS CSV'den fold bazýnda naive ve acc bilgisini oku ---
 wf_path <- file.path(OUTDIR, "mcaware_walkforward_RESULTS.csv")
 if (!file.exists(wf_path)) {
   stop("HATA: mcaware_walkforward_RESULTS.csv bulunamadi!")
@@ -23,8 +23,8 @@ wf_df <- read.csv(wf_path, stringsAsFactors = FALSE)
 cat("Walk-forward fold sayisi:", nrow(wf_df), "\n")
 cat("Toplam test ornegi:", sum(wf_df$n_test), "\n\n")
 
-# --- Ã–zet confusion matrix hesapla (fold bazÄ±nda) ---
-# Her fold iÃ§in: TP, FP, TN, FN tahmin etmemiz gerekiyor
+# --- Özet confusion matrix hesapla (fold bazýnda) ---
+# Her fold için: TP, FP, TN, FN tahmin etmemiz gerekiyor
 # Acc, Sens, Spec'ten ters hesaplama:
 # Sens = TP/(TP+FN), Spec = TN/(TN+FP), Acc = (TP+TN)/N
 # up_pct_test * n_test = n_positive, (1-up_pct_test) * n_test = n_negative

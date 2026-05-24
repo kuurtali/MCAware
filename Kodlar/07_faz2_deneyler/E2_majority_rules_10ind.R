@@ -1,6 +1,6 @@
-ï»¿################################################################################
-# E2 â€” Majority Rules Technical Analysis Matrix (10 Indicator)
-# 10 teknik gÃ¶sterge ile majority-voting tabanlÄ± klasik sinyal Ã¼retimi
+################################################################################
+# E2 — Majority Rules Technical Analysis Matrix (10 Indicator)
+# 10 teknik gösterge ile majority-voting tabanlý klasik sinyal üretimi
 ################################################################################
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
@@ -10,7 +10,7 @@ library(here)
 cat("\n========== E2: Majority Rules Technical Analysis Matrix ==========\n")
 
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
 setwd(WORKDIR)
 
 # --- Gerekli paketler ---
@@ -20,8 +20,8 @@ library(quantmod)
 library(TTR)
 
 # --- THYAO verisini oku (mevcut CSV'den) ---
-# Oncelikle mevcut predictions CSV'den kapanÄ±ÅŸ fiyatlarÄ±nÄ± Ã§ek
-pred_path <- "here::here("Sonuclar")/predictions"
+# Oncelikle mevcut predictions CSV'den kapanýþ fiyatlarýný çek
+pred_path <- file.path(here::here("Sonuclar"), "predictions")
 pred_files <- list.files(pred_path, pattern = "THYAO.*PREDICTIONS", full.names = TRUE)
 
 if (length(pred_files) > 0) {
@@ -31,7 +31,7 @@ if (length(pred_files) > 0) {
 } else {
   cat("UYARI: THYAO predictions CSV bulunamadi.\n")
   cat("Yahoo Finance'den cekiliyor...\n\n")
-  # Alternatif: Yahoo'dan Ã§ek
+  # Alternatif: Yahoo'dan çek
   getSymbols("THYAO.IS", from = "2020-01-01", to = "2025-12-31", src = "yahoo")
   thyao_data <- data.frame(
     Date = index(THYAO.IS),
@@ -44,12 +44,12 @@ if (length(pred_files) > 0) {
   pred_df <- thyao_data
 }
 
-# --- Close fiyatÄ± sÃ¼tununu bul ---
+# --- Close fiyatý sütununu bul ---
 close_col <- grep("close|Close|kapan", names(pred_df), value = TRUE, ignore.case = TRUE)
 if (length(close_col) == 0) {
   # Fiyat verisinden direkt hesapla
   cat("Close sutunu bulunamadi. Mevcut sutunlardan hesaplanacak.\n")
-  # SimÃ¼lasyon: random walk
+  # Simülasyon: random walk
   set.seed(42)
   n <- nrow(pred_df)
   close_prices <- cumsum(rnorm(n, 0, 1)) + 100
@@ -144,19 +144,19 @@ signals <- data.frame(
   ROC = signal_roc
 )
 
-# NA'larÄ± temizle (warm-up dÃ¶nemi)
+# NA'larý temizle (warm-up dönemi)
 signals[is.na(signals)] <- 0
 
-# Majority vote: 10 gÃ¶stergeden 6+ = BUY (1), <6 = SELL (0)
+# Majority vote: 10 göstergeden 6+ = BUY (1), <6 = SELL (0)
 vote_count <- rowSums(signals)
 majority_signal <- ifelse(vote_count >= 6, 1, 0)
 
 # --- Performans Hesapla ---
-# GerÃ§ek yÃ¶n: t+1 kapanÄ±ÅŸ > t kapanÄ±ÅŸ
+# Gerçek yön: t+1 kapanýþ > t kapanýþ
 actual_dir <- c(NA, diff(close_prices) > 0)
 actual_dir <- as.numeric(actual_dir)
 
-# Son 200 gÃ¼n (test dÃ¶nemi)
+# Son 200 gün (test dönemi)
 test_start <- max(1, n - 200 + 1)
 test_end <- n
 
@@ -164,7 +164,7 @@ test_actual <- actual_dir[test_start:test_end]
 test_majority <- majority_signal[test_start:test_end]
 test_votes <- vote_count[test_start:test_end]
 
-# NA'larÄ± Ã§Ä±kar
+# NA'larý çýkar
 valid <- !is.na(test_actual) & !is.na(test_majority)
 test_actual <- test_actual[valid]
 test_majority <- test_majority[valid]
@@ -179,7 +179,7 @@ cat(sprintf("Naive Baseline:         %.4f\n", naive_acc))
 cat(sprintf("beats_naive:            %s\n", ifelse(majority_acc > naive_acc, "TRUE", "FALSE")))
 cat(sprintf("Ortalama UP sinyal orani: %.1f%%\n", mean(test_majority) * 100))
 
-# --- GÃ¶sterge bazlÄ± accuracy ---
+# --- Gösterge bazlý accuracy ---
 cat("\n=== GOSTERGE BAZLI ACCURACY ===\n")
 ind_names <- names(signals)
 ind_results <- data.frame(

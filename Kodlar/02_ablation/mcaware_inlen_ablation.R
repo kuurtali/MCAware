@@ -1,6 +1,6 @@
-ï»¿# ===========================================================================
-# MC-AWARE â€” IN_LEN ABLASYONU (DENEY I.20)
-# TUBITAK 2209-A â€” Yurutucu: Mehmet Ali KURT
+# ===========================================================================
+# MC-AWARE — IN_LEN ABLASYONU (DENEY I.20)
+# TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
 # ---------------------------------------------------------------------------
 # AMACI:
@@ -22,7 +22,7 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

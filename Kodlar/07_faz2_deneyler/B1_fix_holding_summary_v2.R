@@ -1,21 +1,21 @@
-ï»¿################################################################################
-# B1 FIX â€” mcaware_bist5_holding_v2.R
-# SAHOL dl_anti_prediktif_mi tek-sÃ¼tun â†’ 3 sÃ¼tun + sinif etiketi
-# CSV-as-constitution kuralÄ±: ESKÄ° CSV'nin Ã¼zerine yazar (R script Ã¼zerinden)
+################################################################################
+# B1 FIX — mcaware_bist5_holding_v2.R
+# SAHOL dl_anti_prediktif_mi tek-sütun › 3 sütun + sinif etiketi
+# CSV-as-constitution kuralý: ESKÝ CSV'nin üzerine yazar (R script üzerinden)
 ################################################################################
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
 library(here)
 
 
-cat("\n========== B1 FIX: Holding SUMMARY v2 â€” 3 sÃ¼tun + sinif ==========\n")
+cat("\n========== B1 FIX: Holding SUMMARY v2 — 3 sütun + sinif ==========\n")
 
-# --- Paths (projenin mevcut yapÄ±sÄ±yla uyumlu) ---
+# --- Paths (projenin mevcut yapýsýyla uyumlu) ---
 WORKDIR <- here::here()
-OUTDIR  <- "here::here("Sonuclar")/summaries"
+OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
 setwd(WORKDIR)
 
-# --- Mevcut RESULTS CSV'yi oku (ham veri â€” dokunulmaz, sadece okunur) ---
+# --- Mevcut RESULTS CSV'yi oku (ham veri — dokunulmaz, sadece okunur) ---
 results_path <- file.path(OUTDIR, "mcaware_bist5_holding_RESULTS.csv")
 cat("Okunan CSV:", results_path, "\n")
 
@@ -27,7 +27,7 @@ all_df <- read.csv(results_path, stringsAsFactors = FALSE)
 cat("Toplam satir:", nrow(all_df), "\n")
 cat("Ticker'lar:", paste(unique(all_df$ticker), collapse=", "), "\n\n")
 
-# --- Yeni SUMMARY hesapla (3 sÃ¼tun + sinif) ---
+# --- Yeni SUMMARY hesapla (3 sütun + sinif) ---
 suppressPackageStartupMessages(library(dplyr))
 
 summary_df <- all_df %>%
@@ -37,13 +37,13 @@ summary_df <- all_df %>%
     mean_flip   = mean(acc_flip, na.rm = TRUE),
     naive       = mean(naive_acc),
     dt_acc      = mean(dt_acc),
-    # --- YENÄ°: 3 ayrÄ± anti-prediktif kriter sÃ¼tunu ---
+    # --- YENÝ: 3 ayrý anti-prediktif kriter sütunu ---
     loose_anti_pred_flip_gt_naive = mean(acc_flip) > mean(naive_acc),
     strict_anti_pred_flip_gt_naive_AND_acc_le_naive = 
       (mean(acc_flip) > mean(naive_acc)) & (mean(acc, na.rm=TRUE) <= mean(naive_acc)),
     ambiguous_both_above = 
       (mean(acc_flip) > mean(naive_acc)) & (mean(acc, na.rm=TRUE) > mean(naive_acc)),
-    # --- YENÄ°: Kategorik sinif etiketi ---
+    # --- YENÝ: Kategorik sinif etiketi ---
     sinif = case_when(
       (mean(acc_flip) > mean(naive_acc)) & (mean(acc, na.rm=TRUE) <= mean(naive_acc)) ~ "strict_anti_pred",
       (mean(acc_flip) > mean(naive_acc)) & (mean(acc, na.rm=TRUE) > mean(naive_acc))  ~ "ambiguous_both_above",
@@ -55,15 +55,15 @@ summary_df <- all_df %>%
   )
 
 # --- Ekrana bas ---
-cat("\n=== YENÄ° SUMMARY (strict/ambiguous ayrÄ±mÄ±) ===\n")
+cat("\n=== YENÝ SUMMARY (strict/ambiguous ayrýmý) ===\n")
 print(as.data.frame(summary_df))
 
-# --- Eski SUMMARY'nin Ã¼zerine yaz ---
+# --- Eski SUMMARY'nin üzerine yaz ---
 out_path <- file.path(OUTDIR, "mcaware_bist5_holding_SUMMARY.csv")
 write.csv(summary_df, out_path, row.names = FALSE)
 cat("\n[OK] Yazildi:", out_path, "\n")
 
-# --- STRICT CSV de Ã¼ret (sigorta ile tutarlÄ±) ---
+# --- STRICT CSV de üret (sigorta ile tutarlý) ---
 strict_df <- summary_df %>%
   select(ticker, mean_acc, mean_flip, naive, 
          loose_anti_pred_flip_gt_naive,
