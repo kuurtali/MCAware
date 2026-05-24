@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE — GARAN KORELASYON KIRILMASI ANALİZİ (ADIM I.18)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -243,14 +243,20 @@ garan_mean_abs_diff <- mean(abs(garan_price$cor_diff))
 
 cat(sprintf("\n  GARAN ortalama |kırılma|: %.3f\n", garan_mean_abs_diff))
 
-# THYAO kırılma büyüklüğü (bilinen)
-thyao_known <- c(0.496, 0.562, 0.117)  # USDTRY, Oil, TCMB
-thyao_mean_abs_diff <- mean(thyao_known)
+# THYAO kırılma büyüklüğü
+if (exists("thyao_price")) {
+  thyao_mean_abs_diff <- mean(thyao_price$abs_diff)
+} else {
+  thyao_mean_abs_diff <- mean(c(0.496, 0.562, 0.117))
+}
 cat(sprintf("  THYAO ortalama |kırılma|: %.3f (önceki I.12'den)\n", thyao_mean_abs_diff))
 
-# AAPL kırılma büyüklüğü (bilinen)
-aapl_known <- c(0.760, 1.056, 0.935)  # DXY, Oil, Fed_Rate
-aapl_mean_abs_diff <- mean(aapl_known)
+# AAPL kırılma büyüklüğü
+if (exists("aapl_rows")) {
+  aapl_mean_abs_diff <- mean(aapl_rows$abs_diff)
+} else {
+  aapl_mean_abs_diff <- mean(c(0.760, 1.056, 0.935))
+}
 cat(sprintf("  AAPL  ortalama |kırılma|: %.3f (önceki I.13'den)\n", aapl_mean_abs_diff))
 
 cat("\n  KARAR MATRİSİ:\n")
@@ -270,8 +276,7 @@ if (garan_mean_abs_diff < thyao_mean_abs_diff * 0.7) {
   cat("      DÜRÜST RAPORLAMA: Korelasyon kırılması açıklaması yetersiz.\n")
 }
 
-cat("\n  NOT: AAPL'da kırılma EN BÜYÜK (ortalama %.3f) ama anti-prediktif\n",
-    aapl_mean_abs_diff)
+cat(sprintf("\n  NOT: AAPL'da kırılma EN BÜYÜK (ortalama %.3f) ama anti-prediktif\n", aapl_mean_abs_diff))
 cat("  YOK. Bu, korelasyon kırılmasının GEREKLI ama YETERLİ OLMAYAN\n")
 cat("  bir koşul olduğuna işaret eder. Ek faktörler (piyasa etkinliği,\n")
 cat("  likidite, trader profili) rol oynuyor olabilir.\n")

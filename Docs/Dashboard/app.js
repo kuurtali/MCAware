@@ -176,7 +176,7 @@ document.addEventListener('DOMContentLoaded', () => {
             labels: ['THYAO DL', 'THYAO ML', 'GARAN DL', 'GARAN ML', 'AAPL DL', 'AAPL ML'],
             datasets: [{
                 label: 'Anti-Prediktif Oranı (%)',
-                data: [97, 0, 47, 0, 0, 0],
+                data: [97, 0, 47, 25, 0, 0],
                 backgroundColor: [
                     'rgba(239, 68, 68, 0.7)',  // THYAO DL - Yüksek Anti-pred
                     'rgba(16, 185, 129, 0.7)', // THYAO ML
