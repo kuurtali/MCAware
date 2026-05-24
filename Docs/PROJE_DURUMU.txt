@@ -5761,6 +5761,16 @@ TÜBİTAK 2209-A HAZIRLIK DURUMU (v3 NİHAİ):
 - Tüm nihai belgeler `MC_AWARE_Birlesitirilmis_Rapor.docx` dosyası altında (Hata raporu 0 hata gösterecek şekilde) birleştirilerek nihai teslimata hazır hale getirilmiştir.
 - Tüm bu değişiklikler GitHub'a "v4 NİHAİ" sürüm etiketiyle başarıyla push edilmiştir.
 
+--------------------------------------------------------------------------------
+12.1. YENİ EKLENEN PROJE KURALLARI VE PRENSİPLER (ANAYASA)
+--------------------------------------------------------------------------------
+Sohbet oturumlarında alınan kararlar doğrultusunda, bundan sonraki süreçler ve olası yeni yapay zeka/ajan oturumları için geçerli olmak üzere aşağıdaki kesin kurallar "Anayasa" olarak kabul edilmiştir:
+
+1. **CSV ANAYASASI:** CSV'ler (ground-truth veriler) KESİNLİKLE DEĞİŞTİRİLEMEZ, SADECE OKUNUR. Tüm metin, rapor ve tablo değişiklikleri tamamen CSV dosyalarındaki sayısal sonuçları referans almak zorundadır.
+2. **PROJE_DURUMU.TXT DOKUNULMAZLIĞI (Append-Only):** PROJE_DURUMU.txt dosyasının geçmiş bölümleri kesinlikle değiştirilemez ve silinemez. Sadece yeni yapılan işler ve güncellemeler dosyanın EN SONUNA yeni bir bölüm (örn: Bölüm 13) olarak eklenir.
+3. **ESKİ HATALARIN SİLİNMESİ KURALI:** Eğer bir hata raporundaki (B1-B18, vs.) hatalar düzeltilmiş ve tamamlanmışsa, bu hataya dair eski "YAPILMADI" veya "EKSİK" şeklindeki bildirimler nihai raporlardan (ve birleşik word'den) TAMAMEN SİLİNİR, sadece son temiz hali bırakılır.
+4. **DOSYA HİJYENİ VE DÜZENİ:** Proje klasöründe çalıştırılan gereksiz test scriptleri, geçici build dosyaları (örn: build_docx.py gibi birleştiriciler) işleri bittikten sonra silinmeli, klasör yapısı (Gorseller/, Kodlar/, Sonuclar/ ve Docs/) her zaman temiz ve teslimata hazır (Nihai) tutulmalıdır.
+
 ================================================================================
                             DOSYA SONU
 ================================================================================
