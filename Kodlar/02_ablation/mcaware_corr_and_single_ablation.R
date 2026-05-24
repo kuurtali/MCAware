@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — KORELASYON KIRILMASI ANALİZİ (ADIM I.12)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 22.05.2026
@@ -21,9 +21,13 @@
 # CIKTI: mcaware_corr_analysis.csv + mcaware_single_feat_ablation.csv
 # Süre: ~45-60 dk
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

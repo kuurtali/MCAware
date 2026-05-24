@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — BiLSTM v2.a (THRESHOLD OPTIMIZATION)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT | Danışman: Övgücan KARADAĞ ERDEMİR
 # Tarih: 19.05.2026 (gece) — v1.1 sonrası "MC çözüldü ama Acc çöktü" düzeltmesi
@@ -33,10 +33,14 @@
 #   - mcaware_BiLSTM_v2a_OPTIMAL.csv           (her konfig için optimal threshold)
 #   - mcaware_BiLSTM_v2a_SUMMARY.csv           (lambda x threshold tipi ozet)
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ayarlari ---
-WORKDIR  <- "C:/Users/Kurt/Desktop"
-OUTDIR   <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"   # CSV'ler buraya
+WORKDIR <- here::here()
+OUTDIR <- here::here()   # CSV'ler buraya
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

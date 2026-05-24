@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — BiLSTM (R + keras3) — v1.1 (hatasız sürüm)
 # TÜBİTAK 2209-A Ön Kanıt Çalışması
 # Yürütücü: Mehmet Ali Kurt | Danışman: Övgücan KARADAĞ ERDEMİR
@@ -21,14 +21,18 @@
 #   3) ~50-90 dakika bekle (CPU modunda)
 #   4) Üretilen 3 CSV'yi Cowork'e geri yükle
 #
-# Çıktı dosyaları (C:/Users/Kurt/Desktop/ altında):
+# Çıktı dosyaları (here::here()/ altında):
 #   - mcaware_BiLSTM_v1_RESULTS.csv      (20 satır ham)
 #   - mcaware_BiLSTM_v1_SUMMARY.csv      (4 satır lambda özet)
 #   - mcaware_BiLSTM_v1_SEED_REPORT.csv  (5 satır seed dirençlilik)
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ayarları ---
-WORKDIR <- "C:/Users/Kurt/Desktop"
+WORKDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")     # GPU bypass (RTX 5050 keras3 sorunu)
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")      # TF gürültüsünü kapat

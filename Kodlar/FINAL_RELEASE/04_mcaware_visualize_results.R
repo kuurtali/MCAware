@@ -1,8 +1,12 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — GÖRSELLEŞTİRME VE RAPORLAMA SCRİPTİ
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- "here::here()"
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({

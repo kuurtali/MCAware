@@ -396,9 +396,9 @@ Seed varyansı v2'de büyük ölçüde normale döndü (RAYSG std 6.7× arttı).
 - Sınırlı Zaman Serisi: 2014-2026 test edildi. Korelasyon kırılmasının yapısal bir hata olup olmadığını kanıtlamak için 2001 ve 2008 krizlerini içeren 20 yıllık devasa (Big Data) veri setine ihtiyaç vardır.
 - Finansal Zarar Ölçümü Eksikliği (Backtesting): Modellerin ters tahmin üretmesinin yatırımcıya "gerçek" maliyeti (Maksimum Çöküş, Sharpe Oranı) hesaplanmamıştır. Finansal portföy simülatörleriyle entegrasyon bir sonraki hedeftir.
 - Walk-forward 3/7 — tüm dönemlerde tutarlı değil (rejim bağımlı).
-- IN_LEN=2 — kısa pencere. IN_LEN ablation yapılmadı.
+- ~~IN_LEN=2 — kısa pencere. IN_LEN ablation yapılmadı.~~ → **YAPILDI (I.20, IN_LEN={2,5,10}, 45 koşu: anti-pred IN_LEN=2'ye özgü).**
 - MI ölçülemedi tam doğrulukta (histogram-MI bias; kNN-tabanlı estimator ileride).
-- GARAN korelasyon kırılması büyüklüğü ölçülmedi (Y5 mekanizmasını sayısal kanıtlamak için ek deney I.18: ~5 dk).
+- ~~GARAN korelasyon kırılması büyüklüğü ölçülmedi~~ → **YAPILDI (I.18, GARAN |Δr|=0.370; petrol |Δr|=0.951 — korelasyon kırılması gerekli ama yetersiz koşul).**
 - ~~BiLSTM + ayrı Attention katmanı denenmedi~~ → **YAPILDI (I.15, attn de anti-prediktif).**
 - ~~Majority voting ensemble denenmedi~~ → **YAPILDI (I.14, ensemble de anti-prediktif).**
 - ~~Rule-based / klasik ML kıyas yok~~ → **YAPILDI (I.16+I.17, klasik ML Naive seviyesinde her iki varlıkta).**

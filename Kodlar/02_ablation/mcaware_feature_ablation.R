@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — FEATURE ABLATION (ADIM I.11: DIS DEGISKEN TESTI)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 22.05.2026
@@ -20,9 +20,13 @@
 # CIKTI: mcaware_feature_ablation_SUMMARY.csv
 # Süre: ~45-60 dk (2 x 15 koşu)
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

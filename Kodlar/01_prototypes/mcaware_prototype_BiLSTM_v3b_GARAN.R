@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — BiLSTM v3b WINDOW (ADIM I.17: GARAN DOGRULAMA)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 19.05.2026 — v3 GARAN'nun PENCERE-DÜZELTİLMİŞ kopyası
@@ -39,10 +39,14 @@
 #
 # Çalıştırma: RStudio → Ctrl+Shift+S → ~30-45 dk → 5 CSV
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ---
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

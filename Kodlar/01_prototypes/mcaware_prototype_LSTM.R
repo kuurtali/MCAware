@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — LSTM (R + keras3)
 # TÜBİTAK 2209-A Ön Kanıt Çalışması (Mehmet Ali Kurt, yürütücü)
 # ---------------------------------------------------------------------------
@@ -18,9 +18,13 @@
 #
 # Süre: CPU modunda yaklaşık 30-60 dakika (12 koşu × ~3-5 dakika)
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ---
-setwd("C:/Users/Kurt/Desktop")  # senin EMEKLILIK_GUNCEL.R'daki ile aynı
+setwd("here::here()")  # senin EMEKLILIK_GUNCEL.R'daki ile aynı
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")  # GPU bypass (RTX 5050)
 
 suppressPackageStartupMessages({

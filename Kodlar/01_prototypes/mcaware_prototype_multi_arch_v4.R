@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — MULTI-ARCHITECTURE v4 (ADIM I.8: MIMARI ABLATION)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 22.05.2026
@@ -20,10 +20,14 @@
 # CIKTI: 5 mimari x 4 CSV = 20 CSV + CROSS_ARCH_SUMMARY + McNEMAR
 # Calistirma: RStudio → Ctrl+Shift+S → ~90-120 dk → 22 CSV
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ---
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

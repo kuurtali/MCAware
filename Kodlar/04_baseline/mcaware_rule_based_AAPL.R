@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — NASDAQ AAPL KLASIK ML BASELINE (DENEY I.19)
 # TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
@@ -16,9 +16,13 @@
 # CIKTI: Sonuclar/summaries/mcaware_rule_based_AAPL_RESULTS.csv
 # Sure: ~5 dk
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak/Sonuclar/summaries"
+
+WORKDIR <- here::here()
+OUTDIR  <- "here::here("Sonuclar")/summaries"
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({

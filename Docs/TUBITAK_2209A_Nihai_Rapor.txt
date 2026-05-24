@@ -6,7 +6,7 @@
 **Yardımcı Araştırmacı:** Şevval DEMİR
 **Danışman:** Övgücan KARADAĞ ERDEMİR
 **Tarih:** 23 Mayıs 2026 (v3 — 4 yeni deney entegrasyonu sonrası NİHAİ)
-**Durum:** TAMAMLANDI — 22 Deney, 6 Mimari, 200+ Konfigürasyon
+**Durum:** TAMAMLANDI — 22 Deney, 6 Mimari, 350+ Konfigürasyon
 
 ────────────────────────────────────────────────────────────────────────────────
 SÜRÜM NOTU (v3 NİHAİ, 23 Mayıs 2026 — 4 yeni deney entegrasyonu):
@@ -147,7 +147,7 @@ tüketimiyle (Green AI konseptine uygun ve bütçe dostu olarak) tamamlanmışt�
 *   **Küresel Kontrol Grubu:** Gelişmiş piyasa tepkilerini kıyaslamak için NASDAQ (AAPL) verisi ve DXY (Dolar Endeksi), FED Faiz kararları özellikleri modele dahil edilmiştir.
 *   **Hiperparametreler:** Modeller Adam optimizer (Learning Rate: 0.001) ile 50 epoch boyunca eğitilmiş, aşırı uyumu (overfitting) önlemek için Early Stopping (patience=5) ve Batch Size = 32 kullanılmıştır. CNN tabanlı mimarilerde (Conv1D, TCN) kernel boyutu 3 olarak sabitlenmiştir.
 
-Bu yapılandırma, 120+ konfigürasyonun karşılaştırmalı değerlendirmesi için şeffaf bir referans nokta sunar.
+Bu yapılandırma, 350+ konfigürasyonun (seed tekrarları dahil) karşılaştırmalı değerlendirmesi için şeffaf bir referans nokta sunar.
 
 #### 2.3.2 Walk-Forward Çapraz Doğrulama (Zaman Kaydırmalı CV)
 
@@ -210,7 +210,7 @@ gözlemlenmişti (ALZ: %100, THYAO LSTM: %33). Geliştirilen çözüm paketi:
 | ALZ — BES fonu        | %100          | 15/15 (veri-üstü sınırlama) |
 
 ALZ, eğitim setinde %100 Yukarı etiketli dejenere veriye sahiptir; herhangi bir
-teknik bununla başa çıkamaz (matematiksel sınırlama, model başarısızlığı değil).
+teknik bununla başa çıkamaz (matematiksel sınırlama, model başarısızlığı değil). Not: MC=0 iddiası MC-Aware BiLSTM mimarisi (class_weight=balanced) için geçerlidir. Ön çalışmadaki vanilla LSTM/CNN modelleri farklı MC oranları göstermiştir (ALZ: %100, AZS: 1/15 arta kalan).
 
 CW=NULL ablasyonu (v3c): THYAO'da class_weight olmadan da MC=0/15. THYAO sınıf oranı
 ~%52/%48 dengeli olduğundan CW tek başına gerekmez; MC-Aware loss yeterli.
@@ -261,7 +261,7 @@ BiLSTM+Attention (v6): 14/15 flip>Naive (Acc_flip ort. 0.556)
 Ensemble Hard:          1/1  flip>Naive (Acc_flip=0.603)
 Ensemble Soft:          1/1  flip>Naive (Acc_flip=0.623)
 
-**Genel toplam (tek-split): 37/38 konfigürasyon (%97.4) flip>naive.**
+**Genel toplam (tek-split): 37/38 konfigürasyon (%97.4) flip>naive.** [Bölüm 3.3 Tablo 3'teki 118/120 + Attention 14/15 + Ensemble 2/2 + BiLSTM ref 3/3 = 137/140 = %97.9]
 Binom testi: p ≈ 3×10⁻¹⁴ (tek split). Bu rakam yalnızca tekil train-test ayrımı
 için geçerlidir. Walk-forward CV (Bölüm 3.4) tutarsızlık göstermektedir; bu
 nedenle "%97 sistematik" çerçevelemesi tek-split bağlamıyla sınırlı tutulmalıdır.
@@ -275,7 +275,7 @@ dağılmadığını test eder:
 
 | Fold | Naive | Acc   | Acc_flip | flip>Naive |
 |------|-------|-------|----------|------------|
-| 1    | 0.455 | 0.540 | 0.460    | HAYIR      |
+| 1    | 0.455 | 0.540 | 0.460    | EVET (marjinal) |
 | 2    | 0.430 | 0.440 | 0.560    | **EVET**   |
 | 3    | 0.675 | 0.480 | 0.520    | HAYIR      |
 | 4    | 0.580 | 0.485 | 0.515    | HAYIR      |
@@ -285,7 +285,7 @@ dağılmadığını test eder:
 
 Not: Fold 1 yhat_range=0.116, Fold 6-7 range=0.229-0.132 — model üretkenliği değişken.
 
-Flip>Naive: 3/7 fold (ağırlıklı olarak düşük-Naive dönemlerde, Fold 1 ve Fold 6).
+Flip>Naive: 3/7 fold (Fold 1 marjinal 0.460>0.455, Fold 2, Fold 6). Düşük-Naive dönemlerinde yoğunlaşmaktadır.
 
 **Yorum:** Tek-split analizinin aksine, walk-forward testi anti-prediktif etkinin tüm
 piyasa rejimlerine eşit dağılmadığını göstermektedir. Etki belirli dönemlerde
@@ -342,7 +342,7 @@ klasik bir tezahürüdür (Gama vd., 2014).
 | NASDAQ AAPL| Fed Rate  | +0.149    | −0.785  | 0.936   | HAYIR      |
 
 AAPL'da korelasyon kırılması THYAO'dan belirgin biçimde daha büyük olmasına rağmen
-anti-prediktif davranış gözlemlenmemiştir (mean_acc=0.523, Naive=0.518). Bu, korelasyon
+anti-prediktif davranış gözlemlenmemiştir (DL: mean_acc=0.523, Naive=0.518; ML: Naive≈0.524). Bu, korelasyon
 kırılmasının tek başına yeterli olmadığına; gelişmekte olan piyasanın yapısal
 özelliklerinin (düşük likidite, yüksek volatilite, kur krizleri) modelin adaptasyonunu
 güçleştirdiğine işaret etmektedir.
@@ -440,7 +440,8 @@ NASDAQ AAPL üzerinde klasik ML modelleri koşturulmuştur.
 | Karar Ağacı         | 0.476  | 0.092  | 0.942  | 0.524    | HAYIR       | HAYIR      |
 | Rastgele Orman      | 0.480  | 0.625  | 0.304  | 0.520    | HAYIR       | HAYIR      |
 | Lojistik Regresyon  | 0.454  | 0.024  | 0.976  | 0.546    | HAYIR       | HAYIR      |
-| OneR                | (paket atlandı) | — | — | — | — | — |
+| OneR                | NA     | NA     | NA     | NA       | NA (MC)       | NA         |
+Not: OneR modeli tüm örnekleri tek sınıfa atadığı için (is_MC=TRUE) anlamlı metrik hesaplanamamıştır (NA).
 
 **Sonuç: 0/3 beats_naive + 0/3 flip>naive.** AAPL'da da klasik ML Naive seviyesinde
 kalmaktadır. THYAO + GARAN + AAPL üçlüsünde klasik ML her piyasada Naive seviyesi
@@ -615,8 +616,8 @@ Aşağıdaki sınırlamaları açıkça ifade etmek bilimsel dürüstlüğün ge
 (d) Sektörel test (5+5 hisse) ön kanıt düzeyindedir; istatistiksel anlamlılığa
     ulaşmamaktadır.
 
-(e) IN_LEN=2 tek pencere uzunluğu ile çalışılmıştır. IN_LEN ∈ {5, 10, 20} ablasyonu
-    yapılmamıştır; bulguların pencere uzunluğuna bağımlılığı bilinmemektedir.
+(e) ✅ KAPATILDI (I.20): IN_LEN ablasyonu yapıldı (IN_LEN ∈ {2, 5, 10}, 45 koşu). Anti-prediktif
+    etki IN_LEN=2'ye özgü; IN_LEN={5,10}'da 0/15 sıkı anti-pred (Bölüm 3.11, Tablo 11).
 
 (f) Bazı sektörel testlerde BiLSTM seedler arası IDENTICAL sonuçlar üretmiştir (KCHOL,
     SAHOL std=0). Bu, küçük model + erken durdurma + kısa pencere kombinasyonunun

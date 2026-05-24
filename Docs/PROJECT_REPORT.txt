@@ -1,3 +1,9 @@
+########################################################################
+# ⚠ DİKKAT: Bu dosya ÖN ÇALIŞMANIN (UYIK 2026 bildirisi) teknik
+# raporudur (PROJECT_REPORT v7 GOD-MODE). MC-AWARE TÜBİTAK 2209-A
+# projesi için güncel rapor TUBITAK_2209A_Nihai_Rapor.txt dosyasındadır.
+# Bu dosya sadece tarihsel referans olarak saklanmaktadır.
+########################################################################
 ╔══════════════════════════════════════════════════════════════════════╗
 ║           PROJECT_REPORT — BİRLEŞİK ÇALIŞMA DOSYASI                ║
 ║           LSTM & CNN Tabanlı BES Fonu Yönsel Tahmin Projesi         ║

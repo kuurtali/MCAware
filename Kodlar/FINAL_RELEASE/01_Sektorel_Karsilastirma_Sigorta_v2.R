@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — BIST-5 SIGORTA v2 (SEED FIX + DERIN EGITIM) — DENEY I.22
 # TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
@@ -20,9 +20,13 @@
 # CIKTI: mcaware_bist5_sigorta_v2_RESULTS.csv + _SUMMARY.csv
 # Sure: ~60-90 dk
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak/Sonuclar"
+
+WORKDIR <- here::here()
+OUTDIR <- here::here("Sonuclar")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

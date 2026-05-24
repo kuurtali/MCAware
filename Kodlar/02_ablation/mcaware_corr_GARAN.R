@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — GARAN KORELASYON KIRILMASI ANALİZİ (ADIM I.18)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -21,9 +21,13 @@
 #   mcaware_corr_COMPARISON.csv    — THYAO vs GARAN vs AAPL karşılaştırma
 # Süre: ~2-3 dk (model eğitimi YOK, sadece korelasyon hesabı)
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({

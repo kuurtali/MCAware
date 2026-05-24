@@ -1,10 +1,14 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE - TUM OLASI GRAFIKLERI CIZME (EXHAUSTIVE VISUALS)
 # Amac: Makale icin eklenebilecek tum ekstra istatistiksel grafikler
 # NOT: RStudio karakter kodlamasi hatasini onlemek adina ASCII (Turkce karaktersiz) kullanilmistir.
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- "here::here()"
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({

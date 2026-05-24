@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — BiLSTM v2.b (FOCAL LOSS + NO BALANCED CLASS_WEIGHT)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT | Danışman: Övgücan KARADAĞ ERDEMİR
 # Tarih: 19.05.2026 (gece geç) — v2.a F1-trap sonrası kök sebep müdahalesi
@@ -29,10 +29,14 @@
 #      AMA Focal Loss biraz yavaş, beklenen süre benzer)
 #   4) 00_Tubitak/ altındaki 4 CSV'yi Cowork'e yükle
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ---
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")

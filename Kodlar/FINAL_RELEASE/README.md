@@ -1,6 +1,6 @@
 # Nihai Yayın Paketi (FINAL_RELEASE)
 
-Bu klasör, araştırmanın nihai aşamasında koşturulan onaylı deney kodlarını ve görselleştirme scriptlerini içerir. Toplam 8 dosya bulunmaktadır.
+Bu klasör, araştırmanın nihai aşamasında koşturulan onaylı deney kodlarını ve görselleştirme scriptlerini içerir. Toplam 7 R scripti + 1 README = 8 dosya bulunmaktadır.
 
 ## (1) Sektörel Testler
 - `01_Sektorel_Karsilastirma_Sigorta.R`: Sigorta sektörü ilk analizi (v1).

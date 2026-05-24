@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE PROTOTYPE — v4 DIAGNOSTIC (etiket cross-check + Mutual Information)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 19.05.2026 (öğleden sonra — 5 versiyon sonrası teşhis adımı)
@@ -23,10 +23,14 @@
 # Çalıştırma:
 #   RStudio → Ctrl+Shift+S → ~3 dk → 2 CSV → Cowork'e yükle
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
+
 
 # --- 0. Ortam ---
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 PRED_FILE <- file.path(OUTDIR, "mcaware_BiLSTM_v3THYAO_PREDICTIONS.csv")
 AMZ_FILE  <- file.path(WORKDIR, "ALZ_AZS_AMZ_Haftalik.xlsx")
 setwd(WORKDIR)

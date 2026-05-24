@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — MAJORITY VOTING ENSEMBLE (ADIM I.14)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -29,8 +29,12 @@
 # YENI MODEL EGITIMI YOK — sadece mevcut CSV'leri okuyor.
 # Calistirma: RStudio → Ctrl+Shift+S → ~30 saniye → 3 CSV
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- "here::here()"
 OUTDIR  <- WORKDIR
 setwd(WORKDIR)
 

@@ -1,4 +1,4 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — RULE-BASED CLASSIFIER BASELINE (ADIM I.17, GARAN DOGRULAMA)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -31,9 +31,13 @@
 # CIKTI: 1 SUMMARY CSV + her model icin PREDICTIONS CSV
 # Calistirma: RStudio → Ctrl+Shift+S → ~5-10 dk → CSV'ler
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop"
-OUTDIR  <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- here::here()
+OUTDIR <- here::here()
 setwd(WORKDIR)
 
 # Yardimci: paket yoksa otomatik kurmayi dene, basaramazsa FALSE dondur

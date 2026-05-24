@@ -1,9 +1,13 @@
-# ===========================================================================
+﻿# ===========================================================================
 # MC-AWARE — GENİŞLETİLMİŞ GÖRSELLEŞTİRME (AKSIYON 5)
 # Amaç: TÜBİTAK Jüri raporunu destekleyecek 3 gelişmiş grafiğin çizilmesi
 # ===========================================================================
+# --- B6 fix: here paketi ile gorecel yollar ---
+if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
+library(here)
 
-WORKDIR <- "C:/Users/Kurt/Desktop/Proje/00_Tubitak"
+
+WORKDIR <- "here::here()"
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({
