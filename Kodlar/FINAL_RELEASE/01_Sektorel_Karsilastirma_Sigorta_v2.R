@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE — BIST-5 SIGORTA v2 (SEED FIX + DERIN EGITIM) — DENEY I.22
 # TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
@@ -26,7 +26,8 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR <- here::here("Sonuclar")
+OUTDIR  <- here::here("Sonuclar", "summaries")
+DIAGDIR <- here::here("Sonuclar", "diagnostics")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -242,7 +243,7 @@ if (length(all_results) > 0) {
   print(summary_df)
 
   write.csv(summary_df, file.path(OUTDIR, "mcaware_bist5_sigorta_v2_SUMMARY.csv"), row.names = FALSE)
-  write.csv(seed_var, file.path(OUTDIR, "mcaware_bist5_sigorta_v2_SEED_VAR.csv"), row.names = FALSE)
+  write.csv(seed_var, file.path(DIAGDIR, "mcaware_bist5_sigorta_v2_SEED_VAR.csv"), row.names = FALSE)
   cat("\nDosyalar Sonuclar/ klasorune kaydedildi.\n")
 }
 cat("\nBIST-5 SIGORTA v2 TAMAMLANDI.\n")

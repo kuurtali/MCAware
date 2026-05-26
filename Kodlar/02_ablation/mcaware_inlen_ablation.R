@@ -1,6 +1,6 @@
 # ===========================================================================
-# MC-AWARE — IN_LEN ABLASYONU (DENEY I.20)
-# TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
+# MC-AWARE ï¿½ IN_LEN ABLASYONU (DENEY I.20)
+# TUBITAK 2209-A ï¿½ Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
 # ---------------------------------------------------------------------------
 # AMACI:
@@ -22,7 +22,7 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -202,13 +202,13 @@ summary_df <- all_df %>%
 
 print(summary_df)
 
-if (!dir.exists(OUTDIR)) dir.create(OUTDIR, recursive = TRUE)
-write.csv(all_df, file.path(OUTDIR, "mcaware_inlen_ablation_RESULTS.csv"),
+if (!dir.exists(OUTDIR_SUM)) dir.create(OUTDIR_SUM, recursive = TRUE)
+write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_inlen_ablation_RESULTS.csv"),
           row.names = FALSE)
-write.csv(summary_df, file.path(OUTDIR, "mcaware_inlen_ablation_SUMMARY.csv"),
+write.csv(summary_df, file.path(OUTDIR_SUM, "mcaware_inlen_ablation_SUMMARY.csv"),
           row.names = FALSE)
 
 cat(sprintf("\nKaydedildi:\n  %s\n  %s\n",
-            file.path(OUTDIR, "mcaware_inlen_ablation_RESULTS.csv"),
-            file.path(OUTDIR, "mcaware_inlen_ablation_SUMMARY.csv")))
+            file.path(OUTDIR_SUM, "mcaware_inlen_ablation_RESULTS.csv"),
+            file.path(OUTDIR_SUM, "mcaware_inlen_ablation_SUMMARY.csv")))
 cat("\nIN_LEN ABLASYONU TAMAMLANDI.\n")

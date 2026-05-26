@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE PROTOTYPE — v5 MI CALIBRATION (ADIM I.5)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 22.05.2026 — v4'teki histogram-MI olcumlerinin DOGRULAMA testi
@@ -50,7 +50,15 @@ library(here)
 
 # --- 0. Ortam ---
 WORKDIR <- here::here()
-OUTDIR <- here::here()
+# [B18] OUTDIR <- here::here()
+# --- B18 fix: Subdirectory tanimlari ---
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_PRED <- here::here("Sonuclar", "predictions")
+OUTDIR_THR  <- here::here("Sonuclar", "thresholds")
+OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
+for (.d in c(OUTDIR_SUM, OUTDIR_PRED, OUTDIR_THR, OUTDIR_DIAG)) {
+  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
+}
 DATA_FILE <- file.path(WORKDIR, "ALZ_AZS_AMZ_Haftalik.xlsx")
 setwd(WORKDIR)
 
@@ -319,7 +327,7 @@ if (nrow(key_close_thy) > 0) {
 }
 
 # --- 6. Kaydet ---
-out_csv <- file.path(OUTDIR, "mcaware_v5_MI_CALIBRATION.csv")
+out_csv <- file.path(OUTDIR_DIAG, "mcaware_v5_MI_CALIBRATION.csv")
 write.csv(mi_cal_df, out_csv, row.names = FALSE)
 cat(sprintf("\nKaydedildi: %s\n", basename(out_csv)))
 cat("\nADIM I.5 TAMAMLANDI — sonuclari PROJE_DURUMU.txt Bolum 10.27 olarak isle.\n")

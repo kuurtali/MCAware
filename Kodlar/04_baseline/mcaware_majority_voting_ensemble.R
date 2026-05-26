@@ -1,6 +1,6 @@
 # ===========================================================================
-# MC-AWARE — MAJORITY VOTING ENSEMBLE (ADIM I.14)
-# TÜBÝTAK 2209-A — Yürütücü: Mehmet Ali KURT
+# MC-AWARE ï¿½ MAJORITY VOTING ENSEMBLE (ADIM I.14)
+# Tï¿½Bï¿½TAK 2209-A ï¿½ Yï¿½rï¿½tï¿½cï¿½: Mehmet Ali KURT
 # Tarih: 23.05.2026
 # ---------------------------------------------------------------------------
 # AMACI:
@@ -13,21 +13,21 @@
 # NEDEN ANLAMLI:
 #   McNemar testi 6 mimarinin COGUNLUKLA AYNI hatalari yaptigini gosterdi
 #   (n.s. cogunlukta). Eger gercekten ayni yondeyse, ensemble da ayni
-#   sekilde anti-prediktif olur › hipotezimizi GUCLENDIRIR.
-#   Eger ensemble Naive'i geciyorsa › mimari cesitliligi sinyali yakaliyor
-#   demek › Yorum 3'u ZAYIFLATIR ama operasyonel kazanc.
+#   sekilde anti-prediktif olur ï¿½ hipotezimizi GUCLENDIRIR.
+#   Eger ensemble Naive'i geciyorsa ï¿½ mimari cesitliligi sinyali yakaliyor
+#   demek ï¿½ Yorum 3'u ZAYIFLATIR ama operasyonel kazanc.
 #
 # YONTEM:
 #   1. 6 mimari PREDICTIONS.csv'lerini yukle
 #   2. Her test sample'i icin: 6 modelin (lambda x seed = 15 config'in
-#      ortalamasi) tahmin olasiligi › cogunluk yonu
+#      ortalamasi) tahmin olasiligi ï¿½ cogunluk yonu
 #   3. Aynileri Acc/Spec/Sens/MC/flip metrikleri
 #   4. Iki strateji:
 #      (a) HARD VOTING: her model thr=0.5 ile sinif, sonra cogunluk
 #      (b) SOFT VOTING: 6 modelin yhat ortalamasi, sonra thr=0.5
 #
-# YENI MODEL EGITIMI YOK — sadece mevcut CSV'leri okuyor.
-# Calistirma: RStudio › Ctrl+Shift+S › ~30 saniye › 3 CSV
+# YENI MODEL EGITIMI YOK ï¿½ sadece mevcut CSV'leri okuyor.
+# Calistirma: RStudio ï¿½ Ctrl+Shift+S ï¿½ ~30 saniye ï¿½ 3 CSV
 # ===========================================================================
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
@@ -35,7 +35,12 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- WORKDIR
+# [B18] OUTDIR  <- WORKDIR
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_PRED <- here::here("Sonuclar", "predictions")
+for (.d in c(OUTDIR_SUM, OUTDIR_PRED)) {
+  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
+}
 setwd(WORKDIR)
 
 suppressPackageStartupMessages({
@@ -43,7 +48,7 @@ suppressPackageStartupMessages({
 })
 
 cat("\n========================================================================\n")
-cat("MC-AWARE — MAJORITY VOTING ENSEMBLE (ADIM I.14)\n")
+cat("MC-AWARE ï¿½ MAJORITY VOTING ENSEMBLE (ADIM I.14)\n")
 cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
 cat("Mimariler: BiLSTM (v3b), GRU, SimpleRNN, Conv1D, TCN, Transformer\n")
 cat("========================================================================\n\n")
@@ -185,27 +190,27 @@ cat(strrep("=", 80), "\n", sep = "")
 if (m_soft$Acc > naive_acc) {
   cat("[A] ENSEMBLE NAIVE'I GECTI:\n")
   cat(sprintf("    Soft Acc=%.3f > Naive=%.3f\n", m_soft$Acc, naive_acc))
-  cat("    Mimari cesitliligi anti-prediktif egilimi nötrledi.\n")
+  cat("    Mimari cesitliligi anti-prediktif egilimi nï¿½trledi.\n")
   cat("    BU SURPRIZ - hipotezimizi REVIZE etmek gerekir.\n")
 } else if (m_soft$Acc_flip > naive_acc) {
   cat("[B] ENSEMBLE TERS-PREDIKTIF (BEKLENEN):\n")
   cat(sprintf("    Soft Acc=%.3f < Naive=%.3f, ama Acc_flip=%.3f > Naive\n",
               m_soft$Acc, naive_acc, m_soft$Acc_flip))
-  cat("    6 mimari ayni yonde yaniliyor › ensemble da anti-prediktif.\n")
-  cat("    Bu MIMARI-BAGIMSIZLIK iddiamizi GUCLENDIRIR (118/120 › 119/121).\n")
-  cat("    Majority Rules baseline anti-prediktif › TUBITAK iddiasý icin\n")
+  cat("    6 mimari ayni yonde yaniliyor ï¿½ ensemble da anti-prediktif.\n")
+  cat("    Bu MIMARI-BAGIMSIZLIK iddiamizi GUCLENDIRIR (118/120 ï¿½ 119/121).\n")
+  cat("    Majority Rules baseline anti-prediktif ï¿½ TUBITAK iddiasï¿½ icin\n")
   cat("    pozitif kanit.\n")
 } else {
   cat("[C] NOTR:\n")
   cat(sprintf("    Ensemble Acc=%.3f, flip=%.3f, Naive=%.3f\n",
               m_soft$Acc, m_soft$Acc_flip, naive_acc))
-  cat("    Voting nötr kaldi - mimariler birbirini iptal ediyor.\n")
+  cat("    Voting nï¿½tr kaldi - mimariler birbirini iptal ediyor.\n")
 }
 
 # --- 8. CSV cikti ---
-out1 <- file.path(OUTDIR, "mcaware_ensemble_RESULTS.csv")
-out2 <- file.path(OUTDIR, "mcaware_ensemble_HARD_VOTES.csv")
-out3 <- file.path(OUTDIR, "mcaware_ensemble_SOFT_VOTES.csv")
+out1 <- file.path(OUTDIR_SUM, "mcaware_ensemble_RESULTS.csv")
+out2 <- file.path(OUTDIR_PRED, "mcaware_ensemble_HARD_VOTES.csv")
+out3 <- file.path(OUTDIR_PRED, "mcaware_ensemble_SOFT_VOTES.csv")
 
 write.csv(results_df, out1, row.names = FALSE)
 write.csv(hard_votes, out2, row.names = FALSE)

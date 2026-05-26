@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE — RULE-BASED CLASSIFIER BASELINE (ADIM I.17, GARAN DOGRULAMA)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -37,7 +37,15 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR <- here::here()
+# [B18] OUTDIR <- here::here()
+# --- B18 fix: Subdirectory tanimlari ---
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_PRED <- here::here("Sonuclar", "predictions")
+OUTDIR_THR  <- here::here("Sonuclar", "thresholds")
+OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
+for (.d in c(OUTDIR_SUM, OUTDIR_PRED, OUTDIR_THR, OUTDIR_DIAG)) {
+  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
+}
 setwd(WORKDIR)
 
 # Yardimci: paket yoksa otomatik kurmayi dene, basaramazsa FALSE dondur
@@ -78,7 +86,7 @@ cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
 cat("Modeller: rpart, C5.0 Rules, OneR, randomForest, glm\n")
 cat("========================================================================\n\n")
 
-if (!dir.exists(OUTDIR)) { OUTDIR <- WORKDIR }
+# [B18] if (!dir.exists(OUTDIR)) { OUTDIR <- WORKDIR }
 
 # --- 1. Veri (v3b ile AYNI) ---
 cat("GARAN verisi cekiliyor...\n")
@@ -331,7 +339,7 @@ if (n_beats_naive >= n_models / 2) {
 }
 
 # --- 7. CSV cikti ---
-out <- file.path(OUTDIR, "mcaware_rule_based_GARAN_RESULTS.csv")
+out <- file.path(OUTDIR_SUM, "mcaware_rule_based_GARAN_RESULTS.csv")
 write.csv(results_df, out, row.names = FALSE)
 cat(sprintf("\nCSV kaydedildi: %s\n", out))
 cat("\nCSV'yi yukleyince Claude Bolum 10.39 (ADIM I.17 GARAN dogrulamasi) olarak isleyecek.\n")

@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE — BIST-5 HOLDING PORTFOYU TESTI (KONTROL GRUBU)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -21,7 +21,15 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR <- here::here("Sonuclar")
+# [B18] OUTDIR <- here::here("Sonuclar")
+# --- B18 fix: Subdirectory tanimlari ---
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_PRED <- here::here("Sonuclar", "predictions")
+OUTDIR_THR  <- here::here("Sonuclar", "thresholds")
+OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
+for (.d in c(OUTDIR_SUM, OUTDIR_PRED, OUTDIR_THR, OUTDIR_DIAG)) {
+  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
+}
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -43,7 +51,7 @@ cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
 cat("Hisseler: KCHOL.IS, SAHOL.IS, DOHOL.IS, ALARK.IS, ENKAI.IS\n")
 cat("========================================================================\n\n")
 
-if (!dir.exists(OUTDIR)) { dir.create(OUTDIR, recursive = TRUE) }
+# [B18] if (!dir.exists(OUTDIR)) { dir.create(OUTDIR, recursive = TRUE) }
 
 .ns <- asNamespace("keras3")
 if (exists("bidirectional", envir = .ns)) {
@@ -208,7 +216,7 @@ for (tk in TICKERS) {
 
 if(length(all_results) > 0) {
   all_df <- do.call(rbind, all_results)
-  write.csv(all_df, file.path(OUTDIR, "mcaware_bist5_holding_RESULTS.csv"), row.names=FALSE)
+  write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_bist5_holding_RESULTS.csv"), row.names=FALSE)
 
   cat("\n", strrep("=", 80), "\n", sep="")
   cat("ADIM I.20 — BIST-5 HOLDING SONUCLARI\n")
@@ -225,7 +233,7 @@ if(length(all_results) > 0) {
               .groups="drop")
   print(summary_df)
 
-  write.csv(summary_df, file.path(OUTDIR, "mcaware_bist5_holding_SUMMARY.csv"), row.names=FALSE)
+  write.csv(summary_df, file.path(OUTDIR_SUM, "mcaware_bist5_holding_SUMMARY.csv"), row.names=FALSE)
   cat(sprintf("\nDosyalar Sonuclar klasorune kaydedildi.\n"))
 } else {
   cat("\nHicbir hisse basariyla cekilemedi.\n")

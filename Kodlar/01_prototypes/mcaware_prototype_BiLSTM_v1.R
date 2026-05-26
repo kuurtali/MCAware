@@ -292,9 +292,9 @@ cat("       BiLSTM'in geri-ileri yapisi direncligi kirarsa hoca'nin\n")
 cat("       'MC yendik' iddiasi destek bulur.\n")
 
 # --- 12. CSV ciktisi ---
-out1 <- file.path(WORKDIR, "mcaware_BiLSTM_v1_RESULTS.csv")
-out2 <- file.path(WORKDIR, "mcaware_BiLSTM_v1_SUMMARY.csv")
-out3 <- file.path(WORKDIR, "mcaware_BiLSTM_v1_SEED_REPORT.csv")
+out1 <- file.path(OUTDIR_SUM, "mcaware_BiLSTM_v1_RESULTS.csv")
+out2 <- file.path(OUTDIR_SUM, "mcaware_BiLSTM_v1_SUMMARY.csv")
+out3 <- file.path(OUTDIR_DIAG, "mcaware_BiLSTM_v1_SEED_REPORT.csv")
 write.csv(df_res, out1, row.names = FALSE)
 write.csv(summary_tbl, out2, row.names = FALSE)
 write.csv(seed_mc, out3, row.names = FALSE)

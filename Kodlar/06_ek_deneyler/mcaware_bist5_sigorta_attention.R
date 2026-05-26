@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE — BIST-5 SIGORTA "ATTENTION" ROBUSTNESS TESTI
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
 # Tarih: 23.05.2026
@@ -16,7 +16,15 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR <- here::here("Sonuclar")
+# [B18] OUTDIR <- here::here("Sonuclar")
+# --- B18 fix: Subdirectory tanimlari ---
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_PRED <- here::here("Sonuclar", "predictions")
+OUTDIR_THR  <- here::here("Sonuclar", "thresholds")
+OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
+for (.d in c(OUTDIR_SUM, OUTDIR_PRED, OUTDIR_THR, OUTDIR_DIAG)) {
+  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
+}
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -34,7 +42,7 @@ cat("\n========================================================================\
 cat("MC-AWARE — BIST-5 SIGORTA (ATTENTION ROBUSTNESS TESTI)\n")
 cat("========================================================================\n\n")
 
-if (!dir.exists(OUTDIR)) { dir.create(OUTDIR, recursive = TRUE) }
+# [B18] if (!dir.exists(OUTDIR)) { dir.create(OUTDIR, recursive = TRUE) }
 
 .ns <- asNamespace("keras3")
 if (exists("bidirectional", envir = .ns)) {
@@ -176,12 +184,12 @@ for (tk in TICKERS) {
 
 if(length(all_res) > 0) {
   all_df <- do.call(rbind, all_res)
-  write.csv(all_df, file.path(OUTDIR, "mcaware_bist5_sigorta_attention_RESULTS.csv"), row.names=FALSE)
+  write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_bist5_sigorta_attention_RESULTS.csv"), row.names=FALSE)
   summ_df <- all_df %>% group_by(ticker) %>%
     summarise(mean_acc=mean(acc), mean_flip=mean(acc_flip), naive=mean(naive_acc),
               dl_anti_prediktif_mi = mean(acc_flip) > mean(naive_acc),
               mc_tuzagi_var_mi = any(is_MC), .groups="drop")
   print(summ_df)
-  write.csv(summ_df, file.path(OUTDIR, "mcaware_bist5_sigorta_attention_SUMMARY.csv"), row.names=FALSE)
+  write.csv(summ_df, file.path(OUTDIR_SUM, "mcaware_bist5_sigorta_attention_SUMMARY.csv"), row.names=FALSE)
   cat("\nSonuclar kaydedildi!\n")
 }

@@ -1,22 +1,22 @@
 # ===========================================================================
-# MC-AWARE PROTOTYPE — LSTM (R + keras3)
-# TÜBÝTAK 2209-A Ön Kanýt Çalýþmasý (Mehmet Ali Kurt, yürütücü)
+# MC-AWARE PROTOTYPE ï¿½ LSTM (R + keras3)
+# Tï¿½Bï¿½TAK 2209-A ï¿½n Kanï¿½t ï¿½alï¿½ï¿½masï¿½ (Mehmet Ali Kurt, yï¿½rï¿½tï¿½cï¿½)
 # ---------------------------------------------------------------------------
-# Amaç:
-#   AMZ LSTM full/In=2/Out=3 þampiyon konfigürasyonu üzerinde MC_Penalty
-#   teriminin etkisini ölçmek.
+# Amaï¿½:
+#   AMZ LSTM full/In=2/Out=3 ï¿½ampiyon konfigï¿½rasyonu ï¿½zerinde MC_Penalty
+#   teriminin etkisini ï¿½lï¿½mek.
 #
-# Karþýlaþtýrma:
-#   Vanilla BCE  vs  BCE + ?·|mean(y)-0.5|   (? ? {0.0, 0.1, 0.3, 0.5})
-#   3 seed: 23, 27, 98 (mevcut çalýþmayla ayný)
+# Karï¿½ï¿½laï¿½tï¿½rma:
+#   Vanilla BCE  vs  BCE + ?ï¿½|mean(y)-0.5|   (? ? {0.0, 0.1, 0.3, 0.5})
+#   3 seed: 23, 27, 98 (mevcut ï¿½alï¿½ï¿½mayla aynï¿½)
 #
-# Çalýþtýrma:
-#   1) RStudio'da bu dosyayý aç.
-#   2) setwd() yolunu kontrol et (mevcut EMEKLILIK_GUNCEL.R ile ayný).
+# ï¿½alï¿½ï¿½tï¿½rma:
+#   1) RStudio'da bu dosyayï¿½ aï¿½.
+#   2) setwd() yolunu kontrol et (mevcut EMEKLILIK_GUNCEL.R ile aynï¿½).
 #   3) Source > Run All
-#   4) Çýktý: mcaware_LSTM_RESULTS.csv (özet) + konsol tablosu
+#   4) ï¿½ï¿½ktï¿½: mcaware_LSTM_RESULTS.csv (ï¿½zet) + konsol tablosu
 #
-# Süre: CPU modunda yaklaþýk 30-60 dakika (12 koþu × ~3-5 dakika)
+# Sï¿½re: CPU modunda yaklaï¿½ï¿½k 30-60 dakika (12 koï¿½u ï¿½ ~3-5 dakika)
 # ===========================================================================
 # --- B6 fix: here paketi ile gorecel yollar ---
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
@@ -24,7 +24,9 @@ library(here)
 
 
 # --- 0. Ortam ---
-setwd(here::here())  # senin EMEKLILIK_GUNCEL.R'daki ile ayný
+setwd(here::here())  # senin EMEKLILIK_GUNCEL.R'daki ile aynï¿½
+OUTDIR_SUM <- here::here("Sonuclar", "summaries")
+if (!dir.exists(OUTDIR_SUM)) dir.create(OUTDIR_SUM, recursive = TRUE)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")  # GPU bypass (RTX 5050)
 
 suppressPackageStartupMessages({
@@ -46,7 +48,7 @@ colnames(raw) <- c("Date", "Price_ALZ", "LogReturn_ALZ",
 for (c in c("Price_AMZ", "LogReturn_AMZ")) raw[[c]] <- as.numeric(raw[[c]])
 amz <- raw %>% filter(!is.na(Price_AMZ)) %>% select(Date, Close = Price_AMZ)
 
-# --- 2. Özellik mühendisliði (full set, TEFAS proxies) ---
+# --- 2. ï¿½zellik mï¿½hendisliï¿½i (full set, TEFAS proxies) ---
 amz$RSI       <- TTR::RSI(amz$Close, n = 14)
 ema12         <- TTR::EMA(amz$Close, n = 12)
 ema26         <- TTR::EMA(amz$Close, n = 26)
@@ -58,7 +60,7 @@ amz$Volatility <- zoo::rollapply(c(NA, diff(log(amz$Close))),
                                   width = 14, FUN = sd,
                                   fill = NA, align = "right")
 amz <- amz %>% drop_na()
-cat(sprintf("AMZ veri (warmup sonrasý): %d hafta\n", nrow(amz)))
+cat(sprintf("AMZ veri (warmup sonrasï¿½): %d hafta\n", nrow(amz)))
 
 # --- 3. Pencereleme (In=2, Out=3) ---
 IN_LEN  <- 2L
@@ -73,13 +75,13 @@ N <- nrow(feats)
 X_list <- list(); y_vec <- c()
 for (t in (IN_LEN + 1):(N - OUT_LEN)) {
   X_list[[length(X_list) + 1L]] <- feats[(t - IN_LEN + 1L - 1L):(t - 1L), , drop = FALSE]
-  # Yukarýdaki: t = mevcut nokta. Pencere = t-IN_LEN .. t-1 (geçmiþ IN_LEN hafta).
+  # Yukarï¿½daki: t = mevcut nokta. Pencere = t-IN_LEN .. t-1 (geï¿½miï¿½ IN_LEN hafta).
   # Etiket: P_{t+OUT_LEN} > P_t  ?  1 : 0
   y_vec <- c(y_vec, as.integer(prices[t + OUT_LEN] > prices[t]))
 }
 X_arr <- array(unlist(X_list), dim = c(length(X_list), IN_LEN, F_DIM))
 y_arr <- y_vec
-cat(sprintf("Toplam pencere: %d | sýnýf Up=%%%.1f\n",
+cat(sprintf("Toplam pencere: %d | sï¿½nï¿½f Up=%%%.1f\n",
             length(y_arr), 100 * mean(y_arr)))
 
 # --- 4. Split (70/15/15 kronolojik) ---
@@ -93,12 +95,12 @@ y_va <- y_arr[(i_tr + 1L):i_va]
 X_te <- X_arr[(i_va + 1L):n_total, , , drop = FALSE]
 y_te <- y_arr[(i_va + 1L):n_total]
 
-cat(sprintf("Split: Eðitim=%d | Doðrulama=%d | Test=%d\n",
+cat(sprintf("Split: Eï¿½itim=%d | Doï¿½rulama=%d | Test=%d\n",
             length(y_tr), length(y_va), length(y_te)))
 cat(sprintf("Test Up=%%%.1f (Up=%d, Down=%d)\n",
             100 * mean(y_te), sum(y_te), length(y_te) - sum(y_te)))
 
-# --- 5. Train-only normalization (data leakage önleme) ---
+# --- 5. Train-only normalization (data leakage ï¿½nleme) ---
 mu <- apply(X_tr, c(2,3), mean)
 sd <- apply(X_tr, c(2,3), sd) + 1e-8
 normalize <- function(A) sweep(sweep(A, c(2,3), mu, "-"), c(2,3), sd, "/")
@@ -114,7 +116,7 @@ make_mc_aware_loss <- function(lambda) {
   }
 }
 
-# --- 7. Model fabrikasý (AMZ þampiyonu HP: adam / tanh / dropout=0.4) ---
+# --- 7. Model fabrikasï¿½ (AMZ ï¿½ampiyonu HP: adam / tanh / dropout=0.4) ---
 build_lstm <- function(seed, lambda_mc = 0.0) {
   keras3::set_random_seed(seed)
   model <- keras3::keras_model_sequential(input_shape = c(IN_LEN, F_DIM)) %>%
@@ -122,7 +124,7 @@ build_lstm <- function(seed, lambda_mc = 0.0) {
     keras3::layer_dropout(0.4) %>%
     keras3::layer_dense(units = 1, activation = "sigmoid")
 
-  # class weight (AMZ sýnýf dengesizliði için)
+  # class weight (AMZ sï¿½nï¿½f dengesizliï¿½i iï¿½in)
   cw <- list("0" = length(y_tr) / (2 * sum(y_tr == 0)),
              "1" = length(y_tr) / (2 * sum(y_tr == 1)))
 
@@ -142,7 +144,7 @@ build_lstm <- function(seed, lambda_mc = 0.0) {
   list(model = model, class_weight = cw)
 }
 
-# --- 8. Eðitim + deðerlendirme ---
+# --- 8. Eï¿½itim + deï¿½erlendirme ---
 train_eval <- function(seed, lambda_mc) {
   bundle <- build_lstm(seed, lambda_mc)
   cb <- keras3::callback_early_stopping(monitor = "val_accuracy",
@@ -170,12 +172,12 @@ train_eval <- function(seed, lambda_mc) {
        is_MC = is_mc)
 }
 
-# --- 9. Grid: ? × seed ---
+# --- 9. Grid: ? ï¿½ seed ---
 SEEDS <- c(23L, 27L, 98L)
 LAMBDAS <- c(0.0, 0.1, 0.3, 0.5)
 
 cat("\n", strrep("=", 85), "\n", sep = "")
-cat(sprintf("AMZ — full / In=%d / Out=%d — LSTM MC_Penalty Grid\n", IN_LEN, OUT_LEN))
+cat(sprintf("AMZ ï¿½ full / In=%d / Out=%d ï¿½ LSTM MC_Penalty Grid\n", IN_LEN, OUT_LEN))
 cat(strrep("=", 85), "\n", sep = "")
 cat(sprintf("%5s | %4s | %6s | %6s | %6s | %8s | %4s | %4s | %3s\n",
             "lambda", "seed", "Acc", "Sens", "Spec", "mean", "#Up", "#Dn", "MC?"))
@@ -184,7 +186,7 @@ cat(strrep("-", 85), "\n", sep = "")
 results <- list()
 for (lam in LAMBDAS) {
   for (sd_ in SEEDS) {
-    cat(sprintf("Koþuluyor: ?=%.1f seed=%d ...\n", lam, sd_))
+    cat(sprintf("Koï¿½uluyor: ?=%.1f seed=%d ...\n", lam, sd_))
     res <- train_eval(sd_, lam)
     results[[length(results) + 1]] <- c(list(lambda = lam, seed = sd_), res)
     cat(sprintf("%5.1f | %4d | %6.4f | %6.4f | %6.4f | %8.4f | %4d | %4d | %3s\n",
@@ -196,10 +198,10 @@ for (lam in LAMBDAS) {
   }
 }
 
-# --- 10. Özet ---
+# --- 10. ï¿½zet ---
 df_res <- do.call(rbind, lapply(results, as.data.frame))
 cat("\n", strrep("=", 85), "\n", sep = "")
-cat("ÖZET — ? baþýna 3-seed ortalamasý\n")
+cat("ï¿½ZET ï¿½ ? baï¿½ï¿½na 3-seed ortalamasï¿½\n")
 cat(strrep("=", 85), "\n", sep = "")
 
 summary_tbl <- df_res %>%
@@ -210,8 +212,8 @@ summary_tbl <- df_res %>%
             mean_yhat_m = mean(mean_yhat), MC_count = sum(is_MC), .groups = "drop")
 print(summary_tbl)
 
-# CSV çýktýsý
+# CSV ï¿½ï¿½ktï¿½sï¿½
 write.csv(df_res, "mcaware_LSTM_RESULTS.csv", row.names = FALSE)
 write.csv(summary_tbl, "mcaware_LSTM_SUMMARY.csv", row.names = FALSE)
 cat("\nCSV'ler kaydedildi: mcaware_LSTM_RESULTS.csv ve mcaware_LSTM_SUMMARY.csv\n")
-cat("Bu CSV'leri benimle paylaþýrsan strateji dosyasýna 'ön kanýt' olarak iþleyeceðim.\n")
+cat("Bu CSV'leri benimle paylaï¿½ï¿½rsan strateji dosyasï¿½na 'ï¿½n kanï¿½t' olarak iï¿½leyeceï¿½im.\n")

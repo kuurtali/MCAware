@@ -1,12 +1,12 @@
 # ===========================================================================
-# MC-AWARE — WALK-FORWARD CV × 6 MÝMARÝ (DENEY I.21)
-# TUBITAK 2209-A — Yurutucu: Mehmet Ali KURT
+# MC-AWARE ï¿½ WALK-FORWARD CV ï¿½ 6 Mï¿½MARï¿½ (DENEY I.21)
+# TUBITAK 2209-A ï¿½ Yurutucu: Mehmet Ali KURT
 # Olusturulma: 23 Mayis 2026 (v3 sonradan ek)
 # ---------------------------------------------------------------------------
 # AMACI:
 #   "Mimari-bagimsiz anti-prediktivite" iddiasi tek-split kanitina dayaniyor.
 #   Walk-forward sadece BiLSTM'de yapildi (3/7 fold flip>naive).
-#   Bu deneyde 7 fold x 6 mimari = 42 koþu yapilir. Sonuc:
+#   Bu deneyde 7 fold x 6 mimari = 42 koï¿½u yapilir. Sonuc:
 #     - Mimari-bagimsiz "donemsel anti-pred" gercekten gozleniyor mu?
 #     - Hangi foldlar/mimariler tutarli?
 #   beklenir.
@@ -22,7 +22,7 @@ library(here)
 
 
 WORKDIR <- here::here()
-OUTDIR  <- file.path(here::here("Sonuclar"), "summaries")
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -250,11 +250,11 @@ print(arch_summary)
 cat("\n=== FOLD BAZINDA ===\n")
 print(fold_summary)
 
-if (!dir.exists(OUTDIR)) dir.create(OUTDIR, recursive = TRUE)
-write.csv(all_df, file.path(OUTDIR, "mcaware_walkforward_multi_arch_RESULTS.csv"),
+if (!dir.exists(OUTDIR_SUM)) dir.create(OUTDIR_SUM, recursive = TRUE)
+write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_walkforward_multi_arch_RESULTS.csv"),
           row.names = FALSE)
-write.csv(arch_summary, file.path(OUTDIR, "mcaware_walkforward_multi_arch_ARCH_SUMMARY.csv"),
+write.csv(arch_summary, file.path(OUTDIR_SUM, "mcaware_walkforward_multi_arch_ARCH_SUMMARY.csv"),
           row.names = FALSE)
-write.csv(fold_summary, file.path(OUTDIR, "mcaware_walkforward_multi_arch_FOLD_SUMMARY.csv"),
+write.csv(fold_summary, file.path(OUTDIR_SUM, "mcaware_walkforward_multi_arch_FOLD_SUMMARY.csv"),
           row.names = FALSE)
 cat("\nWALK-FORWARD MULTI-ARCH TAMAMLANDI.\n")
