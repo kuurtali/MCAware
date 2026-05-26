@@ -30,7 +30,7 @@ Tüm sonuçları, bulguları ve görsel analizleri incelemek için herhangi bir 
 │   ├── PROJE_DURUMU.txt   # Tüm deney süreçlerinin ana günlüğü (SSOT)
 │   ├── TUBITAK_2209A_Proje_Onerisi.pdf
 │   └── MC_AWARE_Birlesitirilmis_Rapor.docx  # Birleştirilmiş resmi doküman
-├── Gorseller/             # 20 adet yüksek çözünürlüklü (300 DPI) grafik
+├── Gorseller/             # 33 adet yüksek çözünürlüklü (300 DPI) grafik
 ├── Kodlar/                # 7 alt dizin, ~40 R/Python scripti
 │   ├── 01_prototypes/     # BiLSTM v1-v6, LSTM, multi-arch (12 dosya)
 │   ├── 02_ablation/       # Feature, IN_LEN, korelasyon ablasyonları (4 dosya)
