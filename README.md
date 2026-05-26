@@ -59,3 +59,47 @@ Tüm sonuçları, bulguları ve görsel analizleri incelemek için herhangi bir 
 - **Mekanizma:** Makro değişkenlerin korelasyon kırılması → gerekli ama yetersiz koşul
 
 Tüm bulguların detaylı analizi: `Docs/TUBITAK_2209A_Nihai_Rapor.txt`
+
+---
+
+## 🇬🇧 English Summary
+
+### About
+
+This project investigates the **Majority Class (MC) trap** in deep learning models applied to daily stock direction prediction on BIST (Borsa Istanbul). Funded under **TÜBİTAK 2209-A** undergraduate research grant.
+
+After solving the MC trap (where models predict only the majority class), we discovered that DL models exhibit **anti-predictive behavior** on macro-sensitive BIST assets — systematically predicting the *opposite* direction due to concept drift in macroeconomic variables between training and test periods.
+
+### Key Findings (22 Experiments)
+
+| Finding | Detail |
+|---------|--------|
+| **MC Trap Solved** | 90/90 configs achieve MC=0 (class_weight=balanced + MC-Aware loss) |
+| **Anti-Predictive Behavior** | 118/120 configs on THYAO predict opposite direction (p ≈ 3×10⁻¹⁴) |
+| **Architecture-Independent** | 6 DL architectures (BiLSTM, GRU, Conv1D, TCN, Transformer, RNN) + Ensemble + Attention — all show same pattern |
+| **Walk-Forward CV** | 3/7 folds show anti-predictive effect — regime-dependent, not universal |
+| **Mechanism** | Macro-variable correlation breakdown (USDTRY: train=0.91 → test=0.41) — necessary but insufficient condition |
+| **Cross-Market** | NASDAQ shows normal behavior — effect is specific to emerging markets |
+| **Classical ML Control** | 1/11 beats naive across THYAO/GARAN/AAPL — consistent with EMH |
+
+### Interactive Dashboard
+
+Open `Docs/Dashboard/index.html` — a self-contained HTML file with 17 high-resolution charts embedded as Base64. No installation or internet required.
+
+### Methodology
+
+- **Data:** BIST daily prices (2014–2023), macro variables (USDTRY, WTI Oil, TCMB policy rate)
+- **Validation:** Walk-Forward Cross Validation (7 folds), Out-of-Time test set
+- **Reproducibility:** Fixed seeds, 350+ configs, all outputs versioned in Git
+- **Scale:** 6 DL architectures × multiple hyperparameter grids × 5 seeds = 378+ configurations
+
+---
+
+## 🔗 Related Projects
+
+| Project | Description |
+|---------|-------------|
+| [Direction Forecasting BIST-BES](https://github.com/kuurtali/direction-forecasting-bist-bes) | Academic paper: ARIMA vs LSTM vs 1D-CNN on BIST & pension funds — majority class illusion |
+| [ADAS Pricing Paradox](https://github.com/kuurtali/ADAS-Pricing-Paradox) | Actuarial pricing: 100K policies, Poisson + Gamma GLM — do ADAS vehicles cost less? |
+| [VOL2 — ADAS Advanced](https://github.com/kuurtali/VOL2-ADAS-Pricing-Paradox) | Extended ADAS: 200K policies, Gini Index, Lift Charts, interaction terms |
+| [Actuarial Shiny Dashboard](https://github.com/kuurtali/actuarial-analysis-w-shiny-and-glm) | Interactive risk scoring: Logistic GLM + R Shiny (AUC 0.828) |
