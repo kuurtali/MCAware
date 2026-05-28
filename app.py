@@ -155,6 +155,7 @@ else:
         **Kullanılan Mimariler:**
         * ARIMA (Baseline)
         * 1D-Convolutional Neural Networks (CNN)
+        * Long Short-Term Memory (LSTM)
         * BiLSTM (Multi-Defense Architecture)
         
         *(MC_Penalty, Focal Loss ve Selective Abstain teknikleri kullanılarak "Majority Class" tuzağı engellenmiştir).*
