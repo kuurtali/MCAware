@@ -59,7 +59,15 @@ with st.sidebar:
     
     hedef_varlik = st.selectbox(
         "Hedef Varlık Seçin:",
-        ("BIST: THYAO (Hisse)", "BES: AMZ (Hisse Fonu)", "BES: AZS (Esnek Fon)")
+        (
+            "BIST: THYAO (Havacılık)",
+            "BIST: AKGRT (Sigorta Sektörü)",
+            "BIST: ANSGR (Sigorta Sektörü)",
+            "BIST: AKBNK (Bankacılık)",
+            "BIST: GARAN (Bankacılık)",
+            "BES: AMZ (Hisse Fonu)", 
+            "BES: AZS (Esnek Fon)"
+        )
     )
     
     st.markdown("---")
