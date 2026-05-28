@@ -12,13 +12,13 @@ Bu proje, BIST (Borsa İstanbul) günlük yön tahmininde derin öğrenme modell
 ## 🔓 Şeffaflık ve Açık Bilim Beyanı (Reproducibility)
 TÜBİTAK 2209-A lisans projesi kapsamında koşturulan **350'den fazla konfigürasyonun** tamamı şeffaftır. Bu repoda yer alan tüm deneyler, kodlar ve görsel çıktılar akademik hakem denetimine %100 açık olacak şekilde versiyon kontrolüne (Git) alınmıştır. Veri seti 2014-2023 yıllarını kapsamakta olup, test seti dışarıda bırakılarak (OOT) Walk-Forward Cross Validation ile model performansı dürüstçe belgelenmiştir.
 
-## 🚀 İnteraktif Dashboard (Tek Dosya Mucizesi)
-Tüm sonuçları, bulguları ve görsel analizleri incelemek için herhangi bir kurulum yapmanıza gerek yoktur:
-- `Docs/Dashboard/index.html` dosyasına çift tıklamanız yeterlidir.
-- Bu dosya CSS, JavaScript ve 17 adet yüksek çözünürlüklü grafiği **kendi içinde (Base64) barındıran** özel bir interaktif rapordur. İnternet bağlantısı olmasa bile tüm grafikler ve animasyonlar kusursuz çalışır.
+## 🚀 İnteraktif Dashboard (Canlı Demo)
+Artık projeyi bilgisayarınıza kurmanıza gerek kalmadan tüm arayüzü ve tahmin motorunu internet üzerinden canlı olarak test edebilirsiniz!
+👉 **[TÜBİTAK MC-AWARE Canlı Demo İçin Tıklayın](https://tubitak-mcaware.streamlit.app/)**
 
+*(Eski HTML tabanlı raporlar `Docs/Dashboard/index.html` içerisinde yedeklenmiştir).*
 
-## 🚀 Nasıl Çalıştırılır (How to Run)
+## 🛠 Nasıl Çalıştırılır (How to Run)
 
 Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek (reproduce) için aşağıdaki adımları izleyin:
 
