@@ -118,7 +118,7 @@ if hesapla:
                 <h4 style="color:#888;">Yarınki Kapanış Yönü</h4>
                 <div class="{color_class}">{icon} {direction}</div>
                 <p style="color:#aaa; margin-top:10px;">Güven Skoru: <b>%{conf*100:.1f}</b></p>
-                <p style="color:#555; font-size:0.8rem; margin-top:5px;">Model: Long Short-Term Memory (LSTM)</p>
+                <p style="color:#555; font-size:0.8rem; margin-top:5px;">Model: BiLSTM (Multi-Defense)</p>
             </div>
             """, unsafe_allow_html=True)
             
@@ -155,7 +155,7 @@ else:
         **Kullanılan Mimariler:**
         * ARIMA (Baseline)
         * 1D-Convolutional Neural Networks (CNN)
-        * Long Short-Term Memory (LSTM)
+        * BiLSTM (Multi-Defense Architecture)
         
-        *(Van der Burgt (2023) Majority Class düzeltme teknikleri kullanılarak eğitilmiştir).*
+        *(MC_Penalty, Focal Loss ve Selective Abstain teknikleri kullanılarak "Majority Class" tuzağı engellenmiştir).*
         """)
