@@ -61,12 +61,21 @@ with st.sidebar:
         "Hedef Varlık Seçin:",
         (
             "BIST: THYAO (Havacılık)",
-            "BIST: AKGRT (Sigorta Sektörü)",
-            "BIST: ANSGR (Sigorta Sektörü)",
+            "BIST: TURSG (Sigorta)",
+            "BIST: AKGRT (Sigorta)",
+            "BIST: ANSGR (Sigorta)",
+            "BIST: RAYSG (Sigorta)",
+            "BIST: AGESA (Sigorta)",
+            "BIST: KCHOL (Holding)",
+            "BIST: SAHOL (Holding)",
+            "BIST: DOHOL (Holding)",
+            "BIST: ALARK (Holding)",
+            "BIST: ENKAI (Holding)",
             "BIST: AKBNK (Bankacılık)",
             "BIST: GARAN (Bankacılık)",
             "BES: AMZ (Hisse Fonu)", 
-            "BES: AZS (Esnek Fon)"
+            "BES: AZS (Esnek Fon)",
+            "BES: ALZ (Düşük Risk Fonu)"
         )
     )
     
