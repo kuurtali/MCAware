@@ -14,7 +14,7 @@ TÜBİTAK 2209-A lisans projesi kapsamında koşturulan **350'den fazla konfigü
 
 ## 🚀 İnteraktif Dashboard (Canlı Demo)
 Artık projeyi bilgisayarınıza kurmanıza gerek kalmadan tüm arayüzü ve tahmin motorunu internet üzerinden canlı olarak test edebilirsiniz!
-👉 **[TÜBİTAK MC-AWARE Canlı Demo İçin Tıklayın](https://tubitak-mcaware.streamlit.app/)**
+👉 **[TÜBİTAK MC-AWARE Canlı Demo İçin Tıklayın](https://tubitak-2209a-mcaware-6ypk7ytf5hqh3jsapudbne.streamlit.app/)**
 
 *(Eski HTML tabanlı raporlar `Docs/Dashboard/index.html` içerisinde yedeklenmiştir).*
 
