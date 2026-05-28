@@ -18,6 +18,31 @@ Tüm sonuçları, bulguları ve görsel analizleri incelemek için herhangi bir 
 - Bu dosya CSS, JavaScript ve 17 adet yüksek çözünürlüklü grafiği **kendi içinde (Base64) barındıran** özel bir interaktif rapordur. İnternet bağlantısı olmasa bile tüm grafikler ve animasyonlar kusursuz çalışır.
 
 
+## 🚀 Nasıl Çalıştırılır (How to Run)
+
+Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek (reproduce) için aşağıdaki adımları izleyin:
+
+1. **Repoyu Klonlayın:**
+   ```bash
+   git clone https://github.com/kuurtali/Tubitak-2209A-MCAware.git
+   cd Tubitak-2209A-MCAware
+   ```
+
+2. **Gerekli Paketleri Kurun:**
+   Proje R dilinde yazılmış olup `keras3` (TensorFlow) bağımlılığına sahiptir. Gerekli tüm paketleri kurmak için R veya RStudio üzerinden şu betiği çalıştırın:
+   ```R
+   source("install_packages.R")
+   ```
+
+3. **Modelleri Eğitme ve Test Etme:**
+   `Kodlar/FINAL_RELEASE` klasöründeki ana test scriptlerini sırasıyla çalıştırabilirsiniz. Örneğin, BIST-5 Sigorta sektörü testini başlatmak için:
+   ```bash
+   Rscript Kodlar/FINAL_RELEASE/01_Sektorel_Karsilastirma_Sigorta.R
+   ```
+   *Not: Eğitim süreleri donanımınıza (CPU/GPU) bağlı olarak 45-60 dakika sürebilir. Çıktılar otomatik olarak `Sonuclar/summaries` klasörüne kaydedilecektir.*
+
+---
+
 ## Proje Klasör Yapısı
 
 ```
