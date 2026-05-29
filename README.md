@@ -6,6 +6,12 @@ TÜBİTAK 2209-A Lisans Araştırma Projesi
 **Danışman:** Övgücan KARADAĞ ERDEMİR
 **Tarih:** Mayıs 2026 | **Durum:** 22 Deney Tamamlandı — v3 NİHAİ
 
+<p align="center">
+  <a href="https://mcaware.streamlit.app">
+    <img src="https://img.shields.io/badge/🚀_Live_Demo-Online-brightgreen?style=for-the-badge" alt="Live Demo" />
+  </a>
+</p>
+
 ## Proje Hakkında
 Bu proje, BIST (Borsa İstanbul) günlük yön tahmininde derin öğrenme modellerinin "Majority Class" (MC) tuzağına düşmesini engelleyip, modellerin gerçek tahmin gücünü ölçmeyi hedefler. MC tuzağı çözüldüğünde, makro-hassas BIST varlıklarında derin öğrenme modellerinin eğitim/test korelasyon kırılmaları (concept drift) nedeniyle dönemsel ve varlık-özgü ters-yön örüntüsü sergilediği tespit edilmiştir.
 
@@ -13,12 +19,7 @@ Bu proje, BIST (Borsa İstanbul) günlük yön tahmininde derin öğrenme modell
 TÜBİTAK 2209-A lisans projesi kapsamında koşturulan **350'den fazla konfigürasyonun** tamamı şeffaftır. Bu repoda yer alan tüm deneyler, kodlar ve görsel çıktılar akademik hakem denetimine %100 açık olacak şekilde versiyon kontrolüne (Git) alınmıştır. Veri seti 2014-2023 yıllarını kapsamakta olup, test seti dışarıda bırakılarak (OOT) Walk-Forward Cross Validation ile model performansı dürüstçe belgelenmiştir.
 
 ## 🚀 İnteraktif Dashboard (Canlı Demo)
-Artık projeyi bilgisayarınıza kurmanıza gerek kalmadan tüm arayüzü ve tahmin motorunu internet üzerinden canlı olarak test edebilirsiniz!
-<p align="center">
-  <a href="https://mcaware.streamlit.app">
-    <img src="https://img.shields.io/badge/🚀_Live_Demo-Online-brightgreen?style=for-the-badge" alt="Live Demo" />
-  </a>
-</p>
+Artık projeyi bilgisayarınıza kurmanıza gerek kalmadan tüm arayüzü ve tahmin motorunu internet üzerinden canlı olarak test edebilirsiniz! Yukarıdaki **Live Demo** butonuna tıklayarak ulaşabilirsiniz.
 
 *(Eski HTML tabanlı raporlar `Docs/Dashboard/index.html` içerisinde yedeklenmiştir).*
 
