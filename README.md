@@ -7,6 +7,14 @@ TÜBİTAK 2209-A Lisans Araştırma Projesi
 **Tarih:** Mayıs 2026 | **Durum:** Tamamlandı
 
 <p align="center">
+  <img src="https://img.shields.io/badge/R-276DC3?style=for-the-badge&logo=r&logoColor=white" />
+  <img src="https://img.shields.io/badge/Keras-D00000?style=for-the-badge&logo=Keras&logoColor=white" />
+  <img src="https://img.shields.io/badge/Deep%20Learning-FF6F00?style=for-the-badge" />
+  <img src="https://img.shields.io/badge/Streamlit-FF4B4B?style=for-the-badge&logo=Streamlit&logoColor=white" />
+  <img src="https://img.shields.io/badge/Actuarial%20Science-brightgreen?style=for-the-badge" />
+</p>
+
+<p align="center">
   <a href="https://mcaware.streamlit.app">
     <img src="https://img.shields.io/badge/🚀_Live_Demo-Online-brightgreen?style=for-the-badge" alt="Live Demo" />
   </a>
