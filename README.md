@@ -4,7 +4,7 @@ TÜBİTAK 2209-A Lisans Araştırma Projesi
 **Yürütücü:** Mehmet Ali KURT
 **Yardımcı:** Şevval DEMİR  
 **Danışman:** Övgücan KARADAĞ ERDEMİR
-**Tarih:** Mayıs 2026 | **Durum:** 22 Deney Tamamlandı — v3 NİHAİ
+**Tarih:** Mayıs 2026 | **Durum:** Tamamlandı
 
 <p align="center">
   <a href="https://mcaware.streamlit.app">
@@ -23,9 +23,9 @@ Artık projeyi bilgisayarınıza kurmanıza gerek kalmadan tüm arayüzü ve tah
 
 *(Eski HTML tabanlı raporlar `Docs/Dashboard/index.html` içerisinde yedeklenmiştir).*
 
-## 🛠 Nasıl Çalıştırılır (How to Run)
+## 🔬 Yeniden Üretilebilirlik (Reproducibility)
 
-Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek (reproduce) için aşağıdaki adımları izleyin:
+Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek için aşağıdaki adımları izleyebilirsiniz:
 
 1. **Repoyu Klonlayın:**
    ```bash
@@ -78,7 +78,7 @@ Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek (repr
 └── README.md              # Bu dosya
 ```
 
-## Temel Bulgular (22 Deney)
+## Temel Bulgular
 - **MC Tuzağı Çözümü:** 90/90 konfigürasyonda MC=0 (class_weight=balanced + MC-Aware loss)
 - **Anti-Prediktif Davranış:** THYAO'da 118/120 konfigürasyonda flip>naive (tek split, p≈3×10⁻¹⁴)
 - **Walk-Forward:** 3/7 fold dönemsel — etki evrensel değil, rejim-bağımlı
@@ -88,7 +88,7 @@ Bu projeyi yerel makinenizde çalıştırmak ve deneyleri yeniden üretmek (repr
 - **Sektörel Kontrast:** Sigorta 2/5 vs Holding 0/5 sıkı anti-pred (ön kanıt)
 - **Mekanizma:** Makro değişkenlerin korelasyon kırılması → gerekli ama yetersiz koşul
 
-Tüm bulguların detaylı analizi: `Docs/TUBITAK_2209A_Nihai_Rapor.txt`
+Tüm bulguların detaylı analizi: `TUBITAK_2209A_Proje.docx`
 
 ---
 
@@ -100,7 +100,7 @@ This project investigates the **Majority Class (MC) trap** in deep learning mode
 
 After solving the MC trap (where models predict only the majority class), we discovered that DL models exhibit **anti-predictive behavior** on macro-sensitive BIST assets — systematically predicting the *opposite* direction due to concept drift in macroeconomic variables between training and test periods.
 
-### Key Findings (22 Experiments)
+### Key Findings
 
 | Finding | Detail |
 |---------|--------|
