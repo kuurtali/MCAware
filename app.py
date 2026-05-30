@@ -262,7 +262,7 @@ with st.sidebar:
     for e in experiments:
         st.markdown(f"- {e}")
     st.divider()
-    st.markdown(f"**{t('sidebar_csv')}:** 64")
+    st.markdown(f"**{t('sidebar_csv')}:** 120")
     st.markdown(f"**{t('sidebar_config')}:** 350+")
     st.caption(t("sidebar_note"))
 
