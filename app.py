@@ -548,6 +548,33 @@ with tabs[3]:
                     c: "{:.4f}" for c in df.select_dtypes("float").columns
                 }), use_container_width=True, hide_index=True)
 
+    # OPTIMAL configurations
+    st.markdown("---")
+    st.markdown("#### 🏆 En İyi Konfigürasyonlar (OPTIMAL)")
+    optimal_files = [
+        ("v1",        "mcaware_BiLSTM_v1_RESULTS.csv"),
+        ("v2a",       "mcaware_BiLSTM_v2a_OPTIMAL.csv"),
+        ("v2b",       "mcaware_BiLSTM_v2b_OPTIMAL.csv"),
+        ("v2bfix",    "mcaware_BiLSTM_v2bfix_OPTIMAL.csv"),
+        ("v3_THYAO",  "mcaware_BiLSTM_v3THYAO_OPTIMAL.csv"),
+        ("v3b_GARAN", "mcaware_BiLSTM_v3b_GARAN_OPTIMAL.csv"),
+        ("v3b_window","mcaware_BiLSTM_v3b_window_OPTIMAL.csv"),
+        ("v3c_noCW",  "mcaware_BiLSTM_v3c_no_cw_OPTIMAL.csv"),
+        ("attn_v6",   "mcaware_BiLSTM_attn_v6_OPTIMAL.csv"),
+        ("Conv1D",    "mcaware_multi_arch_Conv1D_OPTIMAL.csv"),
+        ("GRU",       "mcaware_multi_arch_GRU_OPTIMAL.csv"),
+        ("SimpleRNN", "mcaware_multi_arch_SimpleRNN_OPTIMAL.csv"),
+        ("TCN",       "mcaware_multi_arch_TCN_OPTIMAL.csv"),
+        ("Transformer","mcaware_multi_arch_Transformer_OPTIMAL.csv"),
+    ]
+    for oname, ofname in optimal_files:
+        odf = L("summaries", ofname)
+        if odf is not None:
+            with st.expander(f"🏆 {oname} — Optimal Konfigürasyonlar"):
+                st.dataframe(odf.style.format({
+                    c: "{:.4f}" for c in odf.select_dtypes("float").columns
+                }), use_container_width=True, hide_index=True)
+
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  TAB 5 — Tahmin Analizi                                                 ║
@@ -561,6 +588,12 @@ with tabs[4]:
         "BES-AMZ":     ("predictions", "mcaware_BiLSTM_v3b_BES_AMZ_PREDICTIONS.csv", "bes"),
         "BES-AZS":     ("predictions", "mcaware_BiLSTM_v3b_BES_AZS_PREDICTIONS.csv", "bes"),
         "BES-ALZ":     ("predictions", "mcaware_BiLSTM_v3b_BES_ALZ_PREDICTIONS.csv", "bes"),
+        "BiLSTM v2a":  ("predictions", "mcaware_BiLSTM_v2a_PREDICTIONS.csv",          "stock"),
+        "BiLSTM v2b":  ("predictions", "mcaware_BiLSTM_v2b_PREDICTIONS.csv",          "stock"),
+        "BiLSTM v2bfix":("predictions", "mcaware_BiLSTM_v2bfix_PREDICTIONS.csv",      "stock"),
+        "BiLSTM window":("predictions", "mcaware_BiLSTM_v3b_window_PREDICTIONS.csv",  "stock"),
+        "BiLSTM noCW": ("predictions", "mcaware_BiLSTM_v3c_no_cw_PREDICTIONS.csv",   "stock"),
+        "BiLSTM attn": ("predictions", "mcaware_BiLSTM_attn_v6_PREDICTIONS.csv",     "stock"),
         "Conv1D":      ("predictions", "mcaware_multi_arch_Conv1D_PREDICTIONS.csv",      "arch"),
         "GRU":         ("predictions", "mcaware_multi_arch_GRU_PREDICTIONS.csv",          "arch"),
         "SimpleRNN":   ("predictions", "mcaware_multi_arch_SimpleRNN_PREDICTIONS.csv",    "arch"),
@@ -718,6 +751,19 @@ with tabs[5]:
         title="🔍 Ablation Bulgusu"
     )
 
+    # Ablation raw RESULTS
+    st.markdown("---")
+    st.markdown("#### Ham Ablasyon Sonuçları")
+    for aname, afile in [("Özellik Grubu", "mcaware_feature_ablation_RESULTS.csv"),
+                          ("Tekli Özellik", "mcaware_single_feat_ablation_RESULTS.csv"),
+                          ("Giriş Uzunluğu", "mcaware_inlen_ablation_RESULTS.csv")]:
+        adf = L("summaries", afile)
+        if adf is not None:
+            with st.expander(f"📄 {aname} — Ham Sonuçlar"):
+                st.dataframe(adf.style.format({
+                    c: "{:.4f}" for c in adf.select_dtypes("float").columns
+                }), use_container_width=True, hide_index=True)
+
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  TAB 7 — Cross-Market & Multi-Stock                                     ║
@@ -738,6 +784,30 @@ with tabs[6]:
         fig.add_hline(y=0.5, line_dash="dash", line_color="gray")
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_nq, use_container_width=True, hide_index=True)
+
+    # NASDAQ raw results
+    df_nq_r = L("summaries", "mcaware_nasdaq_RESULTS.csv")
+    if df_nq_r is not None:
+        with st.expander("📄 NASDAQ Ham Sonuçlar (Seed Bazlı)"):
+            st.dataframe(df_nq_r.style.format({
+                c: "{:.4f}" for c in df_nq_r.select_dtypes("float").columns
+            }), use_container_width=True, hide_index=True)
+
+    # NASDAQ Correlation
+    df_nq_corr = L("diagnostics", "mcaware_nasdaq_CORR.csv")
+    if df_nq_corr is not None:
+        with st.expander("📄 NASDAQ Korelasyon (Train vs Test)"):
+            st.dataframe(df_nq_corr.style.format({
+                c: "{:.4f}" for c in df_nq_corr.select_dtypes("float").columns
+            }), use_container_width=True, hide_index=True)
+
+    # GARAN Correlation
+    df_g_corr = L("diagnostics", "mcaware_corr_GARAN.csv")
+    if df_g_corr is not None:
+        with st.expander("📄 GARAN Korelasyon Analizi"):
+            st.dataframe(df_g_corr.style.format({
+                c: "{:.4f}" for c in df_g_corr.select_dtypes("float").columns
+            }), use_container_width=True, hide_index=True)
 
     # Correlation comparison
     df_corr = L("diagnostics", "mcaware_corr_COMPARISON.csv")
@@ -786,6 +856,12 @@ with tabs[6]:
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_ms, use_container_width=True, hide_index=True)
 
+    # Multi-stock raw RESULTS
+    df_ms_r = L("summaries", "mcaware_bist_multi_stock_RESULTS.csv")
+    if df_ms_r is not None:
+        with st.expander("📄 Multi-Stock Ham Sonuçlar"):
+            st.dataframe(df_ms_r, use_container_width=True, hide_index=True)
+
     # Holding (5 stocks)
     df_hold = L("summaries", "mcaware_bist5_holding_SUMMARY.csv")
     if df_hold is not None:
@@ -800,12 +876,36 @@ with tabs[6]:
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_hold, use_container_width=True, hide_index=True)
 
+    # Holding STRICT + RESULTS
+    df_hold_s = L("summaries", "mcaware_bist5_holding_STRICT.csv")
+    if df_hold_s is not None:
+        with st.expander("📄 Holding — Strict Anti-Prediktif Analiz"):
+            st.dataframe(df_hold_s.style.format({
+                c: "{:.4f}" for c in df_hold_s.select_dtypes("float").columns
+            }), use_container_width=True, hide_index=True)
+    df_hold_r = L("summaries", "mcaware_bist5_holding_RESULTS.csv")
+    if df_hold_r is not None:
+        with st.expander("📄 Holding — Ham Sonuçlar"):
+            st.dataframe(df_hold_r, use_container_width=True, hide_index=True)
+
     # Sigorta
     df_sig = L("summaries", "mcaware_bist5_sigorta_SUMMARY.csv")
     if df_sig is not None:
         st.markdown("---")
         st.markdown("#### BIST-5 Sigorta")
         st.dataframe(df_sig, use_container_width=True, hide_index=True)
+
+    # Sigorta STRICT + RESULTS
+    df_sig_s = L("summaries", "mcaware_bist5_sigorta_STRICT.csv")
+    if df_sig_s is not None:
+        with st.expander("📄 Sigorta — Strict Anti-Prediktif Analiz"):
+            st.dataframe(df_sig_s.style.format({
+                c: "{:.4f}" for c in df_sig_s.select_dtypes("float").columns
+            }), use_container_width=True, hide_index=True)
+    df_sig_r = L("summaries", "mcaware_bist5_sigorta_RESULTS.csv")
+    if df_sig_r is not None:
+        with st.expander("📄 Sigorta — Ham Sonuçlar"):
+            st.dataframe(df_sig_r, use_container_width=True, hide_index=True)
 
     # Sigorta V2
     df_sig2 = L("summaries", "mcaware_bist5_sigorta_v2_SUMMARY.csv")
@@ -825,6 +925,38 @@ with tabs[6]:
     if df_siga is not None:
         st.markdown("#### BIST-5 Sigorta — Attention")
         st.dataframe(df_siga, use_container_width=True, hide_index=True)
+
+    # Sigorta Attention RESULTS + V2 RESULTS
+    df_siga_r = L("summaries", "mcaware_bist5_sigorta_attention_RESULTS.csv")
+    if df_siga_r is not None:
+        with st.expander("📄 Sigorta Attention — Ham Sonuçlar"):
+            st.dataframe(df_siga_r, use_container_width=True, hide_index=True)
+    df_sig2_r = L("summaries", "mcaware_bist5_sigorta_v2_RESULTS.csv")
+    if df_sig2_r is not None:
+        with st.expander("📄 Sigorta V2 — Ham Sonuçlar"):
+            st.dataframe(df_sig2_r, use_container_width=True, hide_index=True)
+
+    # BES Individual Summaries
+    st.markdown("---")
+    st.markdown("#### BES Fon Bireysel Özetleri")
+    for bfund, bfile in [("ALZ", "mcaware_BiLSTM_v3b_BES_ALZ_SUMMARY.csv"),
+                         ("AMZ", "mcaware_BiLSTM_v3b_BES_AMZ_SUMMARY.csv"),
+                         ("AZS", "mcaware_BiLSTM_v3b_BES_AZS_SUMMARY.csv")]:
+        bdf = L("summaries", bfile)
+        if bdf is not None:
+            with st.expander(f"📄 BES {bfund} — Detay"):
+                st.dataframe(bdf.style.format({
+                    c: "{:.4f}" for c in bdf.select_dtypes("float").columns
+                }), use_container_width=True, hide_index=True)
+    for bfund, bfile in [("ALZ", "mcaware_BiLSTM_v3b_BES_ALZ_OPTIMAL.csv"),
+                         ("AMZ", "mcaware_BiLSTM_v3b_BES_AMZ_OPTIMAL.csv"),
+                         ("AZS", "mcaware_BiLSTM_v3b_BES_AZS_OPTIMAL.csv")]:
+        bdf = L("summaries", bfile)
+        if bdf is not None:
+            with st.expander(f"🏆 BES {bfund} — Optimal Konfigürasyon"):
+                st.dataframe(bdf.style.format({
+                    c: "{:.4f}" for c in bdf.select_dtypes("float").columns
+                }), use_container_width=True, hide_index=True)
 
     # Seed Variance
     df_sv = L("diagnostics", "mcaware_bist5_sigorta_v2_SEED_VAR.csv")
@@ -946,6 +1078,37 @@ with tabs[7]:
                 xaxis_title="Yöntem", yaxis_title="Doğruluk")
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_ti, use_container_width=True, hide_index=True)
+
+    # Voting Score Meta
+    df_vsm = L("summaries", "mcaware_voting_score_meta_RESULTS.csv")
+    if df_vsm is not None:
+        st.markdown("---")
+        st.markdown("#### Voting Score Meta Analizi")
+        # Accuracy by voting score
+        if "voting_score" in df_vsm.columns and "actual" in df_vsm.columns:
+            acc_vs = []
+            for vs in sorted(df_vsm["voting_score"].unique()):
+                sub = df_vsm[df_vsm["voting_score"] == vs]
+                majority = 1 if vs > 0 else 0
+                correct = (sub["actual"] == majority).sum()
+                acc_vs.append({"voting_score": vs, "n": len(sub),
+                               "accuracy": correct / len(sub) if len(sub) > 0 else 0})
+            vdf = pd.DataFrame(acc_vs)
+            fig = px.bar(vdf, x="voting_score", y="accuracy", text="n",
+                         color="accuracy", color_continuous_scale="RdYlGn",
+                         labels={"voting_score": "Voting Score", "accuracy": "Doğruluk"})
+            _layout(fig, title="Voting Score'a Göre Doğruluk", height=400)
+            fig.add_hline(y=0.5, line_dash="dash", line_color="gray")
+            st.plotly_chart(fig, use_container_width=True)
+        with st.expander("📄 Voting Score Meta — Tüm Veriler"):
+            st.dataframe(df_vsm, use_container_width=True, hide_index=True)
+
+    # Majority Rules Matrix
+    df_mrm = L("summaries", "mcaware_majority_rules_10ind_MATRIX.csv")
+    if df_mrm is not None:
+        st.markdown("---")
+        st.markdown("#### Teknik İndikatör Oylama Matrisi")
+        st.dataframe(df_mrm, use_container_width=True, hide_index=True)
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
