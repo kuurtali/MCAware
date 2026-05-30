@@ -1,4 +1,4 @@
-# MC-AWARE — Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
+﻿# MC-AWARE — Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
 
 **TÜBİTAK 2209-A Lisans Araştırma Projesi (2026)**
 
@@ -32,7 +32,7 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 
 ## 🚀 Canlı Dashboard (10 Tab)
 
-**[mcaware.streamlit.app](https://mcaware.streamlit.app)** — 64 CSV dosyasından yüklenen gerçek deney sonuçları:
+**[mcaware.streamlit.app](https://mcaware.streamlit.app)** — 120 CSV dosyasından yüklenen gerçek deney sonuçları:
 
 | Tab | İçerik | Veri Kaynağı |
 |:---:|--------|-------------|
@@ -102,7 +102,7 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 │   ├── 05_diagnostic/      # MI, teşhis testleri
 │   ├── 06_ek_deneyler/     # Sektörel karşılaştırma
 │   └── FINAL_RELEASE/      # Nihai yayın paketi
-├── Sonuclar/               # 64 CSV dosyası
+├── Sonuclar/               # 120 CSV dosyası
 │   ├── summaries/          # Deney özet tabloları
 │   ├── predictions/        # Ham tahmin serileri
 │   ├── diagnostics/        # İstatistiksel tanı verileri
