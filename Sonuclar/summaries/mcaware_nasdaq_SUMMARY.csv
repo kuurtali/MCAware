@@ -1,0 +1,5 @@
+"market","group","n_feat","n","mean_acc","mean_flip","flip_wins"
+"BIST_THYAO","full_13",13,1,0.396,0.604,1
+"BIST_THYAO","no_ext_10",10,1,0.496,0.504,0
+"NASDAQ_AAPL","full_13",13,3,0.522875816993464,0.477124183006536,0
+"NASDAQ_AAPL","no_ext_10",10,3,0.532679738562091,0.467320261437909,0

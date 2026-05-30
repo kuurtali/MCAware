@@ -1,0 +1,6 @@
+ticker,mean_acc,mean_flip,naive,n_seeds,flip_beats_naive,acc_beats_naive,strict_anti_pred,ambiguous_both_above,neutral,model_wins
+AGESA.IS,0.4890829694323144,0.5109170305676857,0.550218340611354,3,False,False,False,False,True,False
+AKGRT.IS,0.4840579710144927,0.515942028985507,0.504347826086956,3,True,False,True,False,False,False
+ANSGR.IS,0.465217391304348,0.534782608695652,0.526086956521739,3,True,False,True,False,False,False
+RAYSG.IS,0.505797101449275,0.49420289855072497,0.443478260869565,3,True,True,False,True,False,False
+TURSG.IS,0.5405797101449277,0.45942028985507233,0.517391304347826,3,False,True,False,False,False,True

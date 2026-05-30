@@ -1,0 +1,4 @@
+"fund","n_config","naive_acc","mean_acc","mean_acc_flip","flip_beats_naive_count","mc_count","is_degenerate"
+"ALZ",15,1,1,0,0,15,TRUE
+"AZS",15,0.742857142857143,0.619047619047619,0.380952380952381,0,1,FALSE
+"AMZ",15,0.8,0.580952380952381,0.419047619047619,0,0,FALSE

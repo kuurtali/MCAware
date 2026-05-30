@@ -1,0 +1,7 @@
+"dataset","n","n_features","nbins","MI_nat","MI_bit","interpretation"
+"AMZ_closing_price_only",234,1,15,0.0766470299230386,0.110578289968836,"MODERATE: makul sinyal, model ogrenebilir"
+"AMZ_closing_logreturn_only",233,1,15,0.034782940118594,0.0501811752166333,"MODERATE: makul sinyal, model ogrenebilir"
+"AMZ_full_7feat",234,7,15,0.559686122072693,0.80745639276865,"HIGH: guclu sinyal"
+"THYAO_closing_price_only",2032,1,20,0.0146826936685058,0.0211826493424451,"LOW: zayif sinyal, Naive zor gecilir"
+"THYAO_closing_logreturn_only",2031,1,20,0.00535985778110248,0.00773264024066668,"ZERO_INFO: sinyal yok, MC matematiksel optimal"
+"THYAO_full_7feat",2032,7,20,0.66679662239715,0.96198418041388,"HIGH: guclu sinyal"

@@ -1,0 +1,12 @@
+"method","accuracy","naive_acc","beats_naive","up_signal_ratio"
+"Majority_Vote_6of10",0.645,0.52,TRUE,0.495
+"SMA_Cross",0.87,0.52,TRUE,0.46
+"EMA_Cross",0.65,0.52,TRUE,0.49
+"RSI_14",0.65,0.52,TRUE,0.49
+"MACD",0.64,0.52,TRUE,0.47
+"BBand",0.64,0.52,TRUE,0.47
+"Stoch",0.585,0.52,TRUE,0.505
+"CCI",0.57,0.52,TRUE,0.46
+"WilliamsR",0.55,0.52,TRUE,0.48
+"ADX",0.545,0.52,TRUE,0.495
+"ROC",0.48,0.52,FALSE,1

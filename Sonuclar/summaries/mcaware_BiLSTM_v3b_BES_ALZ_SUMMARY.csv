@@ -1,0 +1,4 @@
+"fund","lambda","n_seeds","naive_acc","Acc_05","Spec_05","Sens_05","BalAcc_05","Acc_flip_05","flip_beats_naive_count","MC_05"
+"ALZ",0,5,1,1,NA,1,NA,0,0,5
+"ALZ",0.05,5,1,1,NA,1,NA,0,0,5
+"ALZ",0.1,5,1,1,NA,1,NA,0,0,5
