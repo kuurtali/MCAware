@@ -5,7 +5,7 @@ Researcher: Mehmet Ali Kurt  |  Advisor: Dr. Övgücan Karadağ Erdemir
 Hacettepe Üniversitesi — Aktüerya Bilimleri
 """
 
-import os, warnings
+import os, warnings, datetime, base64, io
 from pathlib import Path
 import streamlit as st
 import pandas as pd
@@ -15,6 +15,72 @@ import plotly.graph_objects as go
 from plotly.subplots import make_subplots
 
 warnings.filterwarnings("ignore")
+
+# ─── language dictionary ─────────────────────────────────────────────────────
+TEXTS = {
+    "title":           {"TR": "MC-AWARE Araştırma Paneli", "EN": "MC-AWARE Research Dashboard"},
+    "subtitle":        {"TR": "TÜBİTAK 2209-A · Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti · 2026",
+                        "EN": "TÜBİTAK 2209-A · Detecting Anti-Predictive Behavior with Deep Learning · 2026"},
+    "tab_main":        {"TR": "📊 Ana Bulgular",        "EN": "📊 Main Findings"},
+    "tab_arch":        {"TR": "🏗️ Mimari Karşılaştırma", "EN": "🏗️ Architecture Comparison"},
+    "tab_wf":          {"TR": "📈 Walk-Forward",        "EN": "📈 Walk-Forward"},
+    "tab_evol":        {"TR": "🔬 BiLSTM Evrim",        "EN": "🔬 BiLSTM Evolution"},
+    "tab_pred":        {"TR": "🔍 Tahmin Analizi",      "EN": "🔍 Prediction Analysis"},
+    "tab_abl":         {"TR": "🧪 Ablation",            "EN": "🧪 Ablation"},
+    "tab_cross":       {"TR": "🌍 Cross-Market",        "EN": "🌍 Cross-Market"},
+    "tab_ens":         {"TR": "🗳️ Ensemble & Baseline", "EN": "🗳️ Ensemble & Baseline"},
+    "tab_stat":        {"TR": "📐 İstatistiksel Kanıtlar", "EN": "📐 Statistical Evidence"},
+    "tab_diag":        {"TR": "📊 Threshold & Diagnostics", "EN": "📊 Threshold & Diagnostics"},
+    "total_config":    {"TR": "Toplam Konfigürasyon",   "EN": "Total Configurations"},
+    "mc_trap":         {"TR": "MC Tuzağı",              "EN": "MC Trap"},
+    "flip_naive":      {"TR": "Flip > Naive",           "EN": "Flip > Naive"},
+    "anti_pred_rate":  {"TR": "Anti-Prediktif Oran",    "EN": "Anti-Predictive Rate"},
+    "finding_main":    {"TR": "Model %41.8 doğrulukla çalıştığında, tahminleri ters çevirince (flip) %58.2'ye ulaşılıyor. "
+                              "105 konfigürasyonun 103'ünde flip stratejisi naive'i geçiyor. "
+                              "Bu, rastgele olma olasılığı p ≈ 3×10⁻¹⁴ olan sistematik anti-prediktif bir davranıştır.",
+                        "EN": "When the model runs at 41.8% accuracy, flipping predictions reaches 58.2%. "
+                              "In 103 out of 105 configurations, the flip strategy beats naive. "
+                              "This is a systematic anti-predictive behavior with p ≈ 3×10⁻¹⁴."},
+    "pooled_cm":       {"TR": "Havuzlanmış Confusion Matrix (7-fold)", "EN": "Pooled Confusion Matrix (7-fold)"},
+    "pool_metrics":    {"TR": "Havuz Metrikleri",       "EN": "Pool Metrics"},
+    "fold_cm":         {"TR": "Fold Bazlı Confusion Metrikleri", "EN": "Per-Fold Confusion Metrics"},
+    "fold_metrics":    {"TR": "Fold Bazlı Metrikler",   "EN": "Per-Fold Metrics"},
+    "arch_title":      {"TR": "Mimari Karşılaştırma (7 Mimari)", "EN": "Architecture Comparison (7 Architectures)"},
+    "arch_chart":      {"TR": "7 Mimari: Model vs Flip vs Naive", "EN": "7 Architectures: Model vs Flip vs Naive"},
+    "mcnemar_title":   {"TR": "McNemar Testi — Mimariler Arası İstatistiksel Fark", "EN": "McNemar Test — Statistical Difference Between Architectures"},
+    "wf_heatmap":      {"TR": "Walk-Forward Multi-Arch Isı Haritası (Acc_flip)", "EN": "Walk-Forward Multi-Arch Heatmap (Acc_flip)"},
+    "wf_title":        {"TR": "Walk-Forward Validation (7 Fold)", "EN": "Walk-Forward Validation (7 Folds)"},
+    "wf_chart":        {"TR": "Walk-Forward 7-Fold: Doğruluk Evrimi", "EN": "Walk-Forward 7-Fold: Accuracy Evolution"},
+    "fold_detail":     {"TR": "Fold Detay Tablosu",     "EN": "Fold Detail Table"},
+    "evol_title":      {"TR": "BiLSTM Evrim: v1 → v2a → v2b → v2bfix → v3 → v3b → v3c → window → attn_v6",
+                        "EN": "BiLSTM Evolution: v1 → v2a → v2b → v2bfix → v3 → v3b → v3c → window → attn_v6"},
+    "evol_table":      {"TR": "Versiyon Karşılaştırma Tablosu (λ=0)", "EN": "Version Comparison Table (λ=0)"},
+    "evol_chart":      {"TR": "BiLSTM Evrim: Model Acc vs Flip Acc (λ=0)", "EN": "BiLSTM Evolution: Model Acc vs Flip Acc (λ=0)"},
+    "pred_title":      {"TR": "Tahmin Analizi",         "EN": "Prediction Analysis"},
+    "pred_select":     {"TR": "Varlık / Mimari Seçin",  "EN": "Select Asset / Architecture"},
+    "yhat_dist":       {"TR": "ŷ (yhat) Dağılımı",      "EN": "ŷ (yhat) Distribution"},
+    "cum_acc":         {"TR": "Kümülatif Doğruluk",     "EN": "Cumulative Accuracy"},
+    "bes_cross":       {"TR": "BES Çapraz-Fon Özeti",   "EN": "BES Cross-Fund Summary"},
+    "abl_title":       {"TR": "Ablation Çalışmaları",   "EN": "Ablation Studies"},
+    "feat_group":      {"TR": "Özellik Grubu Ablasyonu (full_13 vs no_ext_10)", "EN": "Feature Group Ablation (full_13 vs no_ext_10)"},
+    "single_feat":     {"TR": "Tekli Özellik Ablasyonu", "EN": "Single Feature Ablation"},
+    "cross_title":     {"TR": "Cross-Market & Multi-Stock", "EN": "Cross-Market & Multi-Stock"},
+    "ens_title":       {"TR": "Ensemble & Baseline",    "EN": "Ensemble & Baseline"},
+    "stat_title":      {"TR": "İstatistiksel Kanıtlar",  "EN": "Statistical Evidence"},
+    "diag_title":      {"TR": "Threshold & Diagnostics", "EN": "Threshold & Diagnostics"},
+    "sidebar_project": {"TR": "Proje", "EN": "Project"},
+    "sidebar_researcher": {"TR": "Araştırmacı", "EN": "Researcher"},
+    "sidebar_advisor": {"TR": "Danışman", "EN": "Advisor"},
+    "sidebar_uni":     {"TR": "Üniversite", "EN": "University"},
+    "sidebar_arch":    {"TR": "Mimariler", "EN": "Architectures"},
+    "sidebar_data":    {"TR": "Veri Kaynakları", "EN": "Data Sources"},
+    "sidebar_exp":     {"TR": "Deney Serileri", "EN": "Experiment Series"},
+    "sidebar_csv":     {"TR": "Toplam CSV", "EN": "Total CSV"},
+    "sidebar_config":  {"TR": "Toplam Konfigürasyon", "EN": "Total Configurations"},
+    "sidebar_note":    {"TR": "Tüm veriler gerçek deneylerden elde edilmiştir.", "EN": "All data obtained from real experiments."},
+    "pdf_btn":         {"TR": "📄 PDF Rapor İndir", "EN": "📄 Download PDF Report"},
+    "lang_label":      {"TR": "🌐 Dil / Language", "EN": "🌐 Language / Dil"},
+}
 
 # ─── paths ───────────────────────────────────────────────────────────────────
 BASE = Path(os.path.dirname(os.path.abspath(__file__)))
@@ -71,6 +137,72 @@ def finding_box(text, title="🔬 Temel Bulgu"):
 def section(text):
     st.markdown(f"### {text}")
 
+def t(key):
+    """Return translated text for current language."""
+    lang = st.session_state.get("lang", "TR")
+    entry = TEXTS.get(key)
+    if entry is None:
+        return key
+    return entry.get(lang, entry.get("TR", key))
+
+def generate_pdf_html():
+    """Generate a downloadable HTML report summarizing key findings."""
+    lang = st.session_state.get("lang", "TR")
+    now = datetime.datetime.now().strftime("%Y-%m-%d %H:%M")
+    title = t("title")
+    # Load key data
+    arch = L("summaries", "mcaware_multi_arch_CROSS_ARCH_SUMMARY.csv")
+    wf = L("summaries", "mcaware_walkforward_RESULTS.csv")
+    fa = L("summaries", "mcaware_feature_ablation_SUMMARY.csv")
+    nq = L("summaries", "mcaware_nasdaq_SUMMARY.csv")
+    ens = L("summaries", "mcaware_ensemble_RESULTS.csv")
+
+    arch_rows = ""
+    if arch is not None:
+        for _, r in arch.iterrows():
+            arch_rows += f"<tr><td>{r['arch']}</td><td>{r['mean_acc']:.4f}</td><td>{r['mean_acc_flip']:.4f}</td><td>{r['naive_acc']:.4f}</td></tr>"
+    wf_rows = ""
+    if wf is not None:
+        for _, r in wf.iterrows():
+            wf_rows += f"<tr><td>{int(r['fold'])}</td><td>{r['acc']:.4f}</td><td>{r['acc_flip']:.4f}</td><td>{r['naive_acc']:.4f}</td></tr>"
+
+    html = f"""<!DOCTYPE html>
+<html><head><meta charset="utf-8"><title>{title}</title>
+<style>
+body {{ font-family: 'Segoe UI', Arial, sans-serif; max-width: 900px; margin: 40px auto; color: #222; line-height: 1.6; }}
+h1 {{ color: #FF416C; border-bottom: 3px solid #FF416C; padding-bottom: 10px; }}
+h2 {{ color: #1B3A5C; margin-top: 30px; }}
+table {{ border-collapse: collapse; width: 100%; margin: 15px 0; }}
+th {{ background: #1B3A5C; color: white; padding: 10px; text-align: center; }}
+td {{ border: 1px solid #ddd; padding: 8px; text-align: center; }}
+tr:nth-child(even) {{ background: #f8f9fa; }}
+.badge {{ display: inline-block; padding: 4px 12px; border-radius: 12px; font-size: 0.85rem; font-weight: 600; margin: 2px; }}
+.red {{ background: #FFE0E0; color: #CC0000; }}
+.green {{ background: #E0FFE0; color: #008800; }}
+.footer {{ margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; color: #888; font-size: 0.85rem; text-align: center; }}
+</style></head><body>
+<h1>🔬 {title}</h1>
+<p><strong>TÜBİTAK 2209-A</strong> · Mehmet Ali Kurt · Dr. Övgücan Karadağ Erdemir · Hacettepe Üniversitesi</p>
+<p><em>{"Rapor tarihi" if lang=="TR" else "Report date"}: {now}</em></p>
+
+<h2>{"Ana Bulgular" if lang=="TR" else "Main Findings"}</h2>
+<p><span class="badge red">{"Anti-Prediktif Oran" if lang=="TR" else "Anti-Predictive Rate"}: %98</span>
+<span class="badge green">MC {"Tuzağı" if lang=="TR" else "Trap"}: 0/105</span>
+<span class="badge red">p ≈ 3×10⁻¹⁴</span></p>
+<p>{t("finding_main")}</p>
+
+<h2>{"Mimari Karşılaştırma" if lang=="TR" else "Architecture Comparison"}</h2>
+<table><tr><th>{"Mimari" if lang=="TR" else "Architecture"}</th><th>Model Acc</th><th>Flip Acc</th><th>Naive</th></tr>{arch_rows}</table>
+
+<h2>Walk-Forward (7 Fold)</h2>
+<table><tr><th>Fold</th><th>Model Acc</th><th>Flip Acc</th><th>Naive</th></tr>{wf_rows}</table>
+
+<div class="footer">
+<p>MC-AWARE · TÜBİTAK 2209-A · 2026 · {"Tüm veriler gerçek deneylerden elde edilmiştir." if lang=="TR" else "All data from real experiments."}</p>
+</div>
+</body></html>"""
+    return html
+
 # ─── page config ─────────────────────────────────────────────────────────────
 st.set_page_config(page_title="MC-AWARE Dashboard", page_icon="🔬", layout="wide")
 
@@ -87,35 +219,40 @@ st.markdown("""
 
 # ─── title ───────────────────────────────────────────────────────────────────
 st.markdown(
-    """<h1 style="text-align:center;background:linear-gradient(90deg,#FF4B2B,#FF416C);
+    f"""<h1 style="text-align:center;background:linear-gradient(90deg,#FF4B2B,#FF416C);
     -webkit-background-clip:text;-webkit-text-fill-color:transparent;
-    font-size:2.3rem;margin-bottom:0;">MC-AWARE Research Dashboard</h1>
+    font-size:2.3rem;margin-bottom:0;">{t('title')}</h1>
     <p style="text-align:center;color:#888;margin-top:0;">
-    TÜBİTAK 2209-A  ·  Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti  ·  2026</p>""",
+    {t('subtitle')}</p>""",
     unsafe_allow_html=True,
 )
 
 # ─── sidebar ─────────────────────────────────────────────────────────────────
 with st.sidebar:
-    st.markdown("## 🔬 MC-AWARE")
-    st.markdown("""
-    **Proje:** TÜBİTAK 2209-A (2026)
+    # Language selector (top of sidebar)
+    lang_choice = st.selectbox(t("lang_label"), ["Türkçe", "English"], index=0, key="lang_select")
+    st.session_state["lang"] = "TR" if lang_choice == "Türkçe" else "EN"
 
-    **Araştırmacı:** Mehmet Ali Kurt
-    **Danışman:** Dr. Övgücan Karadağ Erdemir
-    **Üniversite:** Hacettepe — Aktüerya Bilimleri
+    st.divider()
+    st.markdown("## 🔬 MC-AWARE")
+    st.markdown(f"""
+    **{t('sidebar_project')}:** TÜBİTAK 2209-A (2026)
+
+    **{t('sidebar_researcher')}:** Mehmet Ali Kurt
+    **{t('sidebar_advisor')}:** Dr. Övgücan Karadağ Erdemir
+    **{t('sidebar_uni')}:** Hacettepe — Aktüerya Bilimleri
     """)
     st.divider()
-    st.markdown("#### 🏗️ Mimariler")
+    st.markdown(f"#### 🏗️ {t('sidebar_arch')}")
     for a in ["BiLSTM", "GRU", "SimpleRNN", "Conv1D", "TCN", "Transformer"]:
         st.markdown(f"- {a}")
     st.divider()
-    st.markdown("#### 📊 Veri Kaynakları")
+    st.markdown(f"#### 📊 {t('sidebar_data')}")
     st.markdown("- BIST (THYAO, GARAN, …)")
     st.markdown("- NASDAQ (AAPL)")
-    st.markdown("- BES Fonları (AMZ, AZS, ALZ)")
+    st.markdown("- BES (AMZ, AZS, ALZ)")
     st.divider()
-    st.markdown("#### 🧪 Deney Serileri")
+    st.markdown(f"#### 🧪 {t('sidebar_exp')}")
     experiments = [
         "BiLSTM v1-v3", "Multi-Arch (7)", "Walk-Forward (7-fold)",
         "Feature Ablation", "Single-Feat Ablation", "Input-Length Ablation",
@@ -125,41 +262,41 @@ with st.sidebar:
     for e in experiments:
         st.markdown(f"- {e}")
     st.divider()
-    st.markdown(f"**Toplam CSV:** 64 dosya")
-    st.markdown(f"**Toplam Konfigürasyon:** 350+")
-    st.caption("Tüm veriler gerçek deneylerden elde edilmiştir.")
+    st.markdown(f"**{t('sidebar_csv')}:** 64")
+    st.markdown(f"**{t('sidebar_config')}:** 350+")
+    st.caption(t("sidebar_note"))
+
+    # PDF Download
+    st.divider()
+    pdf_html = generate_pdf_html()
+    st.download_button(
+        label=t("pdf_btn"),
+        data=pdf_html.encode("utf-8"),
+        file_name=f"MC-AWARE_Report_{datetime.datetime.now().strftime('%Y%m%d')}.html",
+        mime="text/html",
+        use_container_width=True,
+    )
 
 # ─── tabs ────────────────────────────────────────────────────────────────────
 tabs = st.tabs([
-    "📊 Ana Bulgular",
-    "🏗️ Mimari Karşılaştırma",
-    "📈 Walk-Forward",
-    "🔬 BiLSTM Evrim",
-    "🔍 Tahmin Analizi",
-    "🧪 Ablation",
-    "🌍 Cross-Market",
-    "🗳️ Ensemble & Baseline",
-    "📐 İstatistiksel Kanıtlar",
-    "📊 Threshold & Diagnostics",
+    t("tab_main"), t("tab_arch"), t("tab_wf"), t("tab_evol"),
+    t("tab_pred"), t("tab_abl"), t("tab_cross"), t("tab_ens"),
+    t("tab_stat"), t("tab_diag"),
 ])
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
 # ║  TAB 1 — Ana Bulgular                                                    ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[0]:
-    section("Ana Bulgular")
+    section(t("tab_main").replace("📊 ", ""))
 
     c1, c2, c3, c4 = st.columns(4)
-    with c1: metric_card("Toplam Konfigürasyon", "105")
-    with c2: metric_card("MC Tuzağı", "0 / 105", "#00FF00")
-    with c3: metric_card("Flip > Naive", "103 / 105", "#FFA500")
-    with c4: metric_card("Anti-Prediktif Oran", "%98  (p ≈ 3×10⁻¹⁴)", "#FF4444")
+    with c1: metric_card(t("total_config"), "105")
+    with c2: metric_card(t("mc_trap"), "0 / 105", "#00FF00")
+    with c3: metric_card(t("flip_naive"), "103 / 105", "#FFA500")
+    with c4: metric_card(t("anti_pred_rate"), "%98  (p ≈ 3×10⁻¹⁴)", "#FF4444")
 
-    finding_box(
-        "Model %41.8 doğrulukla çalıştığında, tahminleri ters çevirince (flip) %58.2'ye ulaşılıyor. "
-        "105 konfigürasyonun 103'ünde flip stratejisi naive'i geçiyor. "
-        "Bu, rastgele olma olasılığı p ≈ 3×10⁻¹⁴ olan sistematik anti-prediktif bir davranıştır."
-    )
+    finding_box(t("finding_main"))
 
     # Pooled confusion matrix
     st.markdown("---")
@@ -168,7 +305,7 @@ with tabs[0]:
     df_cm = L("summaries", "mcaware_pooled_confusion_matrix.csv")
     if df_cm is not None:
         with col_cm:
-            st.markdown("#### Havuzlanmış Confusion Matrix (7-fold)")
+            st.markdown(f"#### {t('pooled_cm')}")
             metrics_dict = dict(zip(df_cm["metric"], df_cm["value"]))
             tp = int(metrics_dict.get("TP", 0))
             fp = int(metrics_dict.get("FP", 0))
@@ -187,7 +324,7 @@ with tabs[0]:
             st.plotly_chart(fig, use_container_width=True)
 
         with col_met:
-            st.markdown("#### Havuz Metrikleri")
+            st.markdown(f"#### {t('pool_metrics')}")
             met_df = df_cm.copy()
             met_df.columns = ["Metrik", "Değer"]
             met_df["Değer"] = met_df["Değer"].apply(
@@ -216,7 +353,7 @@ with tabs[0]:
 # ║  TAB 2 — Mimari Karşılaştırma                                           ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[1]:
-    section("Mimari Karşılaştırma (7 Mimari)")
+    section(t("arch_title"))
 
     df_arch = L("summaries", "mcaware_multi_arch_CROSS_ARCH_SUMMARY.csv")
     if df_arch is not None:
@@ -293,7 +430,7 @@ with tabs[1]:
 # ║  TAB 3 — Walk-Forward Validation                                        ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[2]:
-    section("Walk-Forward Validation (7 Fold)")
+    section(t("wf_title"))
 
     df_wf = L("summaries", "mcaware_walkforward_RESULTS.csv")
     if df_wf is not None:
@@ -337,7 +474,7 @@ with tabs[2]:
 # ║  TAB 4 — BiLSTM Evrim                                                   ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[3]:
-    section("BiLSTM Evrim: v1 → v2a → v2b → v2bfix → v3 → v3b → v3c → window → attn_v6")
+    section(t("evol_title"))
 
     # Build combined evolution table
     versions = [
@@ -416,7 +553,7 @@ with tabs[3]:
 # ║  TAB 5 — Tahmin Analizi                                                 ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[4]:
-    section("Tahmin Analizi")
+    section(t("pred_title"))
 
     PRED_MAP = {
         "THYAO":       ("predictions", "mcaware_BiLSTM_v3THYAO_PREDICTIONS.csv",     "stock"),
@@ -529,7 +666,7 @@ with tabs[4]:
 # ║  TAB 6 — Ablation                                                       ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[5]:
-    section("Ablation Çalışmaları")
+    section(t("abl_title"))
 
     # Feature group ablation
     df_fa = L("summaries", "mcaware_feature_ablation_SUMMARY.csv")
@@ -586,7 +723,7 @@ with tabs[5]:
 # ║  TAB 7 — Cross-Market & Multi-Stock                                     ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[6]:
-    section("Cross-Market & Multi-Stock Analizi")
+    section(t("cross_title"))
 
     # BIST vs NASDAQ
     df_nq = L("summaries", "mcaware_nasdaq_SUMMARY.csv")
@@ -710,7 +847,7 @@ with tabs[6]:
 # ║  TAB 8 — Ensemble & Baseline                                            ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[7]:
-    section("Ensemble & Baseline Sonuçları")
+    section(t("ens_title"))
 
     # Ensemble results
     df_ens = L("summaries", "mcaware_ensemble_RESULTS.csv")
@@ -815,7 +952,7 @@ with tabs[7]:
 # ║  TAB 9 — İstatistiksel Kanıtlar                                         ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[8]:
-    section("İstatistiksel Kanıtlar")
+    section(t("stat_title"))
 
     # Mutual Information
     df_mi = L("diagnostics", "mcaware_v4_MI_SCORES.csv")
@@ -908,7 +1045,7 @@ with tabs[8]:
 # ║  TAB 10 — Threshold & Diagnostics                                       ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[9]:
-    section("Threshold Grid & Diagnostics")
+    section(t("diag_title"))
 
     # Threshold grid selector
     thr_files = {
