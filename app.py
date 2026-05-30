@@ -281,7 +281,7 @@ with st.sidebar:
 tabs = st.tabs([
     t("tab_main"), t("tab_arch"), t("tab_wf"), t("tab_evol"),
     t("tab_pred"), t("tab_abl"), t("tab_cross"), t("tab_ens"),
-    t("tab_stat"), t("tab_diag"),
+    t("tab_stat"), t("tab_diag"), "⚔️ Karşılaştırma",
 ])
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -290,13 +290,56 @@ tabs = st.tabs([
 with tabs[0]:
     section(t("tab_main").replace("📊 ", ""))
 
+    # ── Hero metrics with st.metric ──
     c1, c2, c3, c4 = st.columns(4)
-    with c1: metric_card(t("total_config"), "105")
-    with c2: metric_card(t("mc_trap"), "0 / 105", "#00FF00")
-    with c3: metric_card(t("flip_naive"), "103 / 105", "#FFA500")
-    with c4: metric_card(t("anti_pred_rate"), "%98  (p ≈ 3×10⁻¹⁴)", "#FF4444")
+    with c1:
+        st.metric("🧪 Toplam Konfigürasyon", "105", help="6 mimari × çoklu lambda/seed")
+    with c2:
+        st.metric("🪤 MC Tuzağı", "0 / 105", delta="Sıfır!", delta_color="normal",
+                  help="Hiçbir model majority class'a sıkışmadı")
+    with c3:
+        st.metric("🔄 Flip > Naive", "103 / 105", delta="%98 oran",
+                  help="Tahminleri ters çevirince naive'den iyi")
+    with c4:
+        st.metric("📉 Model Doğruluğu", "%41.8", delta="-8.2%", delta_color="inverse",
+                  help="Model şanstan kötü → anti-prediktif")
 
-    finding_box(t("finding_main"))
+    # ── Narrative story box ──
+    st.markdown("""
+    <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
+                border-left: 5px solid #FF416C; border-radius: 10px; padding: 25px; margin: 20px 0;">
+        <h3 style="color: #FF416C; margin-top: 0;">🔬 Ne Bulduk?</h3>
+        <p style="color: #ddd; font-size: 1.1rem; line-height: 1.8;">
+            <b>6 farklı derin öğrenme mimarisi</b> (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN) ile
+            <b>105 farklı konfigürasyon</b> test ettik. Sonuç şaşırtıcı:
+        </p>
+        <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #FF4444;">%41.8</div>
+                <div style="color: #aaa;">Model Doğruluğu</div>
+            </div>
+            <div style="text-align: center; font-size: 2rem; color: #666; padding-top: 15px;">→ flip →</div>
+            <div style="text-align: center;">
+                <div style="font-size: 2.5rem; font-weight: 800; color: #00FF00;">%58.2</div>
+                <div style="color: #aaa;">Flip Doğruluğu</div>
+            </div>
+        </div>
+        <p style="color: #ccc; font-size: 1rem;">
+            Model <b>sistematik olarak yanlış</b> tahmin yapıyor. Tahminleri ters çevirince
+            naive stratejiden bile iyi sonuç alınıyor. Bu <b>anti-prediktif davranış</b>,
+            p ≈ 3×10⁻¹⁴ ile istatistiksel olarak anlamlı.
+        </p>
+    </div>
+    """, unsafe_allow_html=True)
+
+    # ── Anti-predictive rate progress bar ──
+    st.markdown("#### 📊 Anti-Prediktif Oran")
+    pcol1, pcol2 = st.columns([3, 1])
+    with pcol1:
+        st.progress(103/105, text="103 / 105 konfigürasyonda flip > naive")
+    with pcol2:
+        st.markdown(f"<div style='text-align:center; font-size:2rem; font-weight:800; color:#FF416C;'>%98</div>",
+                    unsafe_allow_html=True)
 
     # Pooled confusion matrix
     st.markdown("---")
@@ -346,6 +389,8 @@ with tabs[0]:
         fig.add_trace(go.Bar(x=df_fold["fold"], y=df_fold["Spec"], name="Specificity", marker_color="#00FF00"))
         _layout(fig, title="Fold Bazlı Metrikler", barmode="group",
                 xaxis_title="Fold", yaxis_title="Değer", height=380)
+        fig.add_hline(y=0.5, line_dash="dash", line_color="gray",
+                      annotation_text="Şans seviyesi (%50)", annotation_position="top right")
         st.plotly_chart(fig, use_container_width=True)
 
 
@@ -1303,7 +1348,156 @@ with tabs[9]:
             c: "{:.4f}" for c in df_sr.select_dtypes("float").columns
         }), use_container_width=True, hide_index=True)
 
-# ─── footer ──────────────────────────────────────────────────────────────────
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  TAB 11 — Karşılaştırma Modu                                            ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+with tabs[10]:
+    section("Karşılaştırma Modu")
+    st.markdown("""
+    <div style="background: linear-gradient(90deg, #FF416C22, #FF4B2B22);
+                border-radius: 10px; padding: 15px; border-left: 4px solid #FF416C;">
+        <b>⚔️ İki mimari veya versiyonu yan yana karşılaştırın.</b>
+        Her metriği görsel olarak karşılaştırarak hangi modelin nasıl performans gösterdiğini anında görün.
+    </div>
+    """, unsafe_allow_html=True)
+
+    # Build comparison options from available data
+    cmp_options = {}
+    # Architectures
+    df_arch_cmp = L("summaries", "mcaware_multi_arch_CROSS_ARCH_SUMMARY.csv")
+    if df_arch_cmp is not None:
+        for _, row in df_arch_cmp.iterrows():
+            cmp_options[f"🏗️ {row['arch']}"] = {
+                "Model Acc": row["mean_acc"], "Flip Acc": row["mean_acc_flip"],
+                "Naive": row["naive_acc"], "Flip>Naive": row["flip_beats_naive_count"],
+                "MC Trap": row["mc_count"], "type": "arch"
+            }
+    # BiLSTM versions
+    ver_files = [
+        ("v1",       "mcaware_BiLSTM_v1_SUMMARY.csv"),
+        ("v2a",      "mcaware_BiLSTM_v2a_SUMMARY.csv"),
+        ("v2b",      "mcaware_BiLSTM_v2b_SUMMARY.csv"),
+        ("v2bfix",   "mcaware_BiLSTM_v2bfix_SUMMARY.csv"),
+        ("v3_THYAO", "mcaware_BiLSTM_v3THYAO_SUMMARY.csv"),
+        ("v3b_GARAN","mcaware_BiLSTM_v3b_GARAN_SUMMARY.csv"),
+        ("v3c_noCW", "mcaware_BiLSTM_v3c_no_cw_SUMMARY.csv"),
+        ("v3b_window","mcaware_BiLSTM_v3b_window_SUMMARY.csv"),
+        ("attn_v6",  "mcaware_BiLSTM_attn_v6_SUMMARY.csv"),
+    ]
+    for vname, fname in ver_files:
+        vdf = L("summaries", fname)
+        if vdf is not None:
+            lam0 = vdf[vdf["lambda"] == 0] if "lambda" in vdf.columns else vdf.iloc[:1]
+            if not lam0.empty:
+                row = lam0.iloc[0]
+                acc = row.get("Acc_05", row.get("Acc_m", 0))
+                flip = row.get("Acc_flip_05", 1 - acc if acc else 0)
+                spec = row.get("Spec_05", row.get("Spec_m", 0))
+                sens = row.get("Sens_05", row.get("Sens_m", 0))
+                cmp_options[f"🧬 BiLSTM {vname}"] = {
+                    "Model Acc": acc, "Flip Acc": flip,
+                    "Spec": spec, "Sens": sens, "type": "version"
+                }
+
+    if len(cmp_options) >= 2:
+        keys = list(cmp_options.keys())
+        col_a, col_b = st.columns(2)
+        with col_a:
+            sel_a = st.selectbox("Model A", keys, index=0)
+        with col_b:
+            sel_b = st.selectbox("Model B", keys, index=min(1, len(keys)-1))
+
+        data_a = cmp_options[sel_a]
+        data_b = cmp_options[sel_b]
+
+        # Side-by-side metrics
+        st.markdown("---")
+        st.markdown("#### 📊 Metrik Karşılaştırma")
+
+        shared_keys = [k for k in data_a if k in data_b and k != "type"]
+        for metric in shared_keys:
+            va = data_a[metric]
+            vb = data_b[metric]
+            mc1, mc2, mc3 = st.columns([2, 1, 2])
+            with mc1:
+                color_a = "#00FF00" if (isinstance(va, (int, float)) and isinstance(vb, (int, float)) and va > vb) else "#FF4444"
+                val_str = f"{va:.4f}" if isinstance(va, float) else str(va)
+                st.markdown(f"<div style='text-align:center; font-size:1.5rem; font-weight:700; color:{color_a}'>{val_str}</div>",
+                            unsafe_allow_html=True)
+            with mc2:
+                st.markdown(f"<div style='text-align:center; color:#888; padding-top:5px;'>{metric}</div>",
+                            unsafe_allow_html=True)
+            with mc3:
+                color_b = "#00FF00" if (isinstance(va, (int, float)) and isinstance(vb, (int, float)) and vb > va) else "#FF4444"
+                val_str = f"{vb:.4f}" if isinstance(vb, float) else str(vb)
+                st.markdown(f"<div style='text-align:center; font-size:1.5rem; font-weight:700; color:{color_b}'>{val_str}</div>",
+                            unsafe_allow_html=True)
+
+        # Radar chart comparison
+        st.markdown("---")
+        st.markdown("#### 🕸️ Radar Karşılaştırma")
+        float_keys = [k for k in shared_keys if isinstance(data_a[k], float) and isinstance(data_b[k], float)]
+        if float_keys:
+            fig = go.Figure()
+            fig.add_trace(go.Scatterpolar(
+                r=[data_a[k] for k in float_keys] + [data_a[float_keys[0]]],
+                theta=float_keys + [float_keys[0]],
+                fill='toself', name=sel_a, fillcolor="rgba(255,65,108,0.3)",
+                line=dict(color="#FF416C", width=2)
+            ))
+            fig.add_trace(go.Scatterpolar(
+                r=[data_b[k] for k in float_keys] + [data_b[float_keys[0]]],
+                theta=float_keys + [float_keys[0]],
+                fill='toself', name=sel_b, fillcolor="rgba(0,255,0,0.2)",
+                line=dict(color="#00FF00", width=2)
+            ))
+            fig.update_layout(
+                polar=dict(
+                    bgcolor="rgba(0,0,0,0)",
+                    radialaxis=dict(visible=True, range=[0, max(max(data_a[k] for k in float_keys), max(data_b[k] for k in float_keys)) * 1.1]),
+                ),
+                paper_bgcolor="rgba(0,0,0,0)",
+                font=dict(color="white"),
+                height=500,
+                showlegend=True,
+                legend=dict(font=dict(size=14)),
+            )
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Bar chart comparison
+        st.markdown("#### 📊 Bar Karşılaştırma")
+        if float_keys:
+            fig = go.Figure()
+            fig.add_trace(go.Bar(name=sel_a, x=float_keys, y=[data_a[k] for k in float_keys], marker_color="#FF416C"))
+            fig.add_trace(go.Bar(name=sel_b, x=float_keys, y=[data_b[k] for k in float_keys], marker_color="#00FF00"))
+            _layout(fig, barmode="group", title=f"{sel_a} vs {sel_b}", height=420,
+                    xaxis_title="Metrik", yaxis_title="Değer")
+            fig.add_hline(y=0.5, line_dash="dash", line_color="gray", annotation_text="Şans (%50)")
+            st.plotly_chart(fig, use_container_width=True)
+
+        # Winner summary
+        st.markdown("---")
+        wins_a = sum(1 for k in float_keys if data_a[k] > data_b[k])
+        wins_b = sum(1 for k in float_keys if data_b[k] > data_a[k])
+        if wins_a > wins_b:
+            winner = sel_a
+            win_color = "#FF416C"
+        elif wins_b > wins_a:
+            winner = sel_b
+            win_color = "#00FF00"
+        else:
+            winner = "Berabere"
+            win_color = "#FFA500"
+        st.markdown(f"""
+        <div style="text-align:center; padding: 20px; border-radius: 10px;
+                    background: linear-gradient(135deg, {win_color}22, {win_color}11);">
+            <div style="font-size: 1rem; color: #888;">Kazanan</div>
+            <div style="font-size: 2rem; font-weight: 800; color: {win_color};">{winner}</div>
+            <div style="color: #aaa;">{wins_a} — {wins_b} (metrik bazında)</div>
+        </div>
+        """, unsafe_allow_html=True)
+
+
 st.markdown("---")
 st.markdown(
     """<div style="text-align:center;color:#666;font-size:0.8rem;">
