@@ -163,7 +163,8 @@ After solving the MC trap, we discovered that DL models exhibit **anti-predictiv
 | Proje | Açıklama |
 |-------|---------|
 | [Direction Forecasting BIST-BES](https://github.com/kuurtali/direction-forecasting-bist-bes) | Akademik makale: ARIMA vs LSTM vs 1D-CNN — majority class illüzyonu |
-| [VOL2 — ADAS Pricing Paradox](https://github.com/kuurtali/VOL2-ADAS-Pricing-Paradox) | 200K poliçe, Poisson + Gamma GLM, interaction terms |
+| [VOL1 — ADAS Pricing Paradox](https://github.com/kuurtali/ADAS-Pricing-Paradox) | 100K poliçe, Poisson + Gamma GLM, temel ADAS fiyatlama analizi |
+| [VOL2 — ADAS Pricing Paradox](https://github.com/kuurtali/VOL2-ADAS-Pricing-Paradox) | 200K poliçe, interaction terms, Gini Index, Lift Chart |
 | [Actuarial Shiny Dashboard](https://github.com/kuurtali/actuarial-analysis-w-shiny-and-glm) | Logistic GLM + R Shiny interaktif risk skorlama (AUC 0.828) |
 
 ---
