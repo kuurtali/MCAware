@@ -30,7 +30,7 @@
 
 BIST (Borsa İstanbul) günlük yön tahmininde **6 farklı derin öğrenme mimarisi** ile **700+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
 
-Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) eğitim ve test dönemleri arasındaki korelasyon kırılmasından kaynaklanmaktadır. Binom testi: **p ≈ 3×10⁻¹⁴**.
+Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) eğitim ve test dönemleri arasındaki korelasyon kırılmasından kaynaklanmaktadır. 11 BIST hissesinden 5'inde (THYAO, PGSUS, HEKTS, SASA, KRDMD) sistematik anti-prediktif davranış tespit edilmiştir. **Bonferroni-düzeltilmiş p = 0.00012**.
 
 ---
 
