@@ -1563,69 +1563,96 @@ with tabs[10]:
 
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
-# ║  TAB 12 — Ek Görseller (CSV-Based Charts)                               ║
+# ║  TAB 12 — Tüm Görseller Galerisi (52 Görsel)                            ║
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[11]:
-    section("Ek Görseller — CSV Verilerinden Üretilmiş Analizler")
-    st.info("Bu sekmede 130 CSV çıktısından üretilen 15 yeni analiz görseli yer almaktadır.")
+    section("Tüm Proje Görselleri — 52 Görsel Galerisi")
+    st.info("Projede üretilen 52 görselin tamamı, 8 kategoride düzenlenmiştir.")
 
-    _ek_charts = [
-        ("34_PerStock_AccBar_11BIST.png",
-         "11 BIST Hissesi Doğruluk Karşılaştırması",
-         "Her hisse için Naive, Model ve Flip doğrulukları. Anti-prediktif hisseler kırmızı ile vurgulanmıştır."),
-        ("35_Threshold_Heatmap.png",
-         "Eşik Optimizasyonu Yüzey Haritası",
-         "Lambda ve Threshold parametrelerinin model doğruluğuna etkisini gösteren ısı haritası."),
-        ("36_MI_Scores_Bar.png",
-         "Karşılıklı Bilgi (MI) Skorları",
-         "Farklı veri setlerinde özellik-etiket arasındaki karşılıklı bilgi miktarı."),
-        ("37_Ensemble_Agreement.png",
-         "Ensemble Uzlaşma Analizi",
-         "6 mimari uzlaştığında vs bölündüğünde doğruluk farkı."),
-        ("38_CrossMarket_Ablation.png",
-         "Çapraz Piyasa Özellik Ablasyonu",
-         "NASDAQ (AAPL) vs BIST (THYAO) — makro değişken etkisinin piyasa bazlı karşılaştırması."),
-        ("39_Label_Distribution.png",
-         "Hedef Değişken Dağılımı",
-         "Sınıf dengesi kontrolü — yükseldi/düştü oranları."),
-        ("40_WalkForward_v2_Heatmap.png",
-         "Walk-Forward v2: Fold × Mimari Doğruluk",
-         "7 fold × 6 mimari × 3 seed ortalaması. Hangi fold-mimari kombinasyonunda anti-prediktif davranış var?"),
-        ("41_SeedVariance_AllStocks.png",
-         "Seed Varyansı: 11 BIST Hissesi",
-         "Her hissenin farklı seed'ler arasındaki doğruluk dağılımı."),
-        ("42_CorrelationDrift_Detail.png",
-         "Korelasyon Kayması: Eğitim vs Test",
-         "Değişkenlerin eğitim ve test dönemlerinde korelasyon farkı — concept drift kanıtı."),
-        ("43_BES_Fund_Detail.png",
-         "BES Fonları Detaylı Karşılaştırma",
-         "Bireysel emeklilik fonlarında model performansı."),
-        ("44_PooledConfusion_PerFold.png",
-         "Walk-Forward Fold Bazlı Confusion Metrikleri",
-         "Her fold'da Accuracy, Sensitivity ve Specificity."),
-        ("45_Holding_SeedVar.png",
-         "Holding Sektörü Seed Varyansı",
-         "Holding hisselerinin seed'ler arasındaki doğruluk dağılımı."),
-        ("46_Sigorta_SeedVar.png",
-         "Sigorta Sektörü Seed Varyansı",
-         "Sigorta hisselerinin seed'ler arasındaki doğruluk dağılımı."),
-        ("47_Threshold_MultiArch.png",
-         "Mimari Bazlı Eşik-Doğruluk Eğrileri",
-         "Farklı mimarilerde eşik değerinin doğruluğa etkisi."),
-        ("48_INLEN_Ablation_Detail.png",
-         "IN_LEN Ablasyonu Detay",
-         "Pencere uzunluğunun (IN_LEN=2,5,10) doğruluk ve anti-prediktif sayısına etkisi."),
-    ]
+    _gallery = {
+        "🎯 Proje Özet & Metodoloji": [
+            ("31_Proje_Ozet_Infografik.png", "Proje Özet İnfografik", "700+ konfigürasyon, 6 mimari, 27 varlık — projenin genel görünümü."),
+            ("33_Metodoloji_Pipeline.png", "Metodoloji Pipeline", "Veri toplama → Özellik mühendisliği → Model eğitimi → Diagnostik akış şeması."),
+            ("32_Concept_Drift_Timeline.png", "Kavram Kayması Zaman Çizelgesi", "Eğitim-test dönemlerindeki makroekonomik rejim değişiklikleri."),
+            ("39_Label_Distribution.png", "Hedef Değişken Dağılımı", "Sınıf dengesi: yükseldi/düştü oranları ve seed bazlı doğruluk."),
+        ],
+        "🔴 Anti-Prediktif Davranış": [
+            ("02_Anti_Prediktif_Scatter.png", "Anti-Prediktif Scatter", "Model Acc vs Flip Acc — %50 çizgisinin altındaki noktalar anti-prediktif."),
+            ("G3_anti_prediktif_heatmap.png", "Anti-Prediktif Isı Haritası", "Mimari × Lambda matrisinde anti-prediktif yoğunluk."),
+            ("09_AntiPredictive_ROC_Curve.png", "Anti-Prediktif ROC Eğrisi", "AUC < 0.5 → model ters yönde tahmin yapıyor."),
+            ("05_MC_Tuzagi_Cozumu.png", "MC Tuzağı Çözümü", "class_weight=balanced ile MC=0 sağlandı."),
+            ("G1_portfolio_simulation.png", "Portföy Simülasyonu", "Anti-prediktif sinyallerin portföy getirisi üzerindeki etkisi."),
+        ],
+        "📊 Sektörel Analiz (11 BIST Hissesi)": [
+            ("34_PerStock_AccBar_11BIST.png", "11 Hisse Doğruluk Karşılaştırması", "Naive, Model ve Flip doğrulukları — anti-prediktif hisseler kırmızı."),
+            ("01_Sektorel_Kiyaslama_Bar.png", "Sektörel Kıyaslama", "Havacılık vs Bankacılık vs Otomotiv sektör karşılaştırması."),
+            ("10_Sektorel_Sıkı_Kriter_Bar.png", "Sıkı Kriter ile Sektörel Test", "Bonferroni düzeltmeli sektörel anti-prediktif oranlar."),
+            ("29_PerStock_NaiveBaseline.png", "Per-Stock Naive Baseline", "Her hissenin naive doğruluğu ve model performansı."),
+            ("41_SeedVariance_AllStocks.png", "Seed Varyansı: Tüm Hisseler", "11 hissenin seed'ler arası doğruluk dağılımı."),
+            ("13_Seed_Invariance_Bulgusu.png", "Seed İnvaryansı Bulgusu", "Anti-prediktif davranış seed'den bağımsız — yapısal bir sorun."),
+        ],
+        "🧪 Özellik Ablasyonu & Korelasyon": [
+            ("04_Feature_Ablation_Bar.png", "Özellik Ablasyonu: full_13 vs no_ext_10", "Makro değişkenler çıkarılınca anti-prediktif davranış kayboluyor."),
+            ("22_SingleFeat_Ablation.png", "Tekli Özellik Ablasyonu", "Her özelliğin bireysel etkisi."),
+            ("03_Correlation_Drift_Slope.png", "Korelasyon Kayması", "Eğitim vs test dönemlerinde korelasyon farkı."),
+            ("42_CorrelationDrift_Detail.png", "Korelasyon Kayması Detay", "USDTRY eğitim r=0.91 → test r=0.41."),
+            ("11_Korelasyon_Paradoksu.png", "Korelasyon Paradoksu", "Yüksek korelasyonlu özellikler neden ters etki yapıyor?"),
+            ("36_MI_Scores_Bar.png", "Karşılıklı Bilgi (MI)", "Özellik-etiket MI skorları — düşük bilgi-teorik bağlantı."),
+            ("27_TechIndicators_AccUpRatio.png", "Teknik İndikatör Etkisi", "SMA, EMA, RSI gibi indikatörlerin doğruluğa etkisi."),
+        ],
+        "📏 IN_LEN & Pencere Ablasyonu": [
+            ("48_INLEN_Ablation_Detail.png", "IN_LEN Ablasyonu Detay", "IN_LEN=2,5,10 → kısa pencere anti-prediktif tetikler."),
+            ("15_IN_LEN_Ablasyonu.png", "IN_LEN Ablasyonu Genel", "Pencere uzunluğunun doğruluğa etkisi."),
+            ("G2_inlen_ablation_effect.png", "IN_LEN Etki Grafiği", "IN_LEN ≤ 5 tetikler, IN_LEN=10 normalleştirir."),
+        ],
+        "📈 Walk-Forward & Validasyon": [
+            ("40_WalkForward_v2_Heatmap.png", "WF v2 Fold × Mimari Heatmap", "7 fold × 6 mimari × 3 seed — Fold 7 en yoğun anti-prediktif."),
+            ("16_WalkForward_MultiArch_Heatmap.png", "Multi-Arch WF Heatmap", "Mimari bazlı walk-forward performansı."),
+            ("30_WalkForward_FoldByFold.png", "Fold Detayları", "Her fold'un ayrıntılı doğruluk analizi."),
+            ("44_PooledConfusion_PerFold.png", "Fold Bazlı Confusion", "Accuracy, Sensitivity, Specificity per fold."),
+            ("07_WalkForward_Tutarsizlik.png", "WF Tutarsızlık", "Fold'lar arası performans değişkenliği."),
+            ("12_Walkforward_Inconsistency.png", "WF Inconsistency Detail", "Hangi fold'larda model çöküyor?"),
+            ("21_WalkForward_SensSpec_Scatter.png", "WF Sensitivity-Specificity", "Sensitivity vs Specificity scatter."),
+            ("G4_walkforward_temporal_map.png", "WF Temporal Map", "Zaman ekseni üzerinde fold performansları."),
+        ],
+        "🤖 Mimari, Ensemble & Baseline": [
+            ("06_Mimari_Kiyaslama.png", "6 Mimari Karşılaştırması", "BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN."),
+            ("37_Ensemble_Agreement.png", "Ensemble Uzlaşma", "6 mimari uzlaştığında vs bölündüğünde doğruluk farkı."),
+            ("19_Majority_Voting_vs_ML.png", "Majority Voting vs Klasik ML", "DL ensemble vs RF, DT, LR, SVM."),
+            ("25_McNemar_Matrix.png", "McNemar Test Matrisi", "Mimariler arası istatistiksel fark testi."),
+            ("20_Pooled_Confusion_Matrix.png", "Havuzlanmış Confusion Matrix", "Tüm konfigürasyonların birleşik confusion matrisi."),
+            ("14_AAPL_Klasik_ML_Karsilastirma.png", "AAPL Klasik ML", "NASDAQ'ta klasik ML baseline performansı."),
+            ("18_Attention_Heatmap_Bar.png", "Attention Heatmap", "Transformer attention ağırlıkları."),
+            ("08_Piyasa_Hassasiyet_Heatmap.png", "Piyasa Hassasiyet", "Piyasa koşullarına model hassasiyeti."),
+        ],
+        "🏦 Sektör Detay & Çapraz Piyasa": [
+            ("38_CrossMarket_Ablation.png", "Çapraz Piyasa Ablasyon", "NASDAQ vs BIST makro değişken etkisi."),
+            ("28_AAPL_vs_THYAO_GroupCompare.png", "AAPL vs THYAO", "Gelişmiş vs gelişmekte olan piyasa karşılaştırması."),
+            ("24_Sigorta_vs_Holding_PerStock.png", "Sigorta vs Holding", "Sektör bazlı per-stock analiz."),
+            ("17_Sigorta_v1_vs_v2_Seed.png", "Sigorta v1 vs v2", "Sigorta sektörü versiyon karşılaştırması."),
+            ("46_Sigorta_SeedVar.png", "Sigorta Seed Varyansı", "Sigorta hisseleri seed dağılımı."),
+            ("45_Holding_SeedVar.png", "Holding Seed Varyansı", "Holding hisseleri seed dağılımı."),
+            ("26_BES_Fund_AccComparison.png", "BES Fonları Genel", "BES fonlarında model doğruluğu."),
+            ("43_BES_Fund_Detail.png", "BES Fonları Detay", "BES fund bazlı detaylı analiz."),
+            ("35_Threshold_Heatmap.png", "Eşik Optimizasyonu", "Lambda × Threshold ısı haritası."),
+            ("47_Threshold_MultiArch.png", "Mimari Bazlı Eşik", "Her mimaride eşik-doğruluk eğrisi."),
+            ("23_Lambda_Acc_FlipAcc.png", "Lambda vs Acc/Flip", "Lambda parametresinin doğruluğa etkisi."),
+        ],
+    }
 
-    for img_name, title, desc in _ek_charts:
-        img_path = os.path.join("Gorseller", img_name)
-        if os.path.exists(img_path):
-            st.markdown(f"### {title}")
-            st.caption(desc)
-            st.image(img_path, use_container_width=True)
-            st.markdown("---")
-        else:
-            st.warning(f"Görsel bulunamadı: {img_name}")
+    for cat_name, charts in _gallery.items():
+        st.markdown(f"## {cat_name}")
+        cols = st.columns(2)
+        for idx, (img_name, title, desc) in enumerate(charts):
+            img_path = os.path.join("Gorseller", img_name)
+            with cols[idx % 2]:
+                if os.path.exists(img_path):
+                    st.markdown(f"**{title}**")
+                    st.image(img_path, use_container_width=True)
+                    st.caption(desc)
+                else:
+                    st.warning(f"Görsel bulunamadı: {img_name}")
+        st.markdown("---")
 
 
 st.markdown("---")

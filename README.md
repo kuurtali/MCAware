@@ -2,7 +2,7 @@
 
 **TÜBİTAK 2209-A Lisans Araştırma Projesi (2026)**
 
-**Yürütücü:** Mehmet Ali Kurt · **Danışman:** Öğr. Gör. Elif Ayaz · **Üniversite:** Hacettepe — Aktüerya Bilimleri
+**Yürütücü:** Mehmet Ali Kurt · **Danışman:** Dr. Övgücan Karadağ Erdemir · **Üniversite:** Hacettepe — Aktüerya Bilimleri
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />

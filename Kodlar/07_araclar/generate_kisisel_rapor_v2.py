@@ -105,7 +105,7 @@ for _ in range(3):
 
 info_lines = [
     ('Yürütücü:', 'Mehmet Ali Kurt'),
-    ('Danışman:', 'Öğr. Gör. Elif Ayaz'),
+    ('Danışman:', 'Dr. Övgücan Karadağ Erdemir'),
     ('Üniversite:', 'Hacettepe Üniversitesi — Aktüerya Bilimleri'),
     ('Dönem:', 'Ekim 2025 – Haziran 2026'),
 ]
