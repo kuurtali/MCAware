@@ -28,7 +28,7 @@
 
 ## 🔬 Proje Özeti
 
-BIST (Borsa İstanbul) günlük yön tahmininde **6 farklı derin öğrenme mimarisi** ile **378+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
+BIST (Borsa İstanbul) günlük yön tahmininde **6 farklı derin öğrenme mimarisi** ile **700+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
 
 Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) eğitim ve test dönemleri arasındaki korelasyon kırılmasından kaynaklanmaktadır. Binom testi: **p ≈ 3×10⁻¹⁴**.
 
