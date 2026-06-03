@@ -1,6 +1,6 @@
 ============================================================
 MC-AWARE PROJESİ FİNAL DURUM RAPORU
-Son Güncelleme: 3 Haziran 2026, 21:50
+Son Güncelleme: 3 Haziran 2026, 23:20
 ============================================================
 
 1. PROJE ÖZETİ
@@ -8,30 +8,32 @@ Son Güncelleme: 3 Haziran 2026, 21:50
 Proje Adı: MC-AWARE: Derin Öğrenmede Anti-Prediktif Davranışın Çok Boyutlu Teşhisi
 Program: TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri
 Yürütücü: Mehmet Ali Kurt (Hacettepe Üniversitesi, Aktüerya Bilimleri)
-Danışman: Öğr. Gör. Dr. Övgücan Karadağ Erdemir
+Danışman: Dr. Övgücan Karadağ Erdemir
 Süre: Ekim 2025 – Haziran 2026
 
 2. KANTİTATİF ÖLÇEKLER
 ----------------------
-   • Toplam konfigürasyon: 700+ (395 OPTIMAL run + 5000+ RESULTS veri noktası)
+   • Toplam konfigürasyon: 700+
    • DL mimarisi: 6 (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN)
    • Klasik ML: 4 (RF, DT, LR, SVM)
    • Test edilen varlık: 27 (11 BIST + 1 NASDAQ + 3 BES + 12 Sigorta/Holding)
    • CSV çıktı: 130 (71 summary + 19 prediction + 26 diagnostic + 14 threshold)
-   • Görsel: 52 adet (37 orijinal + 15 CSV-tabanlı yeni)
+   • Görsel: 52 PNG
    • R script: 52 (7 klasör)
    • Python script: 5+ (dashboard + araçlar)
    • Walk-Forward: 7-fold v2 (val_data düzeltmesi ile)
    • Deney serisi: 30+
-   • Dashboard: 12 tab (TR/EN)
+   • Dashboard: 12 tab (TR/EN), 52 görsel galerisi
+   • İstatistiksel anlamlılık: Bonferroni-düzeltilmiş p = 0.00012
 
-3. TEMEL BULGULAR (CSV VERİSİYLE DOĞRULANMIŞ)
-----------------------------------------------
+3. TEMEL BULGULAR
+-----------------
    a) Anti-Prediktif Davranış:
       - full_13 grubu: acc=%39.6, flip=%60.4 → KESİN anti-prediktif
-      - no_ext_10 grubu: acc=%49.6, flip=%50.4 → NORMAL → Makro değişkenler suçlu
+      - no_ext_10 grubu: acc=%49.6, flip=%50.4 → NORMAL
+      - Mekanizma: Makro korelasyon kırılması (USDTRY eğitim r=0.91 → test r=0.41)
       
-   b) Sektörel Ayrışma (10 BIST hissesinden):
+   b) Sektörel Ayrışma (11 BIST hissesi):
       - THYAO: 15/15, PGSUS: 15/15, HEKTS: 15/15, SASA: 15/15 → %100
       - KRDMD: 13/15 → %87
       - DOAS: 10/15 → %67 (kısmen)
@@ -41,54 +43,69 @@ Süre: Ekim 2025 – Haziran 2026
       
    c) IN_LEN Ablasyonu:
       - IN_LEN=2: %48.5, IN_LEN=5: %51.5, IN_LEN=10: %52.2
+      - IN_LEN ≤ 5 anti-prediktif tetikler, IN_LEN=10 normalleştirir
       
    d) Walk-Forward v2: Fold 7 en yoğun anti-prediktif (8/18)
    e) Ensemble: HARD %39.7, SOFT %37.7 → düzeltmedi
+   f) NASDAQ'ta anti-prediktif davranış YOK → gelişmekte olan piyasalara özgü
 
-4. DOSYA YAPISI (264 Tracked Dosya)
+4. DOSYA YAPISI (260 Tracked Dosya)
 ------------------------------------
    Tubitak/
-   ├── app.py (12 tab, TR/EN)
+   ├── app.py (12 tab, TR/EN, 52 görsel galerisi)
    ├── README.md, requirements.txt, Dockerfile, LICENSE
-   ├── Docs/ (3 dosya)
+   ├── Docs/
+   │   ├── MC_AWARE_Kisisel_Rapor.docx (v2: 9 bölüm, 35 görsel, 15 DOI referans, 15 kısıt)
    │   ├── TUBITAK_2209A_Sonuc_Raporu.docx (şablon uyumlu)
-   │   ├── MC_AWARE_Kişisel_Rapor.docx (21 bölüm, 525 paragraf, 15 görsel embed)
-   │   └── PROJE_DURUMU.txt (bu dosya)
+   │   ├── PROJE_DURUMU.txt (bu dosya)
+   │   ├── Dashboard/ (statik HTML, 11.6 KB)
+   │   └── rapor_sablonlari/ (orijinal TÜBİTAK şablonları)
    ├── Gorseller/ (52 PNG)
-   ├── Kodlar/ (58 dosya, 7 klasör)
+   ├── Kodlar/ (59 dosya, 7 klasör)
    └── Sonuclar/ (130 CSV, 4 alt klasör)
 
-5. TESLİM DURUMU
------------------
-   [x] TÜBİTAK Sonuç Raporu (şablon uyumlu)
-   [x] Kişisel Rapor (21 bölüm + 15 görsel embed)
-   [x] Literatür (25 bölüm) — kişisel rapora entegre edildi
-   [x] Limitasyonlar (15 kısıt) — kişisel rapora entegre edildi
-   [x] Dashboard (12 tab, syntax OK)
-   [x] 130 CSV hatasız
-   [x] 52 görsel (37 orijinal + 15 yeni)
-   [x] README güncel (12 tab, 52 görsel, doğru danışman)
-   [x] GitHub push tamam
-   [x] CSV tutarlılık doğrulaması tamamlandı
+5. KİŞİSEL RAPOR v2 İÇERİK
+-----------------------------
+   Bölüm 1: Yönetici Özeti
+   Bölüm 2: Giriş ve Motivasyon
+   Bölüm 3: Literatür Taraması (8 alt bölüm, gerçek makaleler)
+   Bölüm 4: Metodoloji (4 alt bölüm)
+   Bölüm 5: Deneysel Bulgular (9 alt bölüm, görseller ilgili bölümlerde)
+   Bölüm 6: İstatistiksel Doğrulama (4 alt bölüm)
+   Bölüm 7: Kısıtlar ve Gelecek Çalışmalar (15 kısıt)
+   Bölüm 8: Sonuç
+   Bölüm 9: Kaynakça (15 APA referans + DOI/URL + neden alıntılandı)
 
-6. BEKLEYEN İŞLER (MANUEL)
+   Referanslar:
+   - Fischer & Krauss (2018) - EJOR - LSTM finansal tahmin
+   - Fama (1970) - JoF - EMH
+   - Geirhos et al. (2020) - Nature MI - Shortcut learning
+   - Gama et al. (2014) - ACM - Concept drift
+   - De Long et al. (1990) - JPE - Noise trader risk
+   - He & Garcia (2009) - IEEE TKDE - Imbalanced data
+   - Geifman & El-Yaniv (2017) - NeurIPS - Selective prediction
+   ... ve 8 referans daha (toplam 15)
+
+6. TESLİM DURUMU
+-----------------
+   [x] Kişisel Rapor v2 (sıfırdan yazıldı, 35 görsel, 15 DOI referans)
+   [x] TÜBİTAK Sonuç Raporu (şablon uyumlu)
+   [x] Literatür + Limitasyonlar → kişisel rapora entegre
+   [x] Streamlit Dashboard (12 tab, 52 görsel, çalışıyor)
+   [x] Statik Dashboard (güncel, hafif)
+   [x] 130 CSV hatasız
+   [x] 52 görsel
+   [x] README güncel
+   [x] GitHub push tamam (0 uncommitted)
+   [x] Danışman bilgisi doğru: Dr. Övgücan Karadağ Erdemir
+   [x] Tüm sayılar güncel: 700+, Bonferroni p=0.00012, 130 CSV, 52 görsel
+
+7. BEKLEYEN İŞLER (MANUEL)
 ----------------------------
    [ ] Harcama kalemleri — TÜBİTAK raporunda Bölüm 5 (yürütücü dolduracak)
    [ ] İmza — Basılı çıktıda yürütücü + danışman
-   [ ] Streamlit Cloud deploy — mcaware.streamlit.app şu an çalışmıyor
-       NOT: Lokal syntax OK, Streamlit 1.51 uyumlu.
-       Olası sorun: Streamlit Cloud'da yeniden deploy gerekiyor.
-       Çözüm: streamlit.io → app settings → reboot veya re-deploy
-   [ ] Word İçindekiler — Kişisel raporda ToC güncellemesi (Word'de sağ tık → güncelle)
-
-7. SİLİNEN DOSYALAR
----------------------
-   - Docs/Literatur_ve_Limitasyonlar.docx → Kişisel Rapor Bölüm 19-20'ye entegre edildi
-   - Docs/Literatur_Taramasi.txt → Daha önce silinmişti
-   - Docs/Limitasyonlar.txt → Daha önce silinmişti
-   - Docs/inceleme.txt → Daha önce silinmişti
 
 ============================================================
          PROJE DURUMU: TESLİME HAZIR ✓
-         Harcama + İmza + Streamlit Deploy = MANUEL
+         Kalan: Harcama + İmza (MANUEL)
 ============================================================
