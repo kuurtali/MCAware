@@ -254,16 +254,17 @@ with st.sidebar:
     st.divider()
     st.markdown(f"#### 🧪 {t('sidebar_exp')}")
     experiments = [
-        "BiLSTM v1-v3", "Multi-Arch (7)", "Walk-Forward (7-fold)",
-        "Feature Ablation", "Single-Feat Ablation", "Input-Length Ablation",
-        "Cross-Market (NASDAQ)", "Multi-Stock (BIST-3/5)",
+        "BiLSTM v1-v3", "Multi-Arch (6)", "Walk-Forward v2 (7-fold×6×3)",
+        "Feature Ablation", "Single-Feat Ablation", "IN_LEN Ablation v2",
+        "Cross-Market (NASDAQ)", "Multi-Stock BIST-11 (makro)",
+        "Multi-Stock BIST-3/5 (sektörel)",
         "Ensemble (Hard+Soft)", "Rule-Based Baseline", "Threshold Grid",
     ]
     for e in experiments:
         st.markdown(f"- {e}")
     st.divider()
-    st.markdown(f"**{t('sidebar_csv')}:** 120")
-    st.markdown(f"**{t('sidebar_config')}:** 350+")
+    st.markdown(f"**{t('sidebar_csv')}:** 130")
+    st.markdown(f"**{t('sidebar_config')}:** 700+")
     st.caption(t("sidebar_note"))
 
     # PDF Download
@@ -774,19 +775,40 @@ with tabs[5]:
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_sfa, use_container_width=True, hide_index=True)
 
-    # Input length ablation
+    # Input length ablation (v1)
     df_ila = L("summaries", "mcaware_inlen_ablation_SUMMARY.csv")
     if df_ila is not None:
         st.markdown("---")
-        st.markdown("#### Giriş Uzunluğu Ablasyonu (IN_LEN = 2, 5, 10)")
+        st.markdown("#### Giriş Uzunluğu Ablasyonu v1 (IN_LEN = 2, 5, 10)")
         fig = go.Figure()
         fig.add_trace(go.Bar(name="Model Acc", x=df_ila["IN_LEN"].astype(str), y=df_ila["mean_acc"], marker_color="#FF416C"))
         fig.add_trace(go.Bar(name="Flip Acc", x=df_ila["IN_LEN"].astype(str), y=df_ila["mean_flip"], marker_color="#00FF00"))
         fig.add_trace(go.Bar(name="Naive Acc", x=df_ila["IN_LEN"].astype(str), y=df_ila["naive"], marker_color="#FFA500"))
-        _layout(fig, barmode="group", title="Giriş Uzunluğu: Model vs Flip vs Naive",
+        _layout(fig, barmode="group", title="Giriş Uzunluğu v1: Model vs Flip vs Naive",
                 xaxis_title="IN_LEN", yaxis_title="Doğruluk", height=400)
         st.plotly_chart(fig, use_container_width=True)
         st.dataframe(df_ila, use_container_width=True, hide_index=True)
+
+    # Input length ablation v2 (düzeltilmiş: OUT_LEN=3, gerçek TCMB)
+    df_ila2 = L("summaries", "mcaware_inlen_ablation_v2_SUMMARY.csv")
+    if df_ila2 is not None:
+        st.markdown("---")
+        st.markdown("#### 🆕 Giriş Uzunluğu Ablasyonu v2 (OUT_LEN=3, Gerçek TCMB)")
+        st.markdown("*Düzeltilmiş: OUT_LEN=1→3, from=2018, Fear.Greed→gerçek TCMB_Rate*")
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name="Model Acc", x=df_ila2["IN_LEN"].astype(str), y=df_ila2["mean_acc"], marker_color="#FF416C"))
+        fig.add_trace(go.Bar(name="Flip Acc", x=df_ila2["IN_LEN"].astype(str), y=df_ila2["mean_flip"], marker_color="#00FF00"))
+        fig.add_trace(go.Bar(name="Naive Acc", x=df_ila2["IN_LEN"].astype(str), y=df_ila2["naive"], marker_color="#FFA500"))
+        _layout(fig, barmode="group", title="Giriş Uzunluğu v2: IN_LEN≤5 → Anti-Prediktif, IN_LEN=10 → Normal",
+                xaxis_title="IN_LEN", yaxis_title="Doğruluk", height=400)
+        st.plotly_chart(fig, use_container_width=True)
+        st.dataframe(df_ila2, use_container_width=True, hide_index=True)
+        finding_box(
+            "IN_LEN=2,5: 15/15 strict anti-prediktif (Flip=%60.4, %54.7). "
+            "IN_LEN=10: 0/15 anti-prediktif (model normal). "
+            "Pencere uzunluğu arttıkça anti-prediktif davranış kayboluyor — temporal resolution etkisi.",
+            title="🆕 IN_LEN v2 Bulgusu"
+        )
 
     finding_box(
         "Dış değişkenler (USDTRY, Brent Oil, TCMB faiz) eklendiğinde anti-prediktif davranış ortaya çıkıyor. "
@@ -815,6 +837,48 @@ with tabs[5]:
 # ╚═══════════════════════════════════════════════════════════════════════════╝
 with tabs[6]:
     section(t("cross_title"))
+
+    # BIST-11 ALL Macro (yeni)
+    df_all_macro = L("summaries", "mcaware_bist_ALL_macro_SUMMARY.csv")
+    if df_all_macro is not None:
+        st.markdown("#### 🆕 BIST-11 Genişletilmiş Test (Makro Değişkenli)")
+        st.markdown("*11 hisse × 3 lambda × 5 seed = 165 model koşusu*")
+        df_all_macro["ticker_short"] = df_all_macro["ticker"].str.replace(".IS", "", regex=False)
+        fig = go.Figure()
+        fig.add_trace(go.Bar(name="Flip Acc", x=df_all_macro["ticker_short"],
+                             y=df_all_macro["Acc_flip_05"], marker_color="#FF416C"))
+        fig.add_trace(go.Bar(name="Naive Acc", x=df_all_macro["ticker_short"],
+                             y=df_all_macro["naive"], marker_color="#FFA500"))
+        _layout(fig, barmode="group", title="11 BIST Hissesi: Flip Accuracy vs Naive",
+                xaxis_title="Hisse", yaxis_title="Doğruluk", height=450)
+        fig.add_hline(y=0.5, line_dash="dash", line_color="gray")
+        st.plotly_chart(fig, use_container_width=True)
+        st.dataframe(df_all_macro.style.format({
+            c: "{:.4f}" for c in df_all_macro.select_dtypes("float").columns
+        }), use_container_width=True, hide_index=True)
+        finding_box(
+            "4 hissede TAM anti-prediktif (15/15): THYAO, PGSUS, HEKTS, SASA. "
+            "1 hissede GÜÇLÜ (13/15): KRDMD. Havacılık+spekülatif+emtia sektörlerinde yoğun. "
+            "Bankacılık (YKBNK) ve otomotiv (FROTO) etkilenmiyor → sektörel bağımlılık.",
+            title="🆕 11-Hisse Genellenebilirlik Bulgusu"
+        )
+        st.markdown("---")
+
+    # Walk-forward v2 özet
+    df_wfv2_arch = L("summaries", "mcaware_walkforward_multi_arch_v2_ARCH_SUMMARY.csv")
+    if df_wfv2_arch is not None:
+        st.markdown("#### 🆕 Walk-Forward v2 — Mimari Özeti (val_data düzeltilmiş)")
+        st.dataframe(df_wfv2_arch.style.format({
+            c: "{:.4f}" for c in df_wfv2_arch.select_dtypes("float").columns
+        }), use_container_width=True, hide_index=True)
+
+    df_wfv2_fold = L("summaries", "mcaware_walkforward_multi_arch_v2_FOLD_SUMMARY.csv")
+    if df_wfv2_fold is not None:
+        st.markdown("#### 🆕 Walk-Forward v2 — Fold Özeti")
+        st.dataframe(df_wfv2_fold.style.format({
+            c: "{:.4f}" for c in df_wfv2_fold.select_dtypes("float").columns
+        }), use_container_width=True, hide_index=True)
+        st.markdown("---")
 
     # BIST vs NASDAQ
     df_nq = L("summaries", "mcaware_nasdaq_SUMMARY.csv")
