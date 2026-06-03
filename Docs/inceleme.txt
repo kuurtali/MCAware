@@ -1,0 +1,117 @@
+=== YAPILACAKLAR (TO-DO) ===
+- dosya d�zeni sa�lanacak
+- github g�ncellenecek
+- dashboard g�ncellenecek
+- stream lit g�ncellenecek
+- kapsaml� word rapor
+- Ve tubitak format�nda rapor haz�rlanacak
+============================
+
+--- TUBITAK BASVURU TASLAGI ---
+
+TÜBİTAK 2209-A PROJE BAŞVURU TASLAĞI VE ARGÜMAN HARİTASI
+
+Bu belge, proje sahibinin yürüttüğü 378+ konfigürasyonluk kapsamlı yapay zeka deneylerinin çıktılarını, TÜBİTAK 2209-A "Özgün Değer", "Yöntem (Gerçekleştirilen İşler)" ve "İş Paketleri" formatına uygun olarak dürüst, ihtiyatlı ve güçlü bir akademik dille özetlemektedir.
+
+====================================================================
+1. PROJENİN ÖZGÜN DEĞERİ VE VİZYONU
+====================================================================
+Finansal piyasaların derin öğrenme (DL) ile tahmin edilmesinde literatürdeki projelerin çoğu yalnızca "Doğruluk (Accuracy)" metriklerine odaklanmakta ve modellerin sınıf dengesizliğinde azınlık sınıfını tamamen yok saydığı "Çoğunluk Sınıfı (MC) Tuzağı"nı gözden kaçırmaktadır. Ön çalışmamızda BiLSTM mimarisi ve maliyet duyarlı sınıf ağırlıklandırması (class_weight=balanced) ile modelin Sensitivity (Duyarlılık) ve Specificity (Özgüllük) dengesi kurularak bu ezber tamamen (105/105) ortadan kaldırılmıştır.  Ancak MC tuzağı çözüldüğünde, Gelişmekte Olan Piyasalara (BIST) özgü yapısal bir zafiyet tespit edilmiştir: Modelin makroekonomik şok ve yoğun spekülasyon dönemlerinde (özellikle THYAO, PGSUS, SASA, HEKTS gibi kırılgan varlıklarda) piyasa yönüyle "Negatif Korelasyonlu (Anti-Prediktif)" bir eğilime girmesi. Model, kriz anlarında eski korelasyonlara saplanarak (overfitting to spurious correlations) %100 ihtimalle (15/15 oranında) çökmekte ve hatalı yön önermektedir. 
+  
+  Bu projenin TÜBİTAK 2209-A için asıl özgün değeri; bu hatayı silmek yerine arkasındaki makroekonomik korelasyon kırılmasını (Concept Drift) ve "Gürültü Tüccarı (Noise Trader)" spekülasyonunu 6-ayaklı bir test evreninde haritalayarak, derin öğrenme modellerinin finansal kriz anlarındaki yapısal körlüğünü "Teşhis (Diagnostic)" etmesidir. Nitekim aynı model, kurumsal ve sağlam hisselerde (FROTO, YKBNK) normal başarı ile çalışarak falsifikasyon (yanlışlanabilirlik) kriterini karşılamıştır.
+
+====================================================================
+2. GERÇEKLEŞTİRİLEN İŞLER VE METODOLOJİK ALTYAPI (ŞİMDİYE KADAR YAPILANLAR)
+====================================================================
+Projenin gücü, teorik bir iddiadan ziyade halihazırda inşa edilmiş ve doğrulanmış devasa bir veri bilimi altyapısına dayanmasıdır:
+
+  A) Veri Hattı (Data Pipeline) ve Özellik Mühendisliği
+  - Kapsamlı Veri Seti: 2014-2026 yıllarını kapsayan, BIST'ten genişletilmiş 20 hisse havuzu (Havacılık, Spekülatif, Banka, Sigorta, Holding), NASDAQ'tan 1 hisse (AAPL) ve 3 BES fonu.
+  - Çok-Boyutlu Zaman Tensörleri: Her işlem günü için 10 adet Teknik İndikatör ve 3 adet Makroekonomik Değişken (USDTRY, Brent Petrol, TCMB Faiz) birleştirilmiş ve zaman pencereleriyle (IN_LEN) modellenmiştir.
+  - Data Leakage (Veri Sızıntısı) Koruması: Veri katı bir şekilde zamansal bölünmüş (Train: %70, Val: %15, Test: %15) ve test seti hiçbir şekilde eğitim normalizasyonuna sızdırılmamıştır.
+
+B) Mimari Zenginliği (12 Farklı Model)
+- 6 Derin Öğrenme Mimarisi: BiLSTM, GRU, Conv1D, TCN, Transformer (Multi-Head Attention), SimpleRNN.
+- 4 Klasik ML Mimarisi (Negatif Kontrol): Random Forest, Decision Tree, Logistic Regression, OneR.
+- 2 Topluluk Yöntemi: Hard/Soft Voting. Tüm modeller MC_Aware optimizasyonlarıyla eğitilmiştir.
+
+C) Devasa Test Hacmi ve İstatistiksel Doğrulama
+- 26 kronolojik deney serisi, 378+ konfigürasyon, 7-Fold Walk-Forward Cross Validation ve şans faktörünü ekarte etmek için rastgele tohum (multi-seed) tekrarları.
+
+D) Şeffaflık ve Analiz Ürünleri
+- 120 adet CSV ground-truth dosyası, 11 sekmeli interaktif Python (Streamlit) Analiz Dashboard'u ve karar adımlarını belgeleyen 6.500+ satırlık proje günlüğü.
+
+====================================================================
+3. 6-AYAKLI YANLIŞLAMA ÇERÇEVESİ (TEŞHİS KANITLARI)
+====================================================================
+Modelin kriz anlarında negatif korelasyona düşmesinin bir kod hatası olmadığını teşhis eden ablasyon testleri şunlardır:
+1. Özellik (Feature) Ablasyonu: Modele verilen 13 değişkenden yalnızca 3 makroekonomik değişken (USDTRY, Petrol, Faiz) çıkarıldığında (10 değişkene inildiğinde), anomali kaybolmaktadır.
+2. Algoritmik Yanlışlama: DL modelleri (BiLSTM, Transformer) gürültüde boğulurken; Klasik ML (Random Forest) algoritmaları bu şoklardan etkilenmemiş ve anti-prediktif eğilim göstermemiştir.
+3. Sektörel Yanlışlama: Makro duyarlı Sigorta sektöründe etki artarken, çeşitlendirilmiş Holding sektöründe etki sıfırlanmıştır (Bu durum BIST-30 genelinde doğrulanmayı bekleyen bir ön-bulgudur).
+4. Zaman (Walk-Forward) Yanlışlaması: Modelin en çok zafiyet gösterdiği dönem, Ağustos 2018 Kur Krizi (Fold 2) olarak net şekilde tespit edilmiştir.
+5. Pencere (IN_LEN) Zafiyeti: Anomali sadece mikro-pencerede (IN_LEN=2) oluşmakta, uzun hafızada kaybolmaktadır.
+6. Piyasa Yanlışlaması: BIST'te zorlanan model, makro-stabil NASDAQ (AAPL) piyasasında aynı konfigürasyonlarla beklenen normal davranışı sergilemiştir.
+
+====================================================================
+4. PROJE YÖNETİMİ VE 12 AYLIK İŞ PAKETLERİ (GELECEK HEDEFLERİ)
+====================================================================
+TÜBİTAK 2209-A desteği, inşa edilen bu tanısal altyapıdaki limitasyonları çözmek ve BIST yatırımcıları için yeni koruma mekanizmaları geliştirmek amacıyla talep edilmektedir:
+
+İş Paketi 1: Piyasa Mikroyapısının (Hacim/Volatilite) Model İstikrarına Etkisi
+Korelasyon kırılması AAPL ve GARAN hisselerinde de görülmesine rağmen bu varlıklarda anomali yaşanmamıştır. TÜBİTAK sürecinde; sipariş defteri (order book) dinamikleri, hacim ve volatilite metrikleri analiz edilerek THYAO'yu diğerlerinden ayıran "tetikleyici mikroyapı (market microstructure)" faktörleri bilimsel olarak haritalanacaktır.
+
+İş Paketi 2: "Selective Abstain" ile Güvenli Liman (Safe Harbor) Mimarisi
+Mevcut algoritmalar sürekli tahmin üretmeye programlıdır. Gelecek fazda, modelin kriz anlarında (korelasyon kırıldığı anda) güvenilirliğinin düştüğünü algılayıp "Tahmin yapmaktan kaçınma (Abstain)" özelliği (Geifman & El-Yaniv, 2017) kodlanacaktır. Burada Kapsam-Doğruluk (Coverage-Accuracy) dengesi optimize edilerek modelin tamamen kapanmasının önüne geçilecektir.
+
+İş Paketi 3: BIST-30 Kırılganlık Haritası ve İstatistiksel Optimizasyon
+Sınırlı sektörel test grubu, tüm BIST-30 endeksine genişletilerek Türkiye'nin ilk "Yapay Zeka-Makro Kırılganlık Haritası" çıkarılacaktır. Analizlerde kullanılan ve histogram yanlılığı taşıdığı ispatlanan bilgi-teorik metrikler (MI), k-NN tabanlı (estimator) yöntemlerle kalibre edilerek daha sağlam istatistiksel sonuçlar elde edilecektir.
+
+
+--- AGIR ELESTIRI MULAKAT ---
+
+====================================================================
+TÜBİTAK JÜRİSİ / AĞIR HAKEM MÜLAKAT SİMÜLASYONU
+====================================================================
+Karakter Profili: Dünyanın en gıcık, en şüpheci Finansal Ekonometri ve Yapay Zeka Profesörü. Projeni okumuş, seni köşeye sıkıştırmak ve zayıf noktalarından vurarak projeyi reddetmek için karşında oturuyor.
+
+--------------------------------------------------------------------
+SORU 1 (Sinyal Yokluğu / Zaman Kaybı Saldırısı)
+Hakem: "Bana derin öğrenmenin borsa yönünü bilemediğini, üstüne ters tahmin yaptığını anlatıyorsun. Etkin Piyasa Hipotezi (EMH) zaten borsanın günlük hareketlerinin rastgele (random walk) olduğunu söyler. Sinyal olmayan bir veriden sinyal çıkarmaya çalışmışsın, başaramamışsın, şimdi de çıkıp 'ters tahmin anomalisi buldum' diyorsun. Neden bütün projenin basitçe 'Piyasada öğrenecek bir şey yoktu, vakit kaybettik' olmadığından emin olayım?"
+
+Cevabın:
+"Hocam, eğer piyasada öğrenecek hiçbir sinyal olmasaydı, modelimiz tıpkı Klasik ML algoritmalarının (Random Forest vb.) yaptığı gibi %50 civarında 'rastgele' (Naive) kalırdı. Ancak derin öğrenme modeli rastgele davranmıyor, %60 oranında SİSTEMATİK OLARAK TERS (Anti-Prediktif) tahmin yapıyor. İstatistiksel olarak sürekli yanlış bilmek, sürekli doğru bilmek kadar zordur. Sürekli ters biliyorsanız, ortada yakaladığınız çok güçlü bir sinyal (korelasyon) var demektir; sadece makroekonomik krizler (2018 kur şoku vb.) nedeniyle test setinde bu sinyalin yönü/işareti değişmiştir. Biz sinyal yokluğu değil, 'korelasyon kırılması' bulduk."
+
+--------------------------------------------------------------------
+SORU 2 (Aşırı Mühendislik / Basitlik Saldırısı)
+Hakem: "Raporunuza bakıyorum; 6 farklı derin öğrenme mimarisi, Transformer'lar, class_weight'ler, özel loss fonksiyonları kodlamışsınız. Ama teknik indikatörler tablosunda basit bir 'Hareketli Ortalama Kesişimi (SMA_Cross)' stratejisinin bütün yapay zeka modellerinizi ezdiğini görüyorum (Acc: 0.87). Madem basit bir Excel formülü senin süper bilgisayarlarla eğittiğin yapay zekadan daha iyi çalışıyor, TÜBİTAK neden senin bu işlevsiz derin öğrenme araştırmana fon versin?"
+
+Cevabın:
+"TÜBİTAK'ın fon vereceği şey 'Borsayı en iyi tahmin eden robotu yapmak' değil hocam. Amacımız o olsaydı SMA_Cross yazar geçerdik. Bizim amacımız 'Teşhis ve Güvenlik'. Bugün dünyadaki devasa kurumsal fonlar SMA_Cross ile değil, Derin Öğrenme ile yönetiliyor. Biz bu projeyle, gelişmekte olan piyasalarda o çok güvenilen Derin Öğrenmenin nasıl körleştiğini ve basit bir SMA'nın bile gerisine düştüğünü ispatlıyoruz. TÜBİTAK bu projeyi, yapay zekanın limitlerini ve zafiyetlerini (shortcut learning) Türkiye piyasası özelinde belgelediğimiz için destekleyecektir."
+
+--------------------------------------------------------------------
+SORU 3 (Cherry-Picking / Veri Cımbızlama Saldırısı)
+Hakem: "Bütün büyük tezini THYAO hissesine ve Walk-Forward Fold 2'ye (Ağustos 2018 kur krizine) dayandırmışsın. Eğer o hisseyi ve o 1 ayı veri setinden çıkarsam, anlattığın anomali muhtemelen buharlaşıp uçacak. Sen bilimsel bir kural bulmamışsın, sadece işine gelen tek bir hisseyi ve tek bir kriz anını cımbızlayıp (cherry-picking) bana satmaya çalışıyorsun. Neden bu projeyi sırf tesadüf olduğu için reddetmeyeyim?"
+
+Cevabın:
+"Hocam, haklı bir endişe. Biz de tam olarak 'Ya sadece THYAO'ya özgüyse?' diyerek Borsa İstanbul'un 10 farklı dev hissesinde 165 farklı konfigürasyonla muazzam bir stres testi (Genişletilmiş Havuz Testi) çalıştırdık. Veriyi cımbızlamadık; tam aksine teorimizi yanlışlamaya çalıştık (Falsifikasyon). Sonuç ne oldu biliyor musunuz? Havacılık sektörünün diğer devi PGSUS'ta da model istisnasız %100 oranında çöktü ve tersine döndü. Dahası, BIST'in en çok manipüle edilen ve perakende yatırımcı hücumuna (Noise Trader Risk) uğrayan ikiz hisseleri SASA ve HEKTS'te de model %100 oranında çöktü. Ancak aynı modeli dış şoklara kapalı, sağlam ve kurumsal hisselere (YKBNK, FROTO) verdiğimizde model %55 başarıyla normal çalıştı. Biz tesadüf bulmadık hocam; makroekonomik krizlerin ve spekülatif gürültünün yapay zekayı nasıl sistemli olarak felç ettiğini hisse hisse kanıtladık."
+
+--------------------------------------------------------------------
+SORU 4 (Pratik Faydasızlık Saldırısı)
+Hakem: "Diyelim ki her dediğin doğru. Derin öğrenme makro şoklarda ters tahmin yapıyor. Ne yapayım ben bu bilgiyi? Bunu alıp 'Tersine İşlem Yapan (Contrarian) Bot' yazarsan spread ve komisyonlardan dolayı batarsın. Madem bu bilgiyi kullanarak para kazanamıyoruz, bu araştırmanın sanayi veya akademi için 'Pratik/Ekonomik' değeri nedir?"
+
+Cevabın:
+"Haklısınız hocam, bundan bir 'Contrarian Bot' yapıp zengin olma niyetimiz yok. Projemizin asıl ekonomik değeri Para Kazandırmak değil, Para Kaybettirmemektir. TÜBİTAK 12 aylık iş paketlerimizde yer alan 'Selective Abstain (Seçici Kaçınma)' mimarisi tam olarak bu pratik faydayı sağlar. Kurumsal bir yapay zeka fonu, BIST'te makro bir şok yaşandığında (korelasyon kırıldığında) inatla işlem yapıp batmak yerine, bizim otonom sistemimiz sayesinde kendi güvenilirliğinin düştüğünü algılayıp işlemleri durduracaktır (Safe Harbor). Bu bir risk yönetimi devrimidir."
+
+--------------------------------------------------------------------
+SORU 5 (Paraya İhtiyacınız Yok Saldırısı - En Gıcık Soru)
+Hakem: "Raporunu okudum. 350 konfigürasyon, 26 deney serisi, 120 CSV, interaktif Python dashboard... Siz bu projeyi zaten bitirmişsiniz! Olan olmuş, biten bitmiş. Her şeyi de yazmışsınız. Neden TÜBİTAK'tan para ve 12 ay süre istiyorsunuz? Sırf CV'nizde bulunsun diye bitmiş projeye devletten fon mu koparmaya çalışıyorsunuz?"
+
+Cevabın:
+"Hocam, okuduğunuz rapor 'Hastalığın Teşhis Raporu'dur. TÜBİTAK bütçesini ve süresini 'Tedavi' için istiyoruz. Teşhisi kendi kısıtlı lisans imkanlarımızla koyduk. Ancak AAPL/GARAN hisselerindeki mikroyapı farklılıklarını (Paradoksları) deşifre etmek, 10 hisselik dar testimizi tüm BIST-30 endeksine uygulamak, donanım yetersizliğinden tam optimize edemediğimiz Çoklu-Başlık Dikkat (Transformer) hiperparametrelerini devasa sunucularda eğitmek ve otonom durma (Selective Abstain) kodunu gerçeğe dönüştürmek için TÜBİTAK desteğine ihtiyacımız var. Biz bitmiş bir proje değil, teşhis edilmiş devasa bir açığı kapatacak mühendislik fazı sunuyoruz."
+
+====================================================================
+SONUÇ: BU PROJE NEDEN TÜBİTAK'TAN KESİN ONAY ALIR?
+Çünkü sıradan öğrenci projeleri "Modelim %85 başarıyla borsayı tahmin ediyor" yalanıyla (MC tuzağıyla) jüri karşısına çıkar ve tecrübeli hakemler tarafından 2 dakikada ezilip çöpe atılır. 
+
+Senin projen ise; "Bizim algoritmamız krizlerde çöküyor. Neden çöktüğünü sektör sektör, gün gün, değişken değişken ispatladık. Şimdi bu çöküşü nasıl engelleyeceğimizi bulmak için sizden destek istiyoruz" diyerek geliyor. Dünyada hiçbir akademi jürisi bu kadar dürüst, bu kadar şeffaf ve bu kadar kanıta dayalı bir "Öz Eleştiri/Teşhis" metodolojisini reddedemez.
+

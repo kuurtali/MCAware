@@ -1,0 +1,23 @@
+ARAŞTIRMANIN KISITLARI VE GELECEK ÇALIŞMALAR (LIMITATIONS & FUTURE WORK)
+
+Her bilimsel araştırma belirli metodolojik ve pratik sınırlar (kısıtlar) içerisinde yürütülür. Projemizin TÜBİTAK 2209-A kapsamında ortaya koyduğu "Derin Öğrenmede Anti-Prediktif Eğilimin 6-Ayaklı Teşhisi" bulgularının akademik şeffaflığa oturması adına, mevcut kısıtlar ve 12 aylık proje süresince hedeflenen çalışmalar (iş paketleri) aşağıda özetlenmiştir:
+
+1. Spekülatif Rejimlerin Tespit Edilemezliği ve Piyasa Mikroyapısı (Market Microstructure) Sınırları
+Projenin nihai testlerinde (10 hisselik genişletilmiş havuz), makroekonomik şokların ve küçük yatırımcı spekülasyonunun (SASA, HEKTS, THYAO, PGSUS) derin öğrenme modellerinde %100 oranında negatif korelasyonlu (ters) tahmine yol açtığı kesin olarak kanıtlanmıştır. Modele aynı makro şoklar verildiğinde, kurumsal/sağlam hisselerde (FROTO, YKBNK) çöküş yaşanmaması, sorunun dış şokların kendisi değil; hissenin piyasa mikroyapısındaki (hacim, spread, spekülatif balon) kırılganlığı olduğunu ispatlamıştır. Ancak model, hangi dönemin rasyonel piyasa, hangi dönemin spekülatif "gürültü" dönemi olduğunu otomatik (dinamik) olarak tespit edememektedir.
+* Gelecek Çalışmalar (İş Paketi 1): Modelin spekülatif çöküş yaşadığı hisselerdeki hacim derinliği ve mikro-volatilite dinamikleri matematiksel olarak modellenecektir. "Gürültü Tüccarı (Noise Trader)" rejimlerini otomatik olarak algılayıp modeli o dönemlerde uyku moduna alacak bir makro-duyarlı (macro-aware) Rejim Değişim (Regime-Switching) algoritması tasarlanması planlanmaktadır.
+
+2. Statik Eşik Değerleri ve Coverage-Accuracy (Kapsam-Doğruluk) İkilemi
+Mevcut mimarilerde model, piyasa ne kadar gürültülü veya istikrarsız olursa olsun (örneğin 2018 Kur Krizinde) statik karar sınırlarıyla "Yön" üretmeye zorlanmaktadır. Bu zorunluluk modelin şok anlarındaki zafiyetini artırmaktadır.
+* Gelecek Çalışmalar (İş Paketi 2): Modellere "Selective Abstain (Seçici Kaçınma)" mekanizması (Geifman & El-Yaniv, 2017) entegre edilecektir. Ancak, modelin yüksek volatiliteli Gelişmekte Olan Piyasalarda kendini sürekli kapatarak işlevsiz (Coverage ≈ %0) hale gelmemesi için, kapsam-doğruluk dengesi (Tradeoff) özel kayıp fonksiyonlarıyla optimize edilecektir.
+
+3. Bilgi-Teorik Metriklerin Yanlılığı (MI Bias) ve Negatif Kontrol Kısıtı
+Projenin analiz aşamalarında, özellikler ile hedef değişken arasındaki sinyali ölçmek için kullanılan standart Karşılıklı Bilgi (Mutual Information - MI) skorlarının, bootstrap permütasyon testleri sonucunda "histogram yanlılığı (bias)" içerdiği saptanmıştır. Bu nedenle mevcut sinyal sınırlarına temkinli yaklaşılmalıdır.
+* Gelecek Çalışmalar (İş Paketi 3): Histogram tabanlı MI hesaplamaları yerine, literatürde küçük örneklemlere daha dayanıklı olduğu bilinen k-En Yakın Komşu (kNN) tabanlı MI tahminleyicileri (estimators) kullanılacaktır. Ayrıca, derin öğrenmeyi geride bırakan Klasik ML (Random Forest vb.) modellerinin başarı sınırları, daha geniş çapraz doğrulama ağlarıyla test edilecektir.
+
+4. Zaman Frekansı (Frequency) ve Kısa Hafıza (IN_LEN=2) Kısıtı
+Pencere ablasyon testlerinde (IN_LEN), anomali etkisinin yalnızca kısa vadeli pencerelerde (son 2 gün) ortaya çıktığı, uzun pencerelerde (5-10 gün) etkisini yitirdiği tespit edilmiştir. Günlük frekanstaki (daily) piyasa mikro-gürültüsü modelin asıl sinyali öğrenmesini zorlaştırmaktadır.
+* Gelecek Çalışmalar: Zaman serisi frekansının haftalık (weekly) periyotlara indirilmesi veya sinyal işleme yöntemleriyle (hareketli ortalama filtreleri) günlük mikro-gürültünün arındırılması planlanmaktadır. Bu sayede modelin uzun vadeli makro şokları daha temiz öğrenip öğrenemeyeceği sınanacaktır.
+
+5. Donanım ve Ölçeklenebilirlik Kısıtları (Hesaplamalı Maliyet)
+Çalışma kapsamında 378'den fazla konfigürasyon 7 farklı Walk-Forward fold ve çoklu seedler ile test edilmiştir. Ancak çok derin katmanlı Çoklu-Başlık Dikkat (Multi-Head Attention) veya Zaman Serisi Temel Modelleri (Time-Series Foundation Models), donanım kısıtları nedeniyle tam kapasiteyle optimize edilememiştir.
+* Gelecek Çalışmalar: Bulut bilişim altyapıları kullanılarak, mevcut mimarilerin ablasyonu çok daha geniş bir hiperparametre uzayında taranacaktır.

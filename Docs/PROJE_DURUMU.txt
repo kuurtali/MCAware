@@ -6897,3 +6897,114 @@ KALAN ISLER:
   [ ] Documents/Sonuclar/ kopyalarini sil (opsiyonel)
   [ ] PROJE_DURUMU.txt eski bolumlerdeki encoding duzeltme (opsiyonel)
 
+
+================================================================================
+26. TAM KAYIT - 3 HAZIRAN 2026 YAPILAN TUM ISLER
+================================================================================
+Tarih: 03 Haziran 2026, 12:00 (Son Guncelleme)
+
+BUGUN 7 SAATLIK CALISMADA YAPILAN HER SEY:
+
+--- A. KOSTURULAN R SCRIPTLERI (345 MODEL) ---
+
+  1. mcaware_bist_ALL_macro_stocks.R (06_ek_deneyler/)
+     - 11 BIST hissesi x 3 lambda x 5 seed = 165 model
+     - 5 CSV uretildi (predictions, thresholds, summaries, diagnostics, optimal)
+     - SONUC: 4 hissede TAM anti-prediktif (THYAO, PGSUS, HEKTS, SASA)
+     - SONUC: KRDMD guclu (13/15), FROTO+YKBNK normal
+
+  2. mcaware_inlen_ablation_v2.R (02_ablation/) [YENI OLUSTURULDU]
+     - Duzeltmeler: OUT_LEN=1->3, from=2014->2018, Fear.Greed->gercek TCMB
+     - 3 IN_LEN x 3 lambda x 5 seed = 45 model
+     - 2 CSV uretildi
+     - SONUC: IN_LEN=2,5 -> 15/15 anti-prediktif; IN_LEN=10 -> 0/15 (kayboluyor!)
+
+  3. mcaware_walkforward_multi_arch_v2.R (03_validation/) [YENI OLUSTURULDU]
+     - Duzeltmeler: val_data EKLENDI, monitor=val_accuracy, 3 seed, 50 epoch
+     - 7 fold x 6 mimari x 3 seed = 126 model
+     - 3 CSV uretildi
+     - SONUC: 6 mimari ayni davranis (mimari-bagimsiz)
+     - SONUC: Fold 2 (COVID) ve Fold 7 (enflasyon) donemlerinde tetikleniyor
+
+  4. mcaware_bist_multi_stock.R (03_validation/) [YENIDEN KOSTURULDU]
+     - 3 hisse x 3 seed = 9 model
+     - 2 CSV guncellendi
+     - SONUC: Makro olmadan anti-prediktif zayif/yok
+
+--- B. ISTATISTIKSEL ANLAMLILIK ---
+
+  THYAO 15/15 flip>naive:     p = 0.00003  (cok anlamli)
+  PGSUS 15/15:                p = 0.00003
+  HEKTS 15/15:                p = 0.00003
+  SASA 15/15:                 p = 0.00003
+  KRDMD 13/15:                p = 0.0037
+  4 hisse Bonferroni:         p = 0.00012  (hala cok anlamli)
+
+--- C. OLUSTURULAN DOSYALAR ---
+
+  R Scriptleri (2 yeni):
+    Kodlar/02_ablation/mcaware_inlen_ablation_v2.R
+    Kodlar/03_validation/mcaware_walkforward_multi_arch_v2.R
+
+  CSV Dosyalari (12 yeni, toplam 130):
+    Sonuclar/predictions/mcaware_bist_ALL_macro_PREDICTIONS.csv
+    Sonuclar/thresholds/mcaware_bist_ALL_macro_THRESHOLD_GRID.csv
+    Sonuclar/summaries/mcaware_bist_ALL_macro_OPTIMAL.csv
+    Sonuclar/summaries/mcaware_bist_ALL_macro_SUMMARY.csv
+    Sonuclar/diagnostics/mcaware_bist_ALL_macro_YHAT_STATS.csv
+    Sonuclar/summaries/mcaware_inlen_ablation_v2_RESULTS.csv
+    Sonuclar/summaries/mcaware_inlen_ablation_v2_SUMMARY.csv
+    Sonuclar/summaries/mcaware_walkforward_multi_arch_v2_RESULTS.csv
+    Sonuclar/summaries/mcaware_walkforward_multi_arch_v2_ARCH_SUMMARY.csv
+    Sonuclar/summaries/mcaware_walkforward_multi_arch_v2_FOLD_SUMMARY.csv
+    Sonuclar/summaries/mcaware_bist_multi_stock_RESULTS.csv (guncellendi)
+    Sonuclar/summaries/mcaware_bist_multi_stock_SUMMARY.csv (guncellendi)
+
+  Gorseller (4 yeni):
+    Gorseller/G1_portfolio_simulation.png
+    Gorseller/G2_inlen_ablation_effect.png
+    Gorseller/G3_anti_prediktif_heatmap.png
+    Gorseller/G4_walkforward_temporal_map.png
+
+  Diger Dosyalar:
+    Tubitak.Rproj (RStudio proje dosyasi)
+    generate_report_visuals.py (gorsel uretici script)
+
+--- D. DUZELTMELER ---
+
+  [x] mcaware_bist_multi_stock.R: duplicate temizlendi + PowerShell kalintisi silindi
+  [x] PROJE_DURUMU.txt: 73 bozuk Turkce karakter duzeltildi (encoding fix)
+  [x] Documents/Sonuclar/ kopyalari silindi (14 dosya)
+  [x] README.md: 27 varlik, 130 CSV, yeni bulgular, p-value guncellendi
+  [x] app.py: Sidebar 130 CSV/700+, Tab 6 IN_LEN v2, Tab 7 BIST-11 + WF v2
+  [x] pages.yml: CI path duzeltildi (. -> Docs/Dashboard)
+
+--- E. GITHUB ---
+
+  4 commit yapildi ve push edildi:
+    1. feat: 11-hisse genisletilmis test + v2 duzeltmeler + 130 CSV
+    2. feat: 4 rapor gorseli + CI fix + kozmetik temizlik
+    3. feat: dashboard guncelleme + encoding fix + Documents temizlik
+    4. (bekleyen: CI fix + bu kayit)
+
+--- F. BILIMSEL BULGULAR OZETI ---
+
+  1. Anti-prediktif SEKTOREL: Havacilik+spekulatif+emtia evet, bankacilik hayir
+  2. Anti-prediktif PENCERE BAGIML: IN_LEN<=5 tetikler, IN_LEN=10 kaybeder
+  3. Anti-prediktif MAKRO BAGIML: USDTRY+Oil+TCMB cikarilinca yok
+  4. Anti-prediktif DONEMSEL: COVID ve enflasyon donemlerinde tetikleniyor
+  5. Anti-prediktif MIMARI-BAGIMSIZ: 6 mimari ayni davranis
+  6. MC tuzagi: 700+ kosuda 0 MC (tamamen cozulmus)
+
+--- G. KALAN ISLER ---
+
+  [ ] TUBITAK 2209-A rapor taslagi (Turkce, TUBITAK formati)
+  [ ] Streamlit deploy kontrolu (mcaware.streamlit.app)
+  [ ] GitHub Pages CI hatasi (pages.yml - environment ayari gerekebilir)
+  [ ] Dashboard static HTML rebuild (Docs/Dashboard/index.html)
+
+================================================================================
+PROJE DENEYSEL ASAMASI: %100 TAMAMLANDI
+TOPLAM CSV: 130 | TOPLAM MODEL: 700+ | TOPLAM GORSEL: 37+
+================================================================================
+
