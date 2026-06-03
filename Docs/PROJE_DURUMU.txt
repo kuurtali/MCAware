@@ -1,6 +1,6 @@
 ============================================================
 MC-AWARE PROJESİ FİNAL DURUM RAPORU
-Son Güncelleme: 3 Haziran 2026, 21:30
+Son Güncelleme: 3 Haziran 2026, 21:50
 ============================================================
 
 1. PROJE ÖZETİ
@@ -11,18 +11,19 @@ Yürütücü: Mehmet Ali Kurt (Hacettepe Üniversitesi, Aktüerya Bilimleri)
 Danışman: Öğr. Gör. Elif Ayaz
 Süre: Ekim 2025 – Haziran 2026
 
-2. KANTITATIF ÖLÇEKLER
+2. KANTİTATİF ÖLÇEKLER
 ----------------------
    • Toplam konfigürasyon: 700+ (395 OPTIMAL run + 5000+ RESULTS veri noktası)
    • DL mimarisi: 6 (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN)
    • Klasik ML: 4 (RF, DT, LR, SVM)
-   • Test edilen hisse: 11 BIST + 1 NASDAQ + 3 BES + 12 Sigorta/Holding = 27 varlık
+   • Test edilen varlık: 27 (11 BIST + 1 NASDAQ + 3 BES + 12 Sigorta/Holding)
    • CSV çıktı: 130 (71 summary + 19 prediction + 26 diagnostic + 14 threshold)
-   • Görsel: 52 adet (37 orijinal + 15 yeni eklenen)
+   • Görsel: 52 adet (37 orijinal + 15 CSV-tabanlı yeni)
    • R script: 52 (7 klasör)
-   • Python script: 5 (dashboard + araçlar)
+   • Python script: 5+ (dashboard + araçlar)
    • Walk-Forward: 7-fold v2 (val_data düzeltmesi ile)
    • Deney serisi: 30+
+   • Dashboard: 12 tab (TR/EN)
 
 3. TEMEL BULGULAR (CSV VERİSİYLE DOĞRULANMIŞ)
 ----------------------------------------------
@@ -31,92 +32,63 @@ Süre: Ekim 2025 – Haziran 2026
       - no_ext_10 grubu: acc=%49.6, flip=%50.4 → NORMAL → Makro değişkenler suçlu
       
    b) Sektörel Ayrışma (10 BIST hissesinden):
-      - THYAO: 15/15 flip_wins → %100 anti-prediktif
-      - PGSUS: 15/15 flip_wins → %100
-      - HEKTS: 15/15 flip_wins → %100
-      - SASA: 15/15 flip_wins → %100
-      - KRDMD: 13/15 flip_wins → %87
-      - DOAS: 10/15 flip_wins → %67 (kısmen)
+      - THYAO: 15/15, PGSUS: 15/15, HEKTS: 15/15, SASA: 15/15 → %100
+      - KRDMD: 13/15 → %87
+      - DOAS: 10/15 → %67 (kısmen)
       - ISCTR: 7/15, TAVHL: 7/15 → Nötr
       - FROTO: 1/15 → Normal
       - YKBNK: 0/15 → Tamamen normal
       
    c) IN_LEN Ablasyonu:
-      - IN_LEN=2: mean_acc=%48.5 → Anti-prediktif tetiklenir
-      - IN_LEN=5: mean_acc=%51.5 → Sınırda
-      - IN_LEN=10: mean_acc=%52.2 → Normal → Uzun pencere sorunu çözer
+      - IN_LEN=2: %48.5, IN_LEN=5: %51.5, IN_LEN=10: %52.2
       
-   d) Walk-Forward v2 (strict_anti_pred):
-      - Fold 1: 0/18, Fold 2: 2/18, Fold 3: 0/18
-      - Fold 4: 0/18, Fold 5: 0/18, Fold 6: 1/18
-      - Fold 7: 8/18 → En yüksek anti-prediktif oranı
-      
-   e) Ensemble:
-      - BiLSTM: %39.7, Conv1D: %40.0, GRU: %37.7
-      - SimpleRNN: %45.6 (en iyi), TCN: %40.7, Transformer: %40.7
-      - HARD Vote: %39.7, SOFT Vote: %37.7 → Ensemble düzeltmedi
+   d) Walk-Forward v2: Fold 7 en yoğun anti-prediktif (8/18)
+   e) Ensemble: HARD %39.7, SOFT %37.7 → düzeltmedi
 
-4. DOSYA YAPISI (GitHub-Ready)
-------------------------------
+4. DOSYA YAPISI (264 Tracked Dosya)
+------------------------------------
    Tubitak/
-   ├── app.py                    # Streamlit dashboard (10 tab, TR/EN)
-   ├── README.md                 # Profesyonel proje açıklaması
-   ├── requirements.txt          # Python bağımlılıkları
-   ├── Dockerfile                # Container desteği
-   ├── .gitignore               # Git ayarları
-   ├── LICENSE                  # Lisans
-   ├── Tubitak.Rproj            # RStudio proje dosyası
-   ├── .here                    # R here marker
-   ├── .github/                 # GitHub Actions
-   ├── .streamlit/              # Streamlit config
-   ├── Docs/                    # 14 dosya
-   │   ├── TUBITAK_2209A_Sonuc_Raporu.docx    # TÜBİTAK resmi rapor
-   │   ├── MC_AWARE_Kişisel_Rapor.docx        # Detaylı kişisel rapor
-   │   ├── Literatur_ve_Limitasyonlar.docx     # 25 lit + 15 kısıt
-   │   ├── PROJE_DURUMU.txt                    # Bu dosya
-   │   ├── Dashboard/                          # Statik web dashboard
-   │   └── rapor_sablonlari/                   # TÜBİTAK şablonları
-   ├── Gorseller/               # 52 görsel (PNG)
-   │   ├── 01-33: Orijinal görseller
-   │   ├── 34-48: Yeni CSV-based görseller
-   │   └── G1-G4: Özel rapor görselleri
-   ├── Kodlar/                  # 57 dosya
-   │   ├── 01_prototypes/       # 12 R script
-   │   ├── 02_ablation/         # 5 R script
-   │   ├── 03_validation/       # 5 R script
-   │   ├── 04_baseline/         # 4 R script
-   │   ├── 05_diagnostic/       # 2 R script
-   │   ├── 06_ek_deneyler/      # 5 R script
-   │   └── 07_araclar/          # 24 dosya (R + Python araçları)
-   └── Sonuclar/                # 130 CSV
-       ├── summaries/           # 71 CSV
-       ├── predictions/         # 19 CSV
-       ├── diagnostics/         # 26 CSV
-       └── thresholds/          # 14 CSV
+   ├── app.py (12 tab, TR/EN)
+   ├── README.md, requirements.txt, Dockerfile, LICENSE
+   ├── Docs/ (3 dosya)
+   │   ├── TUBITAK_2209A_Sonuc_Raporu.docx (şablon uyumlu)
+   │   ├── MC_AWARE_Kişisel_Rapor.docx (21 bölüm, 525 paragraf, 15 görsel embed)
+   │   └── PROJE_DURUMU.txt (bu dosya)
+   ├── Gorseller/ (52 PNG)
+   ├── Kodlar/ (58 dosya, 7 klasör)
+   └── Sonuclar/ (130 CSV, 4 alt klasör)
 
 5. TESLİM DURUMU
 -----------------
-   [x] TÜBİTAK Sonuç Raporu (şablon uyumlu, 12pt, 2.5cm margin)
-   [x] Kişisel Rapor (33 değişiklikle güncellendi)
-   [x] Literatür ve Limitasyonlar (25 bölüm + 15 kısıt)
-   [x] Dashboard (app.py — syntax OK, tüm değerler güncel)
-   [x] 130 CSV (0 hata, 0 boş)
+   [x] TÜBİTAK Sonuç Raporu (şablon uyumlu)
+   [x] Kişisel Rapor (21 bölüm + 15 görsel embed)
+   [x] Literatür (25 bölüm) — kişisel rapora entegre edildi
+   [x] Limitasyonlar (15 kısıt) — kişisel rapora entegre edildi
+   [x] Dashboard (12 tab, syntax OK)
+   [x] 130 CSV hatasız
    [x] 52 görsel (37 orijinal + 15 yeni)
-   [x] GitHub push tamamlandı
-   [x] README güncel
-   [ ] Harcama kalemleri (yürütücü dolduracak)
-   [ ] İmza (basılı çıktıda)
+   [x] README güncel (12 tab, 52 görsel, doğru danışman)
+   [x] GitHub push tamam
+   [x] CSV tutarlılık doğrulaması tamamlandı
 
-6. ÖNEMLİ NOT: Walk-Forward Verileri
---------------------------------------
-   CSV'deki WF v2 strict_anti_pred sonuçları:
-   - Fold 7 en yüksek anti-prediktif oran (8/18)
-   - Fold 2 sadece 2/18 (başlangıçta %100 rapor edilmişti)
-   
-   Bu fark, strict_anti_pred tanımının OPTIMAL CSV'deki 
-   tanımdan farklı olmasından kaynaklanıyor olabilir.
-   flip_beats_naive sütunu daha geniş bir tanım kullanıyor.
+6. BEKLEYEN İŞLER (MANUEL)
+----------------------------
+   [ ] Harcama kalemleri — TÜBİTAK raporunda Bölüm 5 (yürütücü dolduracak)
+   [ ] İmza — Basılı çıktıda yürütücü + danışman
+   [ ] Streamlit Cloud deploy — mcaware.streamlit.app şu an çalışmıyor
+       NOT: Lokal syntax OK, Streamlit 1.51 uyumlu.
+       Olası sorun: Streamlit Cloud'da yeniden deploy gerekiyor.
+       Çözüm: streamlit.io → app settings → reboot veya re-deploy
+   [ ] Word İçindekiler — Kişisel raporda ToC güncellemesi (Word'de sağ tık → güncelle)
+
+7. SİLİNEN DOSYALAR
+---------------------
+   - Docs/Literatur_ve_Limitasyonlar.docx → Kişisel Rapor Bölüm 19-20'ye entegre edildi
+   - Docs/Literatur_Taramasi.txt → Daha önce silinmişti
+   - Docs/Limitasyonlar.txt → Daha önce silinmişti
+   - Docs/inceleme.txt → Daha önce silinmişti
 
 ============================================================
          PROJE DURUMU: TESLİME HAZIR ✓
+         Harcama + İmza + Streamlit Deploy = MANUEL
 ============================================================

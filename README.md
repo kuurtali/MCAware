@@ -2,7 +2,7 @@
 
 **TÜBİTAK 2209-A Lisans Araştırma Projesi (2026)**
 
-**Yürütücü:** Mehmet Ali Kurt · **Danışman:** Dr. Övgücan Karadağ Erdemir · **Üniversite:** Hacettepe — Aktüerya Bilimleri
+**Yürütücü:** Mehmet Ali Kurt · **Danışman:** Öğr. Gör. Elif Ayaz · **Üniversite:** Hacettepe — Aktüerya Bilimleri
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
@@ -16,7 +16,7 @@
 
 <p align="center">
   <a href="https://mcaware.streamlit.app">
-    <img src="https://img.shields.io/badge/Canlı_Demo-Dashboard_(10_Tab)-blue?style=for-the-badge" alt="Live Demo" />
+    <img src="https://img.shields.io/badge/Canlı_Demo-Dashboard_(12_Tab)-blue?style=for-the-badge" alt="Live Demo" />
   </a>
 </p>
 
@@ -42,14 +42,16 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 |:---:|--------|-------------|
 | 📊 | **Ana Bulgular** — Metrik kartlar, confusion matrix, fold-bazlı analiz | `pooled_confusion_matrix.csv` |
 | 🏗️ | **Mimari Karşılaştırma** — 7 mimari bar chart, McNemar heatmap | `CROSS_ARCH_SUMMARY.csv`, `McNEMAR.csv` |
-| 📈 | **Walk-Forward** — 7-fold çizgi grafik, fold detay tablosu | `walkforward_RESULTS.csv`, `FOLD_SUMMARY.csv` |
+| 📈 | **Walk-Forward** — 7-fold çizgi grafik, fold detay tablosu | `walkforward_RESULTS.csv` |
 | 🔬 | **BiLSTM Evrim** — v1 → v3c → attn_v6 gelişim süreci | 9 adet `*_SUMMARY.csv` |
 | 🔍 | **Tahmin Analizi** — ŷ histogram, CM, kümülatif doğruluk | 13 `*_PREDICTIONS.csv` |
-| 🧪 | **Ablation** — Feature grup, tekli özellik, pencere boyutu | 3 `*_ablation_SUMMARY.csv` |
-| 🌍 | **Cross-Market** — BIST vs NASDAQ, sektör analizi | `nasdaq_SUMMARY.csv`, `corr_*.csv` |
+| 🧪 | **Ablation** — Feature grup, tekli özellik, pencere boyutu | 3 `*_ablation_RESULTS.csv` |
+| 🌍 | **Cross-Market** — BIST vs NASDAQ, sektör analizi | `nasdaq_RESULTS.csv`, `corr_*.csv` |
 | 🗳️ | **Ensemble & Baseline** — Voting, rule-based ML, teknik indikatör | `ensemble_*.csv`, `rule_based_*.csv` |
 | 📐 | **İstatistiksel Kanıtlar** — MI, label check, YHAT istatistikleri | `MI_SCORES.csv`, `LABEL_CHECK.csv` |
 | 🔧 | **Threshold & Diagnostics** — Eşik grid heatmap, seed raporu | `THRESHOLD_GRID.csv`, `YHAT_STATS.csv` |
+| ⚔️ | **Karşılaştırma** — İki konfigürasyon arasında birebir metrik karşılaştırma | Tüm `OPTIMAL.csv` |
+| 📷 | **Ek Görseller** — 15 yeni CSV-tabanlı analiz grafiği | 130 CSV'den üretilmiş |
 
 > Dashboard'da sahte veri yoktur. Tüm çıktılar `Sonuclar/` klasöründeki CSV dosyalarından yüklenmektedir.
 
@@ -110,26 +112,26 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 ## 📁 Proje Yapısı
 
 ```
-00_Tubitak/
-├── app.py                  # Streamlit dashboard (10 tab)
+Tubitak/
+├── app.py                  # Streamlit dashboard (12 tab, TR/EN)
 ├── requirements.txt        # Python bağımlılıkları
-├── install_packages.R      # R paket kurulumu
 ├── Dockerfile              # Docker container
-├── Kodlar/
-│   ├── 01_prototypes/      # BiLSTM v1-v6, multi-arch
-│   ├── 02_ablation/        # Feature, IN_LEN, korelasyon
-│   ├── 03_validation/      # Walk-forward, NASDAQ, multi-stock
-│   ├── 04_baseline/        # Klasik ML ve Ensemble
-│   ├── 05_diagnostic/      # MI, teşhis testleri
-│   ├── 06_ek_deneyler/     # Sektörel karşılaştırma
-│   └── FINAL_RELEASE/      # Nihai yayın paketi
+├── README.md               # Bu dosya
+├── Kodlar/                 # 58 kod dosyası (R + Python)
+│   ├── 01_prototypes/      # BiLSTM v1-v6, multi-arch (12)
+│   ├── 02_ablation/        # Feature, IN_LEN, korelasyon (5)
+│   ├── 03_validation/      # Walk-forward, NASDAQ, multi-stock (5)
+│   ├── 04_baseline/        # Klasik ML ve Ensemble (4)
+│   ├── 05_diagnostic/      # MI, teşhis testleri (2)
+│   ├── 06_ek_deneyler/     # Sektörel karşılaştırma (5)
+│   └── 07_araclar/         # Python araçları, rapor üretici (25)
 ├── Sonuclar/               # 130 CSV dosyası
 │   ├── summaries/   (71)   # Deney özet tabloları
 │   ├── predictions/ (19)   # Ham tahmin serileri
 │   ├── diagnostics/ (26)   # İstatistiksel tanı verileri
 │   └── thresholds/  (14)   # Eşik grid sonuçları
-├── Gorseller/              # 33 makale kalitesinde grafik
-└── Docs/                   # Raporlar ve dokümanlar
+├── Gorseller/              # 52 makale kalitesinde grafik (PNG)
+└── Docs/                   # TÜBİTAK raporu, kişisel rapor, şablonlar
 ```
 
 ---
@@ -152,8 +154,7 @@ docker run -p 8501:8501 mcaware
 
 ### Deneyleri Yeniden Üretme (R)
 ```bash
-source("install_packages.R")
-Rscript Kodlar/FINAL_RELEASE/01_Sektorel_Karsilastirma_Sigorta.R
+Rscript Kodlar/01_prototypes/mcaware_prototype_BiLSTM_v3_THYAO.R
 ```
 
 > Model eğitimi donanıma bağlı olarak 45-60 dakika sürebilir.
@@ -176,7 +177,7 @@ After solving the MC trap with `class_weight=balanced`, we discovered that DL mo
 | **Cross-Market** | NASDAQ shows normal behavior — emerging-market specific |
 | **Feature Ablation** | Removing macro variables completely eliminates anti-predictive behavior |
 
-**Live Dashboard:** [mcaware.streamlit.app](https://mcaware.streamlit.app) — 10 tabs, 130 CSV sources, no mock data.
+**Live Dashboard:** [mcaware.streamlit.app](https://mcaware.streamlit.app) — 12 tabs, 130 CSV sources, 52 visuals, no mock data.
 
 ---
 
