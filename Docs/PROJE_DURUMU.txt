@@ -8,7 +8,7 @@ Son Güncelleme: 3 Haziran 2026, 21:50
 Proje Adı: MC-AWARE: Derin Öğrenmede Anti-Prediktif Davranışın Çok Boyutlu Teşhisi
 Program: TÜBİTAK 2209-A Üniversite Öğrencileri Araştırma Projeleri
 Yürütücü: Mehmet Ali Kurt (Hacettepe Üniversitesi, Aktüerya Bilimleri)
-Danışman: Öğr. Gör. Elif Ayaz
+Danışman: Öğr. Gör. Dr. Övgücan Karadağ Erdemir
 Süre: Ekim 2025 – Haziran 2026
 
 2. KANTİTATİF ÖLÇEKLER

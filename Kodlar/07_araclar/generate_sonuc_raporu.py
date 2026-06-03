@@ -53,7 +53,7 @@ t1.alignment = WD_TABLE_ALIGNMENT.CENTER
 data = [
     ('PROJENİN KONUSU', 'MC-AWARE: Derin Öğrenmede Anti-Prediktif Davranışın Çok Boyutlu Teşhisi'),
     ('PROJE YÜRÜTÜCÜSÜNÜN ADI', 'Mehmet Ali Kurt'),             # FIX: adi eklendi
-    ('DANIŞMANIN ADI', 'Öğr. Gör. Elif Ayaz'),                  # FIX: adi eklendi
+    ('DANIŞMANIN ADI', 'Öğr. Gör. Dr. Övgücan Karadağ Erdemir'),                  # FIX: adi eklendi
     ('PROJE BAŞLANGIÇ VE BİTİŞ TARİHLERİ', 'Başlangıç: Ekim 2025 — Bitiş: Haziran 2026')  # FIX: tam ad
 ]
 for i, (k, v) in enumerate(data):
@@ -296,7 +296,7 @@ p01.alignment = WD_ALIGN_PARAGRAPH.CENTER
 
 # Isim satirlari
 t3.cell(1, 0).text = 'Mehmet Ali Kurt'
-t3.cell(1, 1).text = 'Öğr. Gör. Elif Ayaz'
+t3.cell(1, 1).text = 'Öğr. Gör. Dr. Övgücan Karadağ Erdemir'
 for c in range(2):
     t3.cell(1, c).paragraphs[0].alignment = WD_ALIGN_PARAGRAPH.CENTER
     for r in t3.cell(1, c).paragraphs[0].runs:
