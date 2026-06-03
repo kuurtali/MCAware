@@ -1,51 +1,23 @@
 # ===========================================================================
-# MC-AWARE — BIST MULTI-STOCK (ADIM I.10: GENELLENEBILIRLIK TESTI)
+# MC-AWARE — BIST 5 MACRO-SENSITIVE STOCKS (ADIM I.X: YENI HISSE TESTI)
 # TÜBİTAK 2209-A — Yürütücü: Mehmet Ali KURT
-# Tarih: 22.05.2026
 # ---------------------------------------------------------------------------
 # AMACI:
-#   R2 riski: Anti-prediktif sadece THYAO'da gözlendi. Genellenebilir mi?
-#   GARAN.IS ve AKBNK.IS (BIST'in en likit 2 bankacılık hissesi)
-#   aynı pipeline ile test edilir.
-#   Eger GARAN/AKBNK'de de anti-prediktif → BIST bankacılık sektörü
-#   Eger sadece THYAO → THYAO-spesifik
+#   THYAO'da gozlenen anti-prediktif etkinin sadece THYAO'ya ozgu olmadigini,
+#   kur ve petrole duyarli diger dev sanayi/ulastirma sirketlerinde de
+#   goruldugunu ispatlamak.
+#   Test edilecek hisseler: THYAO, PGSUS, SASA, TAVHL, HEKTS
 #
-# CIKTI: mcaware_bist_multi_stock_SUMMARY.csv
-# Süre: ~30-45 dk
+# CIKTI: mcaware_bist_5_macro_stocks_SUMMARY.csv
 # ===========================================================================
-# --- B6 fix: here paketi ile gorecel yollar ---
+
 if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
 library(here)
 
-
 WORKDIR <- here::here()
-# [B18] OUTDIR <- here::here()
-# --- B18 fix: Subdirectory tanimlari ---
 OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
-OUTDIR_PRED <- here::here("Sonuclar", "predictions")
-OUTDIR_THR  <- here::here("Sonuclar", "thresholds")
-OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
-for (.d in c(OUTDIR_SUM, OUTDIR_PRED, OUTDIR_THR, OUTDIR_DIAG)) {
-  if (!dir.exists(.d)) dir.create(.d, recursive = TRUE)
-}
-# Tarih: 22.05.2026
-# ---------------------------------------------------------------------------
-# AMACI:
-#   R2 riski: Anti-prediktif sadece THYAO'da gözlendi. Genellenebilir mi?
-#   GARAN.IS ve AKBNK.IS (BIST'in en likit 2 bankacılık hissesi)
-#   aynı pipeline ile test edilir.
-#   Eger GARAN/AKBNK'de de anti-prediktif → BIST bankacılık sektörü
-#   Eger sadece THYAO → THYAO-spesifik
-#
-# CIKTI: mcaware_bist_multi_stock_SUMMARY.csv
-# Süre: ~30-45 dk
-# ===========================================================================
-# --- B6 fix: here paketi ile gorecel yollar ---
-if (!require(here)) install.packages("here", repos="https://cran.r-project.org")
-library(here)
+if (!dir.exists(OUTDIR_SUM)) dir.create(OUTDIR_SUM, recursive = TRUE)
 
-
-WORKDIR <- here::here()
 setwd(WORKDIR)
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")
@@ -57,12 +29,10 @@ suppressPackageStartupMessages({
 })
 
 cat("\n========================================================================\n")
-cat("MC-AWARE — BIST MULTI-STOCK (ADIM I.10)\n")
+cat("MC-AWARE — BIST 5 MACRO-SENSITIVE STOCKS TESTI\n")
 cat("Tarih:", format(Sys.time(), "%Y-%m-%d %H:%M"), "\n")
-cat("Hisseler: THYAO.IS, GARAN.IS, AKBNK.IS\n")
+cat("Hisseler: THYAO.IS, PGSUS.IS, SASA.IS, TAVHL.IS, HEKTS.IS\n")
 cat("========================================================================\n\n")
-
-# [B18] if (!dir.exists(OUTDIR)) { OUTDIR <- WORKDIR }
 
 .ns <- asNamespace("keras3")
 if (exists("bidirectional", envir = .ns)) {
@@ -128,16 +98,47 @@ test_stock <- function(ticker, from="2018-01-01", to="2026-03-31") {
   stoch_v <- TTR::stoch(df[,c("High","Low","Close")])
   df$SO_K <- stoch_v[,"fastK"]; df$SO_D <- stoch_v[,"fastD"]
   adx_v <- TTR::ADX(df[,c("High","Low","Close")]); df$ADX <- adx_v[,"ADX"]
-  df <- df[28:nrow(df), ] %>% drop_na()
-  cat(sprintf("  Temiz veri: %d satir\n", nrow(df)))
+  
+  # Dis degiskenler (Makro)
+  cat("Dis degiskenler cekiliyor (USDTRY, Oil, TCMB)...\n")
+  tryCatch({
+    getSymbols("USDTRY=X", from = "2018-01-01", to = "2026-03-31", auto.assign = TRUE, warnings = FALSE)
+    usdtry_df <- data.frame(Date = as.character(index(`USDTRY=X`)), USDTRY = as.numeric(Cl(`USDTRY=X`)))
+  }, error = function(e) { usdtry_df <<- data.frame(Date = character(0), USDTRY = numeric(0)) })
+  
+  tryCatch({
+    getSymbols("CL=F", from = "2018-01-01", to = "2026-03-31", auto.assign = TRUE, warnings = FALSE)
+    oil_df <- data.frame(Date = as.character(index(`CL=F`)), Oil = as.numeric(Cl(`CL=F`)))
+  }, error = function(e) { oil_df <<- data.frame(Date = character(0), Oil = numeric(0)) })
+  
+  tryCatch({
+    getSymbols("INTDSRTRM193N", src = "FRED", from = "2018-01-01", to = "2026-03-31", auto.assign = TRUE, warnings = FALSE)
+    tcmb_df <- data.frame(Date = as.Date(index(INTDSRTRM193N)), TCMB_Rate = as.numeric(INTDSRTRM193N))
+    tcmb_daily <- data.frame(Date = as.Date(df$Date)) %>%
+      mutate(YearMonth = format(Date, "%Y-%m")) %>%
+      left_join(tcmb_df %>% mutate(YearMonth = format(Date, "%Y-%m")), by = "YearMonth") %>%
+      select(Date = Date.x, TCMB_Rate)
+  }, error = function(e) { tcmb_daily <<- data.frame(Date = as.Date(df$Date), TCMB_Rate = NA_real_) })
+  
+  df_final <- df %>%
+    left_join(usdtry_df, by = "Date") %>%
+    left_join(oil_df, by = "Date") %>%
+    left_join(tcmb_daily %>% mutate(Date = as.character(Date)), by = "Date")
+  
+  df_final$USDTRY <- zoo::na.locf(df_final$USDTRY, na.rm = FALSE)
+  df_final$Oil <- zoo::na.locf(df_final$Oil, na.rm = FALSE)
+  df_final$TCMB_Rate <- zoo::na.locf(df_final$TCMB_Rate, na.rm = FALSE)
 
-  # Pencereleme
+  df_final <- df_final[28:nrow(df_final), ] %>% drop_na()
+  cat(sprintf("  Temiz veri: %d satir\n", nrow(df_final)))
+
+  # Pencereleme (v3b yapisi: t-1 ve t gunleri)
   IN_LEN <- 2L; OUT_LEN <- 3L
   feat_cols <- c("Close","Open","Volume","RSI","MACD","EMA12","EMA26",
-                 "SO_K","SO_D","ADX")
+                 "SO_K","SO_D","ADX", "USDTRY", "Oil", "TCMB_Rate")
   F_DIM <- length(feat_cols)
-  feats <- as.matrix(df[, feat_cols])
-  prices <- df$Close; N <- nrow(feats)
+  feats <- as.matrix(df_final[, feat_cols])
+  prices <- df_final$Close; N <- nrow(feats)
 
   X_list <- list(); y_vec <- c()
   for (t in (IN_LEN+1):(N-OUT_LEN)) {
@@ -168,8 +169,8 @@ test_stock <- function(ticker, from="2018-01-01", to="2026-03-31") {
   cw <- list("0"=w0, "1"=w1)
   naive_acc <- mean(y_te == as.integer(mean(y_tr) > 0.5))
 
-  # Grid: 3 seed x 1 lambda = 3 koşu (hızlı)
-  SEEDS <- c(23L, 42L, 98L)
+  # Grid: 5 seed x 1 lambda = 5 koşu
+  SEEDS <- c(23L, 42L, 98L, 27L, 41L)
   results <- list()
 
   for (sd in SEEDS) {
@@ -211,7 +212,7 @@ test_stock <- function(ticker, from="2018-01-01", to="2026-03-31") {
 }
 
 # --- Ana çalıştırma ---
-TICKERS <- c("THYAO.IS", "GARAN.IS", "AKBNK.IS")
+TICKERS <- c("THYAO.IS", "PGSUS.IS", "SASA.IS", "TAVHL.IS", "HEKTS.IS")
 all_results <- list()
 t0 <- Sys.time()
 for (tk in TICKERS) {
@@ -221,11 +222,11 @@ for (tk in TICKERS) {
 t1 <- Sys.time()
 
 all_df <- do.call(rbind, all_results)
-write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_bist_multi_stock_RESULTS.csv"), row.names=FALSE)
+write.csv(all_df, file.path(OUTDIR_SUM, "mcaware_bist_5_macro_stocks_RESULTS.csv"), row.names=FALSE)
 
 # Özet
 cat("\n", strrep("=", 80), "\n", sep="")
-cat("ADIM I.10 — BIST MULTI-STOCK SONUCLARI\n")
+cat("YENI BIST 5 HISSE SONUCLARI (USDTRY, OIL, TCMB DAHIL)\n")
 cat(strrep("=", 80), "\n", sep="")
 
 summary_df <- all_df %>%
@@ -237,23 +238,11 @@ summary_df <- all_df %>%
             naive=mean(naive_acc), .groups="drop")
 print(summary_df)
 
-write.csv(summary_df, file.path(OUTDIR_SUM, "mcaware_bist_multi_stock_SUMMARY.csv"), row.names=FALSE)
+write.csv(summary_df, file.path(OUTDIR_SUM, "mcaware_bist_5_macro_stocks_SUMMARY.csv"), row.names=FALSE)
 
-n_anti_stocks <- sum(summary_df$flip_wins >= 2)
-cat(sprintf("\n%d/%d hissede anti-prediktif (flip_wins >= 2/3)\n",
+n_anti_stocks <- sum(summary_df$flip_wins >= 3)
+cat(sprintf("\n%d/%d hissede anti-prediktif (flip_wins >= 3/5)\n",
             n_anti_stocks, nrow(summary_df)))
 
-if (n_anti_stocks >= 2) {
-  cat("\n[A] BIST BANKACILIK SEKTORUNDE YAYGIN:\n")
-  cat("    Anti-prediktif THYAO'ya ozgu DEGIL. R2 riski KAPANDI.\n")
-} else if (n_anti_stocks <= 1 && summary_df$flip_wins[summary_df$ticker=="THYAO.IS"] >= 2) {
-  cat("\n[B] THYAO-SPESIFIK:\n")
-  cat("    Anti-prediktif sadece THYAO. GARAN/AKBNK'de yok.\n")
-  cat("    R2 riski ACIK ama THYAO-spesifik iddia guclu.\n")
-} else {
-  cat("\n[C] KARISIK:\n")
-  cat("    Manuel inceleme gerek.\n")
-}
-
-cat(sprintf("\nCSV: %s\n", file.path(OUTDIR_SUM, "mcaware_bist_multi_stock_SUMMARY.csv")))
-cat("\nADIM I.10 TAMAMLANDI.\n")
+cat(sprintf("\nCSV: %s\n", file.path(OUTDIR_SUM, "mcaware_bist_5_macro_stocks_SUMMARY.csv")))
+cat("\nTEST TAMAMLANDI.\n")
