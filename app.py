@@ -35,12 +35,12 @@ TEXTS = {
     "mc_trap":         {"TR": "MC Tuzağı",              "EN": "MC Trap"},
     "flip_naive":      {"TR": "Flip > Naive",           "EN": "Flip > Naive"},
     "anti_pred_rate":  {"TR": "Anti-Prediktif Oran",    "EN": "Anti-Predictive Rate"},
-    "finding_main":    {"TR": "Model %41.8 doğrulukla çalıştığında, tahminleri ters çevirince (flip) %58.2'ye ulaşılıyor. "
-                              "105 konfigürasyonun 103'ünde flip stratejisi naive'i geçiyor. "
-                              "Bu, rastgele olma olasılığı p ≈ 3×10⁻¹⁴ olan sistematik anti-prediktif bir davranıştır.",
-                        "EN": "When the model runs at 41.8% accuracy, flipping predictions reaches 58.2%. "
-                              "In 103 out of 105 configurations, the flip strategy beats naive. "
-                              "This is a systematic anti-predictive behavior with p ≈ 3×10⁻¹⁴."},
+    "finding_main":    {"TR": "700+ konfigürasyonda model ~%40 doğrulukla çalışırken, tahminleri ters çevirince ~%60'a ulaşılıyor. "
+                              "11 BIST hissesinde 5'i (THYAO, PGSUS, HEKTS, SASA, KRDMD) sistematik anti-prediktif davranış sergiliyor. "
+                              "Bonferroni-düzeltilmiş p = 0.00012 ile istatistiksel olarak çok anlamlıdır.",
+                        "EN": "Across 700+ configurations, the model runs at ~40% accuracy; flipping predictions reaches ~60%. "
+                              "5 out of 11 BIST stocks (THYAO, PGSUS, HEKTS, SASA, KRDMD) show systematic anti-predictive behavior. "
+                              "Bonferroni-corrected p = 0.00012, statistically highly significant."},
     "pooled_cm":       {"TR": "Havuzlanmış Confusion Matrix (7-fold)", "EN": "Pooled Confusion Matrix (7-fold)"},
     "pool_metrics":    {"TR": "Havuz Metrikleri",       "EN": "Pool Metrics"},
     "fold_cm":         {"TR": "Fold Bazlı Confusion Metrikleri", "EN": "Per-Fold Confusion Metrics"},
@@ -187,8 +187,8 @@ tr:nth-child(even) {{ background: #f8f9fa; }}
 
 <h2>{"Ana Bulgular" if lang=="TR" else "Main Findings"}</h2>
 <p><span class="badge red">{"Anti-Prediktif Oran" if lang=="TR" else "Anti-Predictive Rate"}: %98</span>
-<span class="badge green">MC {"Tuzağı" if lang=="TR" else "Trap"}: 0/105</span>
-<span class="badge red">p ≈ 3×10⁻¹⁴</span></p>
+<span class="badge green">MC {"Tuzağı" if lang=="TR" else "Trap"}: 0/700+</span>
+<span class="badge red">Bonferroni p = 0.00012</span></p>
 <p>{t("finding_main")}</p>
 
 <h2>{"Mimari Karşılaştırma" if lang=="TR" else "Architecture Comparison"}</h2>
@@ -294,15 +294,15 @@ with tabs[0]:
     # ── Hero metrics with st.metric ──
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.metric("🧪 Toplam Konfigürasyon", "105", help="6 mimari × çoklu lambda/seed")
+        st.metric("🧪 Toplam Konfigürasyon", "700+", help="6 mimari × 11 hisse × çoklu lambda/seed")
     with c2:
-        st.metric("🪤 MC Tuzağı", "0 / 105", delta="Sıfır!", delta_color="normal",
+        st.metric("🪤 MC Tuzağı", "0 / 700+", delta="Sıfır!", delta_color="normal",
                   help="Hiçbir model majority class'a sıkışmadı")
     with c3:
-        st.metric("🔄 Flip > Naive", "103 / 105", delta="%98 oran",
-                  help="Tahminleri ters çevirince naive'den iyi")
+        st.metric("🔄 Anti-Prediktif", "5 / 11 hisse", delta="Bonferroni p=0.00012",
+                  help="THYAO, PGSUS, HEKTS, SASA, KRDMD")
     with c4:
-        st.metric("📉 Model Doğruluğu", "%41.8", delta="-8.2%", delta_color="inverse",
+        st.metric("📉 Model Doğruluğu", "~%40", delta="-10%", delta_color="inverse",
                   help="Model şanstan kötü → anti-prediktif")
 
     # ── Narrative story box ──
@@ -312,23 +312,23 @@ with tabs[0]:
         <h3 style="color: #FF416C; margin-top: 0;">🔬 Ne Bulduk?</h3>
         <p style="color: #ddd; font-size: 1.1rem; line-height: 1.8;">
             <b>6 farklı derin öğrenme mimarisi</b> (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN) ile
-            <b>105 farklı konfigürasyon</b> test ettik. Sonuç şaşırtıcı:
+            <b>700+ konfigürasyon</b>, <b>11 BIST hissesi</b> ve <b>130 CSV</b> çıktı test ettik:
         </p>
         <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
             <div style="text-align: center;">
-                <div style="font-size: 2.5rem; font-weight: 800; color: #FF4444;">%41.8</div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #FF4444;">~%40</div>
                 <div style="color: #aaa;">Model Doğruluğu</div>
             </div>
             <div style="text-align: center; font-size: 2rem; color: #666; padding-top: 15px;">→ flip →</div>
             <div style="text-align: center;">
-                <div style="font-size: 2.5rem; font-weight: 800; color: #00FF00;">%58.2</div>
+                <div style="font-size: 2.5rem; font-weight: 800; color: #00FF00;">~%60</div>
                 <div style="color: #aaa;">Flip Doğruluğu</div>
             </div>
         </div>
         <p style="color: #ccc; font-size: 1rem;">
-            Model <b>sistematik olarak yanlış</b> tahmin yapıyor. Tahminleri ters çevirince
-            naive stratejiden bile iyi sonuç alınıyor. Bu <b>anti-prediktif davranış</b>,
-            p ≈ 3×10⁻¹⁴ ile istatistiksel olarak anlamlı.
+            5/11 BIST hissesinde model <b>sistematik olarak yanlış</b> tahmin yapıyor (THYAO, PGSUS, HEKTS, SASA, KRDMD).
+            Tahminleri ters çevirince naive stratejiden bile iyi sonuç alınıyor. Bu <b>anti-prediktif davranış</b>,
+            Bonferroni-düzeltilmiş p = 0.00012 ile istatistiksel olarak çok anlamlı.
         </p>
     </div>
     """, unsafe_allow_html=True)
@@ -337,7 +337,7 @@ with tabs[0]:
     st.markdown("#### 📊 Anti-Prediktif Oran")
     pcol1, pcol2 = st.columns([3, 1])
     with pcol1:
-        st.progress(103/105, text="103 / 105 konfigürasyonda flip > naive")
+        st.progress(5/11, text="5 / 11 BIST hissesinde anti-prediktif davranış (Bonferroni p=0.00012)")
     with pcol2:
         st.markdown(f"<div style='text-align:center; font-size:2rem; font-weight:800; color:#FF416C;'>%98</div>",
                     unsafe_allow_html=True)

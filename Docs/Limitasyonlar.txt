@@ -1,0 +1,105 @@
+ARAŞTIRMANIN KISITLARI VE GELECEK ÇALIŞMALAR (LIMITATIONS & FUTURE WORK)
+
+Her bilimsel araştırma belirli metodolojik ve pratik sınırlar içerisinde yürütülür. Projemizin TÜBİTAK 2209-A kapsamında ortaya koyduğu "Derin Öğrenmede Anti-Prediktif Eğilimin Çok Boyutlu Teşhisi" bulgularının akademik şeffaflığa oturması adına, mevcut kısıtlar ve gelecek çalışmalarda hedeflenen iş paketleri aşağıda detaylandırılmıştır:
+
+
+1. Spekülatif Rejimlerin Dinamik Tespit Edilemezliği
+
+Projenin nihai testlerinde (11 hisselik genişletilmiş havuz), makroekonomik şokların ve küçük yatırımcı spekülasyonunun derin öğrenme modellerinde sistematik anti-prediktif eğilime yol açtığı kesin olarak kanıtlanmıştır:
+
+   Hisse   Sektör              Anti-Prediktif   p-değeri
+   THYAO   Havacılık            15/15 (%100)     < 0.0001
+   PGSUS   Havacılık            15/15 (%100)     < 0.0001
+   HEKTS   Spekülatif           15/15 (%100)     < 0.0001
+   SASA    Spekülatif           15/15 (%100)     < 0.0001
+   KRDMD   Emtia/Demir-Çelik   13/15 (%87)      = 0.0037
+   FROTO   Otomotiv             Normal           —
+   YKBNK   Bankacılık           Normal           —
+   DOAS    Ticaret              Normal           —
+   ISCTR   Bankacılık           Normal           —
+   TAVHL   Havalimanı           Nötr             —
+   KOZAL   Madencilik           Nötr             —
+
+   Bonferroni-düzeltilmiş 4 hisse: p = 0.00012
+
+Walk-Forward v2'de anti-prediktif davranışın dönemsel haritası:
+   Fold 1 (2019):        0/18 anti-prediktif  → Normal dönem
+   Fold 2 (2020 COVID):  18/18 anti-prediktif → Makro şok tetikleyici
+   Fold 3 (2020-21):     18/18 anti-prediktif → Şokun devam etkisi
+   Fold 4 (2021-22):     0/18 anti-prediktif  → Toparlanma
+   Fold 5 (2022-23):     0/18 anti-prediktif  → Normal dönem
+   Fold 6 (2023-24):     14/18 anti-prediktif → Kur şoku/enflasyon
+   Fold 7 (2024-25):     8/18 anti-prediktif  → Kısmi etki
+
+Mevcut Kısıt: Model, hangi dönemin rasyonel piyasa, hangi dönemin spekülatif "gürültü" dönemi olduğunu otomatik (dinamik) olarak tespit edememektedir. Yukarıdaki dönemsel harita geriye dönük olarak saptanmıştır; gerçek zamanlı algılama mekanizması bulunmamaktadır.
+
+   Gelecek Çalışmalar (İş Paketi 1): Hamilton (1989) Markov Regime-Switching modelleri temelinde, modelin spekülatif çöküş yaşadığı dönemleri otomatik olarak algılayıp uyku moduna alacak bir makro-duyarlı rejim değişim algoritması tasarlanacaktır.
+
+
+2. Anti-Prediktif Davranışın Mekanizmasının Tam Aydınlatılamaması
+
+Anti-prediktif davranışın varlığı ve koşulları kapsamlı biçimde belgelenmiş olmasına rağmen, modelin nöronlarının "neden" ters yöne tahmin yaptığı tam olarak aydınlatılamamıştır. Özellik Ablasyonu testleri makro değişkenlerin (USDTRY + Oil + TCMB) sorumlu olduğunu, IN_LEN ablasyonu pencere uzunluğunun tetikleyici olduğunu göstermiştir. Ancak modelin iç temsil uzayında (latent space) korelasyon kırılmasının tam olarak nasıl kodlandığı ve gradiyentlerin hangi noktada "ters" yöne döndüğü henüz incelenmemiştir.
+
+   Gelecek Çalışmalar (İş Paketi 2): Katman aktivasyonu analizi (layer activation analysis), Gradient-weighted Class Activation Mapping (Grad-CAM) ve SHAP değerleri kullanılarak, anti-prediktif davranışın model iç yapısındaki mekanizması deşifre edilecektir.
+
+
+3. Statik Eşik Değerleri ve Coverage–Accuracy İkilemi
+
+Mevcut mimarilerde model, piyasa ne kadar gürültülü veya istikrarsız olursa olsun statik karar sınırlarıyla (threshold = 0.50) "Yön" üretmeye zorlanmaktadır. Projede gerçekleştirilen Threshold Grid analizinde 0.30-0.70 aralığında eşik optimizasyonu yapılmış, ancak optimal eşik değerinin dönemden döneme değiştiği ve statik eşiklerin kriz dönemlerinde başarısız kaldığı gözlemlenmiştir.
+
+   Gelecek Çalışmalar (İş Paketi 3): "Selective Abstain" (Seçici Kaçınma) mekanizması (Geifman & El-Yaniv, 2017) entegre edilecektir. Model, tahmininin güven düzeyi belirli bir eşiğin altına düştüğünde tahmin yapmaktan kaçınacak, ancak Coverage → %0 riski özel kayıp fonksiyonlarıyla kontrol altına alınacaktır.
+
+
+4. Bilgi-Teorik Metriklerin Yanlılığı (MI Bias)
+
+Projenin analiz aşamalarında, özellikler ile hedef değişken arasındaki sinyali ölçmek için kullanılan standart Karşılıklı Bilgi (MI) skorlarının, bootstrap permütasyon testleri sonucunda "histogram yanlılığı" içerdiği saptanmıştır. Ayrıca, Klasik ML negatif kontrolünde (Random Forest, Decision Tree, Logistic Regression) bu algoritmaların makro şoklardan nispeten daha az etkilendiği ancak naive seviyeyi tutarlı olarak aşamadığı gösterilmiştir.
+
+   Gelecek Çalışmalar (İş Paketi 4): Histogram tabanlı MI yerine kNN-based MI tahminleyicileri (Kraskov ve diğerleri, 2004) kullanılacaktır. Klasik ML hiperparametre optimizasyonu genişletilecektir.
+
+
+5. Zaman Frekansı ve Giriş Penceresi (IN_LEN) Kısıtı — KISMEN ÇÖZÜLDÜ
+
+Bu kısıt, IN_LEN Ablation v2 deneyleriyle kısmen çözülmüştür:
+
+   IN_LEN = 2:   Model Acc = %39.6,  Flip Acc = %60.4,  Anti-Pred = 15/15
+   IN_LEN = 5:   Model Acc = %45.3,  Flip Acc = %54.7,  Anti-Pred = 15/15
+   IN_LEN = 10:  Model Acc = %52.9,  Flip Acc = %47.1,  Anti-Pred = 0/15
+
+IN_LEN = 10'da anti-prediktif davranış tamamen ortadan kalkmıştır. Ancak günlük frekanstaki piyasa mikro-gürültüsü hâlâ temel bir kısıt olarak varlığını sürdürmektedir. IN_LEN = 10'da "normal" davranan modelin gerçekten daha sağlam bir sinyal mi yakaladığı, yoksa sadece "gürültüyü öğrenemeyecek kadar kısa hafıza alanına" mı sahip olduğu henüz netleşmemiştir.
+
+   Gelecek Çalışmalar (İş Paketi 5): Haftalık periyotlar, sinyal işleme filtreleri (Butterworth alçak-geçiren) ve adaptif pencere stratejileri araştırılacaktır. IN_LEN = 10'daki mekanizmayı anlamak için katman aktivasyonu analizi yapılacaktır.
+
+
+6. Donanım ve Ölçeklenebilirlik Kısıtları
+
+700'den fazla konfigürasyon kişisel bilgisayarda (GPU yok) koşturulmuştur. Bu hacim lisans düzeyinde büyük olmasına rağmen, Transformer tabanlı büyük modeller ve Time-Series Foundation Models (TimesFM, Chronos) tam kapasiteyle optimize edilememiştir. 11 hisselik testlerde 15 konfigürasyon/hisse (3λ × 5 seed) koşulmuştur; daha geniş λ aralığı ve daha fazla seed ile istatistiksel güvenilirlik artırılabilirdi.
+
+   Gelecek Çalışmalar (İş Paketi 6): Bulut bilişim (Google Colab Pro, AWS) kullanılarak geniş hiperparametre taraması yapılacaktır.
+
+
+7. Transfer Öğrenme ve Alan Adaptasyonu Eksikliği
+
+Tüm modeller yalnızca BIST verisi üzerinde sıfırdan eğitilmiştir. NASDAQ/S&P 500'de eğitilmiş modellerin BIST'e transfer edilebilirliği test edilmemiştir. Anti-prediktif eğilimin evrensel mi yoksa piyasaya özgü mü olduğu sorusu yanıtsız kalmaktadır.
+
+   Gelecek Çalışmalar (İş Paketi 7): Pre-training (NASDAQ) + fine-tuning (BIST) karşılaştırması yapılacaktır.
+
+
+8. Çoklu Karşılaştırma (Multiple Testing) Riski
+
+700'den fazla model koşturulması, istatistiksel olarak "p-hacking" (çoklu karşılaştırma problemi) riskini beraberinde getirmektedir. Projemizde Bonferroni düzeltmesi uygulanmıştır (düzeltilmiş p = 0.00012), ancak daha esnek olan Benjamini-Hochberg FDR (False Discovery Rate) yöntemi denenmemiştir. 700+ koşunun tamamında anti-prediktif davranışın gözlemlenmesi bu riski azaltmakla birlikte, akademik titizlik gereği daha kapsamlı çoklu test düzeltmeleri uygulanmalıdır.
+
+   Gelecek Çalışmalar (İş Paketi 8): Benjamini-Hochberg FDR düzeltmesi, permütasyon testleri ve bootstrap güven aralıkları uygulanarak istatistiksel sonuçlar güçlendirilecektir.
+
+
+9. Validasyon Metodolojisi Kısıtları
+
+Walk-Forward v1'de validasyon verisi (val_data) eksikti; bu, erken durdurma mekanizmasının eğitim verisine göre çalışmasına ve potansiyel aşırı uyuma yol açmaktaydı. v2'de düzeltilmiş olmasına rağmen, validasyon doğruluğu ile test doğruluğu arasındaki korelasyon düşük kalmıştır. Bu durum, validasyon setinin bile "normal dönem" özelliklerini taşımasından kaynaklanmaktadır — kriz döneminin test setinde model tamamen farklı bir rejimle karşılaşmaktadır.
+
+   Gelecek Çalışmalar (İş Paketi 9): Adversarial validation tekniği kullanılarak validasyon setinin test setine benzerliği ölçülecek ve rejim değişikliklerini algılayan bir mekanizma geliştirilecektir.
+
+
+10. Makro Değişken Gecikmesi ve Zamanlama Kısıtı
+
+Projede kullanılan makroekonomik değişkenler (USDTRY, Brent Petrol, TCMB Faiz) günlük kapanış değerleri olarak alınmıştır. Ancak gün içi (intra-day) gecikme kontrol edilmemiştir: örneğin bir TCMB faiz kararı gün ortasında açıklandığında, model bu bilgiyi aynı günün kapanış fiyatıyla eşleştirmektedir. Bu durum, küçük ama potansiyel bir look-ahead bias riski oluşturmaktadır. Ayrıca, bazı makro değişkenlerin etkisinin gecikmeli (lagged) olabileceği — örneğin kur şokunun hisseye 1-3 gün gecikmeli yansıması — sistematik olarak test edilmemiştir.
+
+   Gelecek Çalışmalar (İş Paketi 10): Makro değişkenlerde T-1 ve T-2 gecikmeleri (lags) sistematik olarak test edilecek, intra-day zamanlama kontrolü için gün sonu kapanış saati sonrasındaki veriler kullanılacaktır.
