@@ -282,7 +282,7 @@ with st.sidebar:
 tabs = st.tabs([
     t("tab_main"), t("tab_arch"), t("tab_wf"), t("tab_evol"),
     t("tab_pred"), t("tab_abl"), t("tab_cross"), t("tab_ens"),
-    t("tab_stat"), t("tab_diag"), "⚔️ Karşılaştırma",
+    t("tab_stat"), t("tab_diag"), "⚔️ Karşılaştırma", "📷 Ek Görseller",
 ])
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -1560,6 +1560,72 @@ with tabs[10]:
             <div style="color: #aaa;">{wins_a} — {wins_b} (metrik bazında)</div>
         </div>
         """, unsafe_allow_html=True)
+
+
+# ╔═══════════════════════════════════════════════════════════════════════════╗
+# ║  TAB 12 — Ek Görseller (CSV-Based Charts)                               ║
+# ╚═══════════════════════════════════════════════════════════════════════════╝
+with tabs[11]:
+    section("Ek Görseller — CSV Verilerinden Üretilmiş Analizler")
+    st.info("Bu sekmede 130 CSV çıktısından üretilen 15 yeni analiz görseli yer almaktadır.")
+
+    _ek_charts = [
+        ("34_PerStock_AccBar_11BIST.png",
+         "11 BIST Hissesi Doğruluk Karşılaştırması",
+         "Her hisse için Naive, Model ve Flip doğrulukları. Anti-prediktif hisseler kırmızı ile vurgulanmıştır."),
+        ("35_Threshold_Heatmap.png",
+         "Eşik Optimizasyonu Yüzey Haritası",
+         "Lambda ve Threshold parametrelerinin model doğruluğuna etkisini gösteren ısı haritası."),
+        ("36_MI_Scores_Bar.png",
+         "Karşılıklı Bilgi (MI) Skorları",
+         "Farklı veri setlerinde özellik-etiket arasındaki karşılıklı bilgi miktarı."),
+        ("37_Ensemble_Agreement.png",
+         "Ensemble Uzlaşma Analizi",
+         "6 mimari uzlaştığında vs bölündüğünde doğruluk farkı."),
+        ("38_CrossMarket_Ablation.png",
+         "Çapraz Piyasa Özellik Ablasyonu",
+         "NASDAQ (AAPL) vs BIST (THYAO) — makro değişken etkisinin piyasa bazlı karşılaştırması."),
+        ("39_Label_Distribution.png",
+         "Hedef Değişken Dağılımı",
+         "Sınıf dengesi kontrolü — yükseldi/düştü oranları."),
+        ("40_WalkForward_v2_Heatmap.png",
+         "Walk-Forward v2: Fold × Mimari Doğruluk",
+         "7 fold × 6 mimari × 3 seed ortalaması. Hangi fold-mimari kombinasyonunda anti-prediktif davranış var?"),
+        ("41_SeedVariance_AllStocks.png",
+         "Seed Varyansı: 11 BIST Hissesi",
+         "Her hissenin farklı seed'ler arasındaki doğruluk dağılımı."),
+        ("42_CorrelationDrift_Detail.png",
+         "Korelasyon Kayması: Eğitim vs Test",
+         "Değişkenlerin eğitim ve test dönemlerinde korelasyon farkı — concept drift kanıtı."),
+        ("43_BES_Fund_Detail.png",
+         "BES Fonları Detaylı Karşılaştırma",
+         "Bireysel emeklilik fonlarında model performansı."),
+        ("44_PooledConfusion_PerFold.png",
+         "Walk-Forward Fold Bazlı Confusion Metrikleri",
+         "Her fold'da Accuracy, Sensitivity ve Specificity."),
+        ("45_Holding_SeedVar.png",
+         "Holding Sektörü Seed Varyansı",
+         "Holding hisselerinin seed'ler arasındaki doğruluk dağılımı."),
+        ("46_Sigorta_SeedVar.png",
+         "Sigorta Sektörü Seed Varyansı",
+         "Sigorta hisselerinin seed'ler arasındaki doğruluk dağılımı."),
+        ("47_Threshold_MultiArch.png",
+         "Mimari Bazlı Eşik-Doğruluk Eğrileri",
+         "Farklı mimarilerde eşik değerinin doğruluğa etkisi."),
+        ("48_INLEN_Ablation_Detail.png",
+         "IN_LEN Ablasyonu Detay",
+         "Pencere uzunluğunun (IN_LEN=2,5,10) doğruluk ve anti-prediktif sayısına etkisi."),
+    ]
+
+    for img_name, title, desc in _ek_charts:
+        img_path = os.path.join("Gorseller", img_name)
+        if os.path.exists(img_path):
+            st.markdown(f"### {title}")
+            st.caption(desc)
+            st.image(img_path, use_container_width=True)
+            st.markdown("---")
+        else:
+            st.warning(f"Görsel bulunamadı: {img_name}")
 
 
 st.markdown("---")
