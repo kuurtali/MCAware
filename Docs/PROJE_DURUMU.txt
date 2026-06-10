@@ -19,7 +19,7 @@ Süre: Ekim 2025 – Haziran 2026
    • Test edilen varlık: 27 (21 BIST + 1 NASDAQ + 3 BES + 2 çapraz deney)
    • CSV çıktı: 130 (71 summary + 19 prediction + 26 diagnostic + 14 threshold)
    • Görsel: 62 PNG (52 orijinal + 10 yeni CSV-tabanlı)
-   • Kod dosyası: 61 (52 R + 7 Python + 2 PS1, 7 klasör)
+   • Kod dosyası: 62 (40 R + 17 Python + 5 PS1, 7 klasör)
    • Walk-Forward: 7-fold v2 (val_data düzeltmesi ile)
    • Deney serisi: 30+
    • Dashboard: 12 tab (TR/EN), 62 görsel galerisi, 7 mimari, 21 BIST hissesi

@@ -62,11 +62,11 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 | Bulgu | Detay |
 |-------|-------|
 | **MC Tuzağı Çözümü** | 700+ konfigürasyonda MC=0 (`class_weight` + MC-Aware loss) |
-| **Anti-Prediktif Davranış** | THYAO 15/15 anti-prediktif (p < 0.0001), 4 hissede tam, 1 hissede güçlü |
-| **11 Hisse Genellenebilirlik** | Havacılık + spekülatif + emtia sektörlerinde yaygın; bankacılık/otomotivde yok |
-| **Mimariden Bağımsız** | BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN — 6 mimaride aynı örüntü |
+| **Anti-Prediktif Davranış** | THYAO 15/15 anti-prediktif (p < 0.0001), 7/21 BIST hissesinde tespit |
+| **21 Hisse Genellenebilirlik** | Havacılık + spekülatif + emtia + sigorta sektörlerinde yaygın; bankacılık/otomotiv/holdingde yok |
+| **Mimariden Bağımsız** | BiLSTM×2, GRU, Conv1D, TCN, Transformer, SimpleRNN — 7 mimaride aynı örüntü |
 | **Pencere Uzunluğu Etkisi** | IN_LEN ≤ 5 → anti-prediktif; IN_LEN = 10 → kayboluyor (temporal resolution) |
-| **Walk-Forward v2** | 7-fold CV × 6 mimari × 3 seed — Fold 2 (COVID) ve Fold 7 (enflasyon) dönemlerinde tetikleniyor |
+| **Walk-Forward v2** | 7-fold CV × 7 mimari × 3 seed — Fold 2 (COVID) ve Fold 7 (enflasyon) dönemlerinde tetikleniyor |
 | **Mekanizma** | Makro korelasyon kırılması (USDTRY: train 0.91 → test 0.41) |
 | **Makro Değişken Rolü** | USDTRY + Oil + TCMB çıkarılınca anti-prediktif tamamen kayboluyor |
 | **Cross-Market** | NASDAQ'ta normal davranış — gelişmekte olan piyasaya özgü |
@@ -79,13 +79,13 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 | # | Deney | Açıklama | Konfigürasyon |
 |---|-------|---------|--------------|
 | 1 | BiLSTM v1–v6 | Model evrim süreci (6 versiyon) | 9 × 15 = 135 |
-| 2 | Multi-Architecture | 6 DL mimarisi karşılaştırma | 7 × 15 = 105 |
-| 3 | Walk-Forward CV v2 | 7-fold temporal CV × 6 mimari × 3 seed (val_data düzeltilmiş) | 126 |
+| 2 | Multi-Architecture | 7 DL mimarisi karşılaştırma | 7 × 15 = 105 |
+| 3 | Walk-Forward CV v2 | 7-fold temporal CV × 7 mimari × 3 seed (val_data düzeltilmiş) | 147 |
 | 4 | Feature Ablation | full_13 vs no_ext_10 + tekli çıkarma | 5 grup × 3 seed |
 | 5 | IN_LEN Ablation v2 | Pencere boyutu (2, 5, 10 gün) — OUT_LEN=3, gerçek TCMB | 3 × 15 = 45 |
 | 6 | Cross-Market | BIST THYAO vs NASDAQ AAPL | 4 |
 | 7 | Multi-Stock | BIST-3 (banka) + BIST-5 (holding) + BIST-5 (sigorta) + BIST-11 (makro) | 204 |
-| 8 | Ensemble | Hard + Soft Voting (6 mimari) | 8 |
+| 8 | Ensemble | Hard + Soft Voting (7 mimari) | 8 |
 | 9 | Rule-Based Baseline | DecisionTree, RF, LR, OneR × 3 varlık | 12 |
 | 10 | Teknik İndikatörler | SMA, EMA, RSI, MACD, BBand, Stoch, CCI, WilliamsR, ADX, ROC | 11 |
 | 11 | Threshold Grid | Olasılık eşik optimizasyonu (0.30–0.70) | 135 |
@@ -172,8 +172,8 @@ After solving the MC trap with `class_weight=balanced`, we discovered that DL mo
 | Finding | Detail |
 |---------|--------|
 | **MC Trap Solved** | 700+ configs achieve MC=0 |
-| **Anti-Predictive** | 5/11 BIST stocks anti-predictive; THYAO 15/15 (p < 0.0001) |
-| **Architecture-Independent** | 6 DL architectures — all show same pattern in walk-forward |
+| **Anti-Predictive** | 7/21 BIST stocks anti-predictive; THYAO 15/15 (p < 0.0001) |
+| **Architecture-Independent** | 7 DL architectures — all show same pattern in walk-forward |
 | **Window Length** | IN_LEN ≤ 5 → anti-predictive; IN_LEN = 10 → normal |
 | **Mechanism** | Macro-variable correlation breakdown (USDTRY: train 0.91 → test 0.41) |
 | **Cross-Market** | NASDAQ shows normal behavior — emerging-market specific |
