@@ -1,6 +1,6 @@
 ============================================================
 MC-AWARE PROJESİ FİNAL DURUM RAPORU
-Son Güncelleme: 3 Haziran 2026, 23:20
+Son Güncelleme: 10 Haziran 2026, 13:10
 ============================================================
 
 1. PROJE ÖZETİ
@@ -14,16 +14,15 @@ Süre: Ekim 2025 – Haziran 2026
 2. KANTİTATİF ÖLÇEKLER
 ----------------------
    • Toplam konfigürasyon: 700+
-   • DL mimarisi: 6 (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN)
+   • DL mimarisi: 7 (BiLSTM×2, GRU, Conv1D, TCN, Transformer, SimpleRNN)
    • Klasik ML: 4 (RF, DT, LR, SVM)
-   • Test edilen varlık: 27 (11 BIST + 1 NASDAQ + 3 BES + 12 Sigorta/Holding)
+   • Test edilen varlık: 27 (21 BIST + 1 NASDAQ + 3 BES + 2 çapraz deney)
    • CSV çıktı: 130 (71 summary + 19 prediction + 26 diagnostic + 14 threshold)
-   • Görsel: 52 PNG
-   • R script: 52 (7 klasör)
-   • Python script: 5+ (dashboard + araçlar)
+   • Görsel: 62 PNG (52 orijinal + 10 yeni CSV-tabanlı)
+   • Kod dosyası: 61 (52 R + 7 Python + 2 PS1, 7 klasör)
    • Walk-Forward: 7-fold v2 (val_data düzeltmesi ile)
    • Deney serisi: 30+
-   • Dashboard: 12 tab (TR/EN), 52 görsel galerisi
+   • Dashboard: 12 tab (TR/EN), 62 görsel galerisi, 7 mimari, 21 BIST hissesi
    • İstatistiksel anlamlılık: Bonferroni-düzeltilmiş p = 0.00012
 
 3. TEMEL BULGULAR
@@ -33,13 +32,20 @@ Süre: Ekim 2025 – Haziran 2026
       - no_ext_10 grubu: acc=%49.6, flip=%50.4 → NORMAL
       - Mekanizma: Makro korelasyon kırılması (USDTRY eğitim r=0.91 → test r=0.41)
       
-   b) Sektörel Ayrışma (11 BIST hissesi):
-      - THYAO: 15/15, PGSUS: 15/15, HEKTS: 15/15, SASA: 15/15 → %100
-      - KRDMD: 13/15 → %87
-      - DOAS: 10/15 → %67 (kısmen)
-      - ISCTR: 7/15, TAVHL: 7/15 → Nötr
-      - FROTO: 1/15 → Normal
-      - YKBNK: 0/15 → Tamamen normal
+   b) Sektörel Ayrışma (21 BIST hissesi):
+       BIST-11 Macro:
+       - THYAO: 15/15, PGSUS: 15/15, HEKTS: 15/15, SASA: 15/15 → %100
+       - KRDMD: 13/15 → %87
+       - DOAS: 10/15 → %67 (kısmen)
+       - ISCTR: 7/15, TAVHL: 7/15 → Nötr
+       - FROTO: 1/15 → Normal
+       - YKBNK: 0/15 → Tamamen normal
+       Sigorta (5 hisse):
+       - AKGRT: sıkı anti-prediktif, ANSGR: sıkı anti-prediktif
+       - AGESA, RAYSG, TURSG → Normal
+       Holding (5 hisse):
+       - Hiçbirinde kesin anti-prediktif davranış yok
+       TOPLAM: 7/21 BIST hissesi anti-prediktif (THYAO, PGSUS, HEKTS, SASA, KRDMD, AKGRT, ANSGR)
       
    c) IN_LEN Ablasyonu:
       - IN_LEN=2: %48.5, IN_LEN=5: %51.5, IN_LEN=10: %52.2
@@ -52,7 +58,7 @@ Süre: Ekim 2025 – Haziran 2026
 4. DOSYA YAPISI (260 Tracked Dosya)
 ------------------------------------
    Tubitak/
-   ├── app.py (12 tab, TR/EN, 52 görsel galerisi)
+   ├── app.py (12 tab, TR/EN, 62 görsel, 7 mimari, 21 BIST hissesi)
    ├── README.md, requirements.txt, Dockerfile, LICENSE
    ├── Docs/
    │   ├── MC_AWARE_Kisisel_Rapor.docx (v2: 9 bölüm, 35 görsel, 15 DOI referans, 15 kısıt)
@@ -60,8 +66,9 @@ Süre: Ekim 2025 – Haziran 2026
    │   ├── PROJE_DURUMU.txt (bu dosya)
    │   ├── Dashboard/ (statik HTML, 11.6 KB)
    │   └── rapor_sablonlari/ (orijinal TÜBİTAK şablonları)
-   ├── Gorseller/ (52 PNG)
-   ├── Kodlar/ (59 dosya, 7 klasör)
+   ├── Gorseller/ (62 PNG: 52 orijinal + 10 CSV-tabanlı)
+   │   └── Infografikler/ (19 PNG: 9 AI + 10 CSV)
+   ├── Kodlar/ (61 dosya, 7 klasör)
    └── Sonuclar/ (130 CSV, 4 alt klasör)
 
 5. KİŞİSEL RAPOR v2 İÇERİK
@@ -91,14 +98,13 @@ Süre: Ekim 2025 – Haziran 2026
    [x] Kişisel Rapor v2 (sıfırdan yazıldı, 35 görsel, 15 DOI referans)
    [x] TÜBİTAK Sonuç Raporu (şablon uyumlu)
    [x] Literatür + Limitasyonlar → kişisel rapora entegre
-   [x] Streamlit Dashboard (12 tab, 52 görsel, çalışıyor)
+   [x] Streamlit Dashboard (12 tab, 62 görsel, 7 mimari, 21 BIST, çalışıyor)
    [x] Statik Dashboard (güncel, hafif)
    [x] 130 CSV hatasız
-   [x] 52 görsel
-   [x] README güncel
-   [x] GitHub push tamam (0 uncommitted)
+   [x] 62 görsel (52 orijinal + 10 yeni CSV-tabanlı)
+   [x] README güncel (59→61 kod, veri notu eklendi)
    [x] Danışman bilgisi doğru: Dr. Övgücan Karadağ Erdemir
-   [x] Tüm sayılar güncel: 700+, Bonferroni p=0.00012, 130 CSV, 52 görsel
+   [x] Tüm sayılar güncel: 700+, Bonferroni p=0.00012, 130 CSV, 62 görsel, 7/21 AP
 
 7. BEKLEYEN İŞLER (MANUEL)
 ----------------------------
@@ -109,3 +115,61 @@ Süre: Ekim 2025 – Haziran 2026
          PROJE DURUMU: TESLİME HAZIR ✓
          Kalan: Harcama + İmza (MANUEL)
 ============================================================
+
+8. ÇALIŞMA GÜNLÜĞÜ — 10 HAZİRAN 2026
+--------------------------------------
+   Saat 11:00-13:10 arası yapılan kapsamlı güncelleme:
+
+   a) KRİTİK BUG DÜZELTMELERİ:
+      [x] mcaware_prototype_BiLSTM_v1.R: OUTDIR_SUM/OUTDIR_DIAG tanımsız → eklendi
+      [x] app.py: "5/11 hisse" → "7/21 BIST" (sigorta AKGRT+ANSGR dahil edildi)
+      [x] app.py: "6 mimari" → "7 mimari" (BiLSTM×2 dahil)
+      [x] app.py: "11 BIST hissesi" → "21 BIST + 1 NASDAQ + 3 BES = 27 varlık"
+      [x] app.py: Narrative story box baştan sona TR/EN çeviriye taşındı
+      [x] app.py: Hero metrikleri t() çeviri sistemine taşındı
+      [x] app.py: Son 2 sekme adı (Karşılaştırma, Ek Görseller) çeviriye taşındı
+      [x] app.py: "PDF Rapor İndir" → "HTML Rapor İndir" düzeltildi
+      [x] app.py: Görsel galerisi path'i mutlak yapıldı (BASE / "Gorseller")
+      [x] app.py: Sidebar'da 7 mimari listelendi (BiLSTM v3b + v3c-noCW)
+      [x] app.py: Anti-prediktif oran %98 → %33 (7/21) düzeltildi
+
+   b) DOSYA GÜNCELLEMELERİ:
+      [x] Dockerfile: build-essential kaldırıldı, --no-install-recommends eklendi
+      [x] .dockerignore: Yeni oluşturuldu (.git, Kodlar, Docs hariç tutuldu)
+      [x] README.md: 58→59 kod, 25→26 araç, Tab 10 ikonu 🔧→📊, veri notu eklendi
+      [x] TUBITAK_2209A_Sonuc_Raporu.docx: 10→12 tab, 37→52 görsel, 248→260 dosya,
+          52 R scripti → 59 kod dosyası (python-docx ile otomatik güncellendi)
+      [x] PROJE_DURUMU.txt: 6→7 mimari, 11→21 hisse, tarih güncellendi
+
+   c) YENİ GÖRSELLER (10 adet, CSV verilerinden matplotlib ile üretildi):
+      [x] 49_Sigorta_vs_Holding_Detay.png — Sigorta (2 AP) vs Holding (0 AP)
+      [x] 50_FlipVsAcc_Scatter_21Hisse.png — 21 hisse scatter, AP bölgesi işaretli
+      [x] 51_WF_v2_FoldXMimari_Heatmap.png — 7 fold × 6 mimari ısı haritası
+      [x] 52_YHAT_Violin_MultiModel.png — Model çıkış dağılımı violin plot
+      [x] 53_VotingScore_Accuracy.png — Konsensüs vs doğruluk (41K veri)
+      [x] 54_BiLSTM_Evrim_Cizgisi.png — v2a→v2b→v2bfix→v3c→attn_v6 evrim
+      [x] 55_BES_3Fon_Detay.png — ALZ (MC tuzağı), AMZ, AZS × 3 lambda
+      [x] 56_Threshold_MultiArch_Overlay.png — 6 mimari threshold eğrisi
+      [x] 57_AntiPrediktif_Guc_PerStock.png — Flip−Naive fark (per stock)
+      [x] 58_Sektorel_Yogunluk_Haritasi.png — 21 hisse sektörel renk kodlu
+
+   d) İNFOGRAFİK GÖRSELLER (9 adet, AI ile üretildi → Gorseller/Infografikler/):
+      [x] INF01_Metodoloji_Pipeline.png — 5 adımlı proje akışı
+      [x] INF02_Anti_Prediktif_Kavram.png — ~%40 → flip → ~%60 kavram
+      [x] INF03_Sektorel_Ayrisma.png — Hangi sektörler anti-prediktif?
+      [x] INF04_Korelasyon_Kirilmasi.png — Train r=0.91 → Test r=0.41
+      [x] INF05_7_Mimari_Karsilastirma.png — 7 DL mimarisi kartları
+      [x] INF06_Anahtar_Bulgular.png — 8 bulgu tek poster
+      [x] INF07_WalkForward_Zaman_Haritasi.png — 7-fold zaman çizelgesi
+      [x] INF08_BIST_vs_NASDAQ.png — Gelişmekte olan vs gelişmiş piyasa
+      [x] INF09_MC_Tuzagi_Cozumu.png — MC tuzağı problem/çözüm
+
+   e) YENİ SCRIPT'LER:
+      [x] Kodlar/07_araclar/gorsel_uretici.py — 10 CSV-tabanlı görsel üretici
+      [x] Kodlar/07_araclar/gorsel_uretici_v2.py — 10 ek CSV-tabanlı görsel
+
+   f) SYNTAX VE FONKSİYONEL DOĞRULAMA:
+      [x] app.py syntax kontrolü: OK
+      [x] Streamlit dashboard: Hatasız çalışıyor (localhost:8501)
+      [x] Eski referans taraması: 0 kalan (5/11, 6 mimari, 11 hisse tamamen temizlendi)
+      [x] git ls-files: 260 dosya doğrulandı

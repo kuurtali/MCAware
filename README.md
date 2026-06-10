@@ -49,7 +49,7 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 | 🌍 | **Cross-Market** — BIST vs NASDAQ, sektör analizi | `nasdaq_RESULTS.csv`, `corr_*.csv` |
 | 🗳️ | **Ensemble & Baseline** — Voting, rule-based ML, teknik indikatör | `ensemble_*.csv`, `rule_based_*.csv` |
 | 📐 | **İstatistiksel Kanıtlar** — MI, label check, YHAT istatistikleri | `MI_SCORES.csv`, `LABEL_CHECK.csv` |
-| 🔧 | **Threshold & Diagnostics** — Eşik grid heatmap, seed raporu | `THRESHOLD_GRID.csv`, `YHAT_STATS.csv` |
+| 📊 | **Threshold & Diagnostics** — Eşik grid heatmap, seed raporu | `THRESHOLD_GRID.csv`, `YHAT_STATS.csv` |
 | ⚔️ | **Karşılaştırma** — İki konfigürasyon arasında birebir metrik karşılaştırma | Tüm `OPTIMAL.csv` |
 | 📷 | **Ek Görseller** — 15 yeni CSV-tabanlı analiz grafiği | 130 CSV'den üretilmiş |
 
@@ -117,20 +117,20 @@ Tubitak/
 ├── requirements.txt        # Python bağımlılıkları
 ├── Dockerfile              # Docker container
 ├── README.md               # Bu dosya
-├── Kodlar/                 # 58 kod dosyası (R + Python)
+├── Kodlar/                 # 59 kod dosyası (R + Python)
 │   ├── 01_prototypes/      # BiLSTM v1-v6, multi-arch (12)
 │   ├── 02_ablation/        # Feature, IN_LEN, korelasyon (5)
 │   ├── 03_validation/      # Walk-forward, NASDAQ, multi-stock (5)
 │   ├── 04_baseline/        # Klasik ML ve Ensemble (4)
 │   ├── 05_diagnostic/      # MI, teşhis testleri (2)
 │   ├── 06_ek_deneyler/     # Sektörel karşılaştırma (5)
-│   └── 07_araclar/         # Python araçları, rapor üretici (25)
+│   └── 07_araclar/         # Python araçları, rapor üretici (26)
 ├── Sonuclar/               # 130 CSV dosyası
 │   ├── summaries/   (71)   # Deney özet tabloları
 │   ├── predictions/ (19)   # Ham tahmin serileri
 │   ├── diagnostics/ (26)   # İstatistiksel tanı verileri
 │   └── thresholds/  (14)   # Eşik grid sonuçları
-├── Gorseller/              # 52 makale kalitesinde grafik (PNG)
+├── Gorseller/              # 62 makale kalitesinde grafik (PNG)
 └── Docs/                   # TÜBİTAK raporu, kişisel rapor, şablonlar
 ```
 
@@ -159,6 +159,8 @@ Rscript Kodlar/01_prototypes/mcaware_prototype_BiLSTM_v3_THYAO.R
 
 > Model eğitimi donanıma bağlı olarak 45-60 dakika sürebilir.
 
+> **Not:** R deneyleri `ALZ_AZS_AMZ_Haftalik.xlsx` veri dosyasını gerektirir. Bu dosya gizlilik nedeniyle repoya dahil edilmemiştir.
+
 ---
 
 ## 🇬🇧 English Summary
@@ -177,7 +179,7 @@ After solving the MC trap with `class_weight=balanced`, we discovered that DL mo
 | **Cross-Market** | NASDAQ shows normal behavior — emerging-market specific |
 | **Feature Ablation** | Removing macro variables completely eliminates anti-predictive behavior |
 
-**Live Dashboard:** [mcaware.streamlit.app](https://mcaware.streamlit.app) — 12 tabs, 130 CSV sources, 52 visuals, no mock data.
+**Live Dashboard:** [mcaware.streamlit.app](https://mcaware.streamlit.app) — 12 tabs, 130 CSV sources, 62 visuals, no mock data.
 
 ---
 

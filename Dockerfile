@@ -2,11 +2,9 @@ FROM python:3.11-slim
 
 WORKDIR /app
 
-# Sistem bağımlılıklarını kur (R ve diğer kütüphaneler için gerekebilir)
-RUN apt-get update && apt-get install -y \
-    build-essential \
+# Sistem bağımlılıkları (healthcheck için curl gerekli)
+RUN apt-get update && apt-get install -y --no-install-recommends \
     curl \
-    software-properties-common \
     && rm -rf /var/lib/apt/lists/*
 
 COPY requirements.txt .

@@ -1,4 +1,4 @@
-﻿# ===========================================================================
+# ===========================================================================
 # MC-AWARE PROTOTYPE — BiLSTM (R + keras3) — v1.1 (hatasız sürüm)
 # TÜBİTAK 2209-A Ön Kanıt Çalışması
 # Yürütücü: Mehmet Ali Kurt | Danışman: Övgücan KARADAĞ ERDEMİR
@@ -32,8 +32,10 @@ library(here)
 
 
 # --- 0. Ortam ayarları ---
-WORKDIR <- here::here()
+WORKDIR    <- here::here()
 setwd(WORKDIR)
+OUTDIR_SUM  <- here::here("Sonuclar", "summaries")
+OUTDIR_DIAG <- here::here("Sonuclar", "diagnostics")
 Sys.setenv(CUDA_VISIBLE_DEVICES = "-1")     # GPU bypass (RTX 5050 keras3 sorunu)
 Sys.setenv(TF_CPP_MIN_LOG_LEVEL = "3")      # TF gürültüsünü kapat
 Sys.setenv(TF_ENABLE_ONEDNN_OPTS = "0")     # oneDNN deterministiklik

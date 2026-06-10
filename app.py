@@ -36,10 +36,12 @@ TEXTS = {
     "flip_naive":      {"TR": "Flip > Naive",           "EN": "Flip > Naive"},
     "anti_pred_rate":  {"TR": "Anti-Prediktif Oran",    "EN": "Anti-Predictive Rate"},
     "finding_main":    {"TR": "700+ konfigürasyonda model ~%40 doğrulukla çalışırken, tahminleri ters çevirince ~%60'a ulaşılıyor. "
-                              "11 BIST hissesinde 5'i (THYAO, PGSUS, HEKTS, SASA, KRDMD) sistematik anti-prediktif davranış sergiliyor. "
+                              "21 BIST hissesi + 1 NASDAQ + 3 BES = 27 varlıkta test edildi. "
+                              "7 BIST hissesinde (THYAO, PGSUS, HEKTS, SASA, KRDMD, AKGRT, ANSGR) sistematik anti-prediktif davranış tespit edildi. "
                               "Bonferroni-düzeltilmiş p = 0.00012 ile istatistiksel olarak çok anlamlıdır.",
                         "EN": "Across 700+ configurations, the model runs at ~40% accuracy; flipping predictions reaches ~60%. "
-                              "5 out of 11 BIST stocks (THYAO, PGSUS, HEKTS, SASA, KRDMD) show systematic anti-predictive behavior. "
+                              "Tested on 21 BIST stocks + 1 NASDAQ + 3 pension funds = 27 assets. "
+                              "7 BIST stocks (THYAO, PGSUS, HEKTS, SASA, KRDMD, AKGRT, ANSGR) show systematic anti-predictive behavior. "
                               "Bonferroni-corrected p = 0.00012, statistically highly significant."},
     "pooled_cm":       {"TR": "Havuzlanmış Confusion Matrix (7-fold)", "EN": "Pooled Confusion Matrix (7-fold)"},
     "pool_metrics":    {"TR": "Havuz Metrikleri",       "EN": "Pool Metrics"},
@@ -78,8 +80,17 @@ TEXTS = {
     "sidebar_csv":     {"TR": "Toplam CSV", "EN": "Total CSV"},
     "sidebar_config":  {"TR": "Toplam Konfigürasyon", "EN": "Total Configurations"},
     "sidebar_note":    {"TR": "Tüm veriler gerçek deneylerden elde edilmiştir.", "EN": "All data obtained from real experiments."},
-    "pdf_btn":         {"TR": "📄 PDF Rapor İndir", "EN": "📄 Download PDF Report"},
+    "pdf_btn":         {"TR": "📄 HTML Rapor İndir", "EN": "📄 Download HTML Report"},
     "lang_label":      {"TR": "🌐 Dil / Language", "EN": "🌐 Language / Dil"},
+    "tab_compare":     {"TR": "⚔️ Karşılaştırma",  "EN": "⚔️ Comparison"},
+    "tab_gallery":     {"TR": "📷 Ek Görseller",    "EN": "📷 Extra Visuals"},
+    "hero_config":     {"TR": "Toplam Konfigürasyon", "EN": "Total Configurations"},
+    "hero_mc":         {"TR": "MC Tuzağı",           "EN": "MC Trap"},
+    "hero_anti":       {"TR": "Anti-Prediktif",      "EN": "Anti-Predictive"},
+    "hero_acc":        {"TR": "Model Doğruluğu",     "EN": "Model Accuracy"},
+    "hero_mc_help":    {"TR": "Hiçbir model majority class'a sıkışmadı", "EN": "No model collapsed to majority class"},
+    "hero_anti_help":  {"TR": "THYAO, PGSUS, HEKTS, SASA, KRDMD",       "EN": "THYAO, PGSUS, HEKTS, SASA, KRDMD"},
+    "hero_acc_help":   {"TR": "Model şanstan kötü → anti-prediktif",     "EN": "Model worse than chance → anti-predictive"},
 }
 
 # ─── paths ───────────────────────────────────────────────────────────────────
@@ -244,7 +255,7 @@ with st.sidebar:
     """)
     st.divider()
     st.markdown(f"#### 🏗️ {t('sidebar_arch')}")
-    for a in ["BiLSTM", "GRU", "SimpleRNN", "Conv1D", "TCN", "Transformer"]:
+    for a in ["BiLSTM (v3b)", "BiLSTM (v3c-noCW)", "GRU", "SimpleRNN", "Conv1D", "TCN", "Transformer"]:
         st.markdown(f"- {a}")
     st.divider()
     st.markdown(f"#### 📊 {t('sidebar_data')}")
@@ -282,7 +293,7 @@ with st.sidebar:
 tabs = st.tabs([
     t("tab_main"), t("tab_arch"), t("tab_wf"), t("tab_evol"),
     t("tab_pred"), t("tab_abl"), t("tab_cross"), t("tab_ens"),
-    t("tab_stat"), t("tab_diag"), "⚔️ Karşılaştırma", "📷 Ek Görseller",
+    t("tab_stat"), t("tab_diag"), t("tab_compare"), t("tab_gallery"),
 ])
 
 # ╔═══════════════════════════════════════════════════════════════════════════╗
@@ -294,52 +305,58 @@ with tabs[0]:
     # ── Hero metrics with st.metric ──
     c1, c2, c3, c4 = st.columns(4)
     with c1:
-        st.metric("🧪 Toplam Konfigürasyon", "700+", help="6 mimari × 11 hisse × çoklu lambda/seed")
+        st.metric(f"🧪 {t('hero_config')}", "700+", help="7 mimari × 27 varlık × çoklu lambda/seed")
     with c2:
-        st.metric("🪤 MC Tuzağı", "0 / 700+", delta="Sıfır!", delta_color="normal",
-                  help="Hiçbir model majority class'a sıkışmadı")
+        st.metric(f"🪤 {t('hero_mc')}", "0 / 700+", delta="Sıfır!", delta_color="normal",
+                  help=t('hero_mc_help'))
     with c3:
-        st.metric("🔄 Anti-Prediktif", "5 / 11 hisse", delta="Bonferroni p=0.00012",
-                  help="THYAO, PGSUS, HEKTS, SASA, KRDMD")
+        st.metric(f"🔄 {t('hero_anti')}", "7 / 21 BIST", delta="Bonferroni p=0.00012",
+                  help="THYAO, PGSUS, HEKTS, SASA, KRDMD, AKGRT, ANSGR")
     with c4:
-        st.metric("📉 Model Doğruluğu", "~%40", delta="-10%", delta_color="inverse",
-                  help="Model şanstan kötü → anti-prediktif")
+        st.metric(f"📉 {t('hero_acc')}", "~%40", delta="-10%", delta_color="inverse",
+                  help=t('hero_acc_help'))
 
     # ── Narrative story box ──
-    st.markdown("""
+    lang = st.session_state.get("lang", "TR")
+    if lang == "TR":
+        story_title = "🔬 Ne Bulduk?"
+        story_p1 = '<b>7 farklı derin öğrenme mimarisi</b> (BiLSTM×2, GRU, Conv1D, TCN, Transformer, SimpleRNN) ile <b>700+ konfigürasyon</b>, <b>21 BIST hissesi + 1 NASDAQ + 3 BES = 27 varlık</b> ve <b>130 CSV</b> çıktı test ettik:'
+        story_model = "Model Doğruluğu"
+        story_flip = "Flip Doğruluğu"
+        story_p2 = '7/21 BIST hissesinde model <b>sistematik olarak yanlış</b> tahmin yapıyor (THYAO, PGSUS, HEKTS, SASA, KRDMD + AKGRT, ANSGR). Tahminleri ters çevirince naive stratejiden bile iyi sonuç alınıyor. Bu <b>anti-prediktif davranış</b>, Bonferroni-düzeltilmiş p = 0.00012 ile istatistiksel olarak çok anlamlı.'
+    else:
+        story_title = "🔬 What Did We Find?"
+        story_p1 = '<b>7 deep learning architectures</b> (BiLSTM×2, GRU, Conv1D, TCN, Transformer, SimpleRNN), <b>700+ configurations</b>, <b>21 BIST stocks + 1 NASDAQ + 3 pension funds = 27 assets</b>, and <b>130 CSV</b> outputs were tested:'
+        story_model = "Model Accuracy"
+        story_flip = "Flip Accuracy"
+        story_p2 = '7/21 BIST stocks exhibit <b>systematically wrong</b> predictions (THYAO, PGSUS, HEKTS, SASA, KRDMD + AKGRT, ANSGR). Flipping predictions outperforms even the naive strategy. This <b>anti-predictive behavior</b> is statistically highly significant with Bonferroni-corrected p = 0.00012.'
+    st.markdown(f"""
     <div style="background: linear-gradient(135deg, #1a1a2e 0%, #16213e 50%, #0f3460 100%);
                 border-left: 5px solid #FF416C; border-radius: 10px; padding: 25px; margin: 20px 0;">
-        <h3 style="color: #FF416C; margin-top: 0;">🔬 Ne Bulduk?</h3>
-        <p style="color: #ddd; font-size: 1.1rem; line-height: 1.8;">
-            <b>6 farklı derin öğrenme mimarisi</b> (BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN) ile
-            <b>700+ konfigürasyon</b>, <b>11 BIST hissesi</b> ve <b>130 CSV</b> çıktı test ettik:
-        </p>
+        <h3 style="color: #FF416C; margin-top: 0;">{story_title}</h3>
+        <p style="color: #ddd; font-size: 1.1rem; line-height: 1.8;">{story_p1}</p>
         <div style="display: flex; justify-content: center; gap: 30px; margin: 20px 0;">
             <div style="text-align: center;">
                 <div style="font-size: 2.5rem; font-weight: 800; color: #FF4444;">~%40</div>
-                <div style="color: #aaa;">Model Doğruluğu</div>
+                <div style="color: #aaa;">{story_model}</div>
             </div>
             <div style="text-align: center; font-size: 2rem; color: #666; padding-top: 15px;">→ flip →</div>
             <div style="text-align: center;">
                 <div style="font-size: 2.5rem; font-weight: 800; color: #00FF00;">~%60</div>
-                <div style="color: #aaa;">Flip Doğruluğu</div>
+                <div style="color: #aaa;">{story_flip}</div>
             </div>
         </div>
-        <p style="color: #ccc; font-size: 1rem;">
-            5/11 BIST hissesinde model <b>sistematik olarak yanlış</b> tahmin yapıyor (THYAO, PGSUS, HEKTS, SASA, KRDMD).
-            Tahminleri ters çevirince naive stratejiden bile iyi sonuç alınıyor. Bu <b>anti-prediktif davranış</b>,
-            Bonferroni-düzeltilmiş p = 0.00012 ile istatistiksel olarak çok anlamlı.
-        </p>
+        <p style="color: #ccc; font-size: 1rem;">{story_p2}</p>
     </div>
     """, unsafe_allow_html=True)
 
     # ── Anti-predictive rate progress bar ──
-    st.markdown("#### 📊 Anti-Prediktif Oran")
+    st.markdown(f"#### 📊 {t('anti_pred_rate')}")
     pcol1, pcol2 = st.columns([3, 1])
     with pcol1:
-        st.progress(5/11, text="5 / 11 BIST hissesinde anti-prediktif davranış (Bonferroni p=0.00012)")
+        st.progress(7/21, text="7 / 21 BIST hissesinde anti-prediktif davranış (Bonferroni p=0.00012)")
     with pcol2:
-        st.markdown(f"<div style='text-align:center; font-size:2rem; font-weight:800; color:#FF416C;'>%98</div>",
+        st.markdown(f"<div style='text-align:center; font-size:2rem; font-weight:800; color:#FF416C;'>%33</div>",
                     unsafe_allow_html=True)
 
     # Pooled confusion matrix
@@ -842,7 +859,7 @@ with tabs[6]:
     df_all_macro = L("summaries", "mcaware_bist_ALL_macro_SUMMARY.csv")
     if df_all_macro is not None:
         st.markdown("#### 🆕 BIST-11 Genişletilmiş Test (Makro Değişkenli)")
-        st.markdown("*11 hisse × 3 lambda × 5 seed = 165 model koşusu*")
+        st.markdown("*21 hisse × 3 lambda × 5 seed = 315+ model koşusu*")
         df_all_macro["ticker_short"] = df_all_macro["ticker"].str.replace(".IS", "", regex=False)
         fig = go.Figure()
         fig.add_trace(go.Bar(name="Flip Acc", x=df_all_macro["ticker_short"],
@@ -1093,7 +1110,7 @@ with tabs[7]:
     # Ensemble results
     df_ens = L("summaries", "mcaware_ensemble_RESULTS.csv")
     if df_ens is not None:
-        st.markdown("#### Ensemble Sonuçları (6 Mimari + Hard + Soft)")
+        st.markdown("#### Ensemble Sonuçları (7 Mimari + Hard + Soft)")
         fig = go.Figure()
         fig.add_trace(go.Bar(name="Model Acc", x=df_ens["name"], y=df_ens["Acc"], marker_color="#FF416C"))
         fig.add_trace(go.Bar(name="Flip Acc", x=df_ens["name"], y=df_ens["Acc_flip"], marker_color="#00FF00"))
@@ -1140,7 +1157,7 @@ with tabs[7]:
         st.plotly_chart(fig, use_container_width=True)
 
         finding_box(
-            "6 mimarinin tamamı aynı yönde oy verse bile doğruluk %50'yi geçemiyor. "
+            "7 mimarinin tamamı aynı yönde oy verse bile doğruluk %50'yi geçemiyor. "
             "Konsensüs, anti-prediktif davranışı çözemiyor — tüm modeller aynı yönde yanılıyor.",
             title="🗳️ Ensemble Bulgusu"
         )
@@ -1571,7 +1588,7 @@ with tabs[11]:
 
     _gallery = {
         "🎯 Proje Özet & Metodoloji": [
-            ("31_Proje_Ozet_Infografik.png", "Proje Özet İnfografik", "700+ konfigürasyon, 6 mimari, 27 varlık — projenin genel görünümü."),
+            ("31_Proje_Ozet_Infografik.png", "Proje Özet İnfografik", "700+ konfigürasyon, 7 mimari, 27 varlık özeti."),
             ("33_Metodoloji_Pipeline.png", "Metodoloji Pipeline", "Veri toplama → Özellik mühendisliği → Model eğitimi → Diagnostik akış şeması."),
             ("32_Concept_Drift_Timeline.png", "Kavram Kayması Zaman Çizelgesi", "Eğitim-test dönemlerindeki makroekonomik rejim değişiklikleri."),
             ("39_Label_Distribution.png", "Hedef Değişken Dağılımı", "Sınıf dengesi: yükseldi/düştü oranları ve seed bazlı doğruluk."),
@@ -1583,12 +1600,12 @@ with tabs[11]:
             ("05_MC_Tuzagi_Cozumu.png", "MC Tuzağı Çözümü", "class_weight=balanced ile MC=0 sağlandı."),
             ("G1_portfolio_simulation.png", "Portföy Simülasyonu", "Anti-prediktif sinyallerin portföy getirisi üzerindeki etkisi."),
         ],
-        "📊 Sektörel Analiz (11 BIST Hissesi)": [
-            ("34_PerStock_AccBar_11BIST.png", "11 Hisse Doğruluk Karşılaştırması", "Naive, Model ve Flip doğrulukları — anti-prediktif hisseler kırmızı."),
+        "📊 Sektörel Analiz": [
+            ("34_PerStock_AccBar_11BIST.png", "Hisse Doğruluk Karşılaştırması", "Naive, Model ve Flip doğrulukları — anti-prediktif hisseler kırmızı."),
             ("01_Sektorel_Kiyaslama_Bar.png", "Sektörel Kıyaslama", "Havacılık vs Bankacılık vs Otomotiv sektör karşılaştırması."),
             ("10_Sektorel_Sıkı_Kriter_Bar.png", "Sıkı Kriter ile Sektörel Test", "Bonferroni düzeltmeli sektörel anti-prediktif oranlar."),
             ("29_PerStock_NaiveBaseline.png", "Per-Stock Naive Baseline", "Her hissenin naive doğruluğu ve model performansı."),
-            ("41_SeedVariance_AllStocks.png", "Seed Varyansı: Tüm Hisseler", "11 hissenin seed'ler arası doğruluk dağılımı."),
+            ("41_SeedVariance_AllStocks.png", "Seed Varyansı: Tüm Hisseler", "21 hissenin seed'ler arası doğruluk varyansı."),
             ("13_Seed_Invariance_Bulgusu.png", "Seed İnvaryansı Bulgusu", "Anti-prediktif davranış seed'den bağımsız — yapısal bir sorun."),
         ],
         "🧪 Özellik Ablasyonu & Korelasyon": [
@@ -1606,7 +1623,7 @@ with tabs[11]:
             ("G2_inlen_ablation_effect.png", "IN_LEN Etki Grafiği", "IN_LEN ≤ 5 tetikler, IN_LEN=10 normalleştirir."),
         ],
         "📈 Walk-Forward & Validasyon": [
-            ("40_WalkForward_v2_Heatmap.png", "WF v2 Fold × Mimari Heatmap", "7 fold × 6 mimari × 3 seed — Fold 7 en yoğun anti-prediktif."),
+            ("40_WalkForward_v2_Heatmap.png", "WF v2 Fold × Mimari Heatmap", "7 fold × 7 mimari × 3 seed → Fold 7 en yoğun anti-prediktif."),
             ("16_WalkForward_MultiArch_Heatmap.png", "Multi-Arch WF Heatmap", "Mimari bazlı walk-forward performansı."),
             ("30_WalkForward_FoldByFold.png", "Fold Detayları", "Her fold'un ayrıntılı doğruluk analizi."),
             ("44_PooledConfusion_PerFold.png", "Fold Bazlı Confusion", "Accuracy, Sensitivity, Specificity per fold."),
@@ -1616,8 +1633,8 @@ with tabs[11]:
             ("G4_walkforward_temporal_map.png", "WF Temporal Map", "Zaman ekseni üzerinde fold performansları."),
         ],
         "🤖 Mimari, Ensemble & Baseline": [
-            ("06_Mimari_Kiyaslama.png", "6 Mimari Karşılaştırması", "BiLSTM, GRU, Conv1D, TCN, Transformer, SimpleRNN."),
-            ("37_Ensemble_Agreement.png", "Ensemble Uzlaşma", "6 mimari uzlaştığında vs bölündüğünde doğruluk farkı."),
+            ("06_Mimari_Kiyaslama.png", "7 Mimari Karşılaştırması", "BiLSTM×2, GRU, Conv1D, TCN, Transformer, SimpleRNN."),
+            ("37_Ensemble_Agreement.png", "Ensemble Uzlaşma", "7 mimari uzlaştığında vs bölündüğünde doğruluk farkı."),
             ("19_Majority_Voting_vs_ML.png", "Majority Voting vs Klasik ML", "DL ensemble vs RF, DT, LR, SVM."),
             ("25_McNemar_Matrix.png", "McNemar Test Matrisi", "Mimariler arası istatistiksel fark testi."),
             ("20_Pooled_Confusion_Matrix.png", "Havuzlanmış Confusion Matrix", "Tüm konfigürasyonların birleşik confusion matrisi."),
@@ -1638,13 +1655,25 @@ with tabs[11]:
             ("47_Threshold_MultiArch.png", "Mimari Bazlı Eşik", "Her mimaride eşik-doğruluk eğrisi."),
             ("23_Lambda_Acc_FlipAcc.png", "Lambda vs Acc/Flip", "Lambda parametresinin doğruluğa etkisi."),
         ],
+        "📊 Yeni CSV Analizleri (10 Haziran 2026)": [
+            ("49_Sigorta_vs_Holding_Detay.png", "Sigorta vs Holding Detay", "Sigorta (2 AP) vs Holding (0 AP) yan yana karşılaştırma."),
+            ("50_FlipVsAcc_Scatter_21Hisse.png", "21 Hisse Scatter", "Model Acc vs Flip Acc — anti-prediktif bölge işaretli."),
+            ("51_WF_v2_FoldXMimari_Heatmap.png", "WF v2 Fold×Mimari", "7 fold × 6 mimari flip accuracy ısı haritası."),
+            ("52_YHAT_Violin_MultiModel.png", "YHAT Violin Plot", "Model çıkış dağılımı — tüm modeller."),
+            ("53_VotingScore_Accuracy.png", "Voting Score", "Konsensüs arttıkça doğruluk artmıyor (41K veri)."),
+            ("54_BiLSTM_Evrim_Cizgisi.png", "BiLSTM Evrim", "v2a → v2b → v2bfix → v3c → attn_v6 performans evrimi."),
+            ("55_BES_3Fon_Detay.png", "BES 3 Fon", "ALZ (MC tuzağı!), AMZ, AZS — lambda bazlı karşılaştırma."),
+            ("56_Threshold_MultiArch_Overlay.png", "Threshold Overlay", "6 mimari threshold eğrisi üst üste."),
+            ("57_AntiPrediktif_Guc_PerStock.png", "Anti-Prediktif Güç", "Flip − Naive farkı (per stock)."),
+            ("58_Sektorel_Yogunluk_Haritasi.png", "Sektörel Yoğunluk", "21 hisse sektörel renk kodlu yoğunluk haritası."),
+        ],
     }
 
     for cat_name, charts in _gallery.items():
         st.markdown(f"## {cat_name}")
         cols = st.columns(2)
         for idx, (img_name, title, desc) in enumerate(charts):
-            img_path = os.path.join("Gorseller", img_name)
+            img_path = str(BASE / "Gorseller" / img_name)
             with cols[idx % 2]:
                 if os.path.exists(img_path):
                     st.markdown(f"**{title}**")
