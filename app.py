@@ -1,7 +1,7 @@
 """
-MC-AWARE  —  TÜBİTAK 2209-A Research Dashboard
+MC-AWARE — Research Dashboard
 Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
-Researcher: Mehmet Ali Kurt  |  Advisor: Dr. Övgücan Karadağ Erdemir
+Researcher: Mehmet Ali Kurt
 Hacettepe Üniversitesi — Aktüerya Bilimleri
 """
 
@@ -19,8 +19,8 @@ warnings.filterwarnings("ignore")
 # ─── language dictionary ─────────────────────────────────────────────────────
 TEXTS = {
     "title":           {"TR": "MC-AWARE Araştırma Paneli", "EN": "MC-AWARE Research Dashboard"},
-    "subtitle":        {"TR": "TÜBİTAK 2209-A · Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti · 2026",
-                        "EN": "TÜBİTAK 2209-A · Detecting Anti-Predictive Behavior with Deep Learning · 2026"},
+    "subtitle":        {"TR": "Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti · 2026",
+                        "EN": "Detecting Anti-Predictive Behavior with Deep Learning · 2026"},
     "tab_main":        {"TR": "📊 Ana Bulgular",        "EN": "📊 Main Findings"},
     "tab_arch":        {"TR": "🏗️ Mimari Karşılaştırma", "EN": "🏗️ Architecture Comparison"},
     "tab_wf":          {"TR": "📈 Walk-Forward",        "EN": "📈 Walk-Forward"},
@@ -72,7 +72,6 @@ TEXTS = {
     "diag_title":      {"TR": "Threshold & Diagnostics", "EN": "Threshold & Diagnostics"},
     "sidebar_project": {"TR": "Proje", "EN": "Project"},
     "sidebar_researcher": {"TR": "Araştırmacı", "EN": "Researcher"},
-    "sidebar_advisor": {"TR": "Danışman", "EN": "Advisor"},
     "sidebar_uni":     {"TR": "Üniversite", "EN": "University"},
     "sidebar_arch":    {"TR": "Mimariler", "EN": "Architectures"},
     "sidebar_data":    {"TR": "Veri Kaynakları", "EN": "Data Sources"},
@@ -193,7 +192,7 @@ tr:nth-child(even) {{ background: #f8f9fa; }}
 .footer {{ margin-top: 40px; padding-top: 15px; border-top: 1px solid #ddd; color: #888; font-size: 0.85rem; text-align: center; }}
 </style></head><body>
 <h1>🔬 {title}</h1>
-<p><strong>TÜBİTAK 2209-A</strong> · Mehmet Ali Kurt · Dr. Övgücan Karadağ Erdemir · Hacettepe Üniversitesi</p>
+<p><strong>MC-AWARE</strong> · Mehmet Ali Kurt · Hacettepe Üniversitesi</p>
 <p><em>{"Rapor tarihi" if lang=="TR" else "Report date"}: {now}</em></p>
 
 <h2>{"Ana Bulgular" if lang=="TR" else "Main Findings"}</h2>
@@ -209,7 +208,7 @@ tr:nth-child(even) {{ background: #f8f9fa; }}
 <table><tr><th>Fold</th><th>Model Acc</th><th>Flip Acc</th><th>Naive</th></tr>{wf_rows}</table>
 
 <div class="footer">
-<p>MC-AWARE · TÜBİTAK 2209-A · 2026 · {"Tüm veriler gerçek deneylerden elde edilmiştir." if lang=="TR" else "All data from real experiments."}</p>
+<p>MC-AWARE · Independent Research · 2026 · {"Tüm veriler gerçek deneylerden elde edilmiştir." if lang=="TR" else "All data from real experiments."}</p>
 </div>
 </body></html>"""
     return html
@@ -247,10 +246,9 @@ with st.sidebar:
     st.divider()
     st.markdown("## 🔬 MC-AWARE")
     st.markdown(f"""
-    **{t('sidebar_project')}:** TÜBİTAK 2209-A (2026)
+    **{t('sidebar_project')}:** MC-AWARE (2026)
 
     **{t('sidebar_researcher')}:** Mehmet Ali Kurt
-    **{t('sidebar_advisor')}:** Dr. Övgücan Karadağ Erdemir
     **{t('sidebar_uni')}:** Hacettepe — Aktüerya Bilimleri
     """)
     st.divider()
@@ -1687,7 +1685,7 @@ with tabs[11]:
 st.markdown("---")
 st.markdown(
     """<div style="text-align:center;color:#666;font-size:0.8rem;">
-    MC-AWARE  ·  TÜBİTAK 2209-A  ·  Hacettepe Üniversitesi  ·  2026
+    MC-AWARE · Independent Research · 2026
     <br>Tüm veriler gerçek deneylerden elde edilmiştir. Yapay veri kullanılmamıştır.
     </div>""",
     unsafe_allow_html=True,

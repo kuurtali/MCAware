@@ -1,8 +1,6 @@
 # MC-AWARE — Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
 
-**TÜBİTAK 2209-A Lisans Araştırma Projesi (2026)**
-
-**Yürütücü:** Mehmet Ali Kurt · **Danışman:** Dr. Övgücan Karadağ Erdemir · **Üniversite:** Hacettepe — Aktüerya Bilimleri
+Independent research project by **Mehmet Ali Kurt** · Hacettepe University — Actuarial Sciences
 
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
@@ -112,7 +110,7 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 ## 📁 Proje Yapısı
 
 ```
-Tubitak/
+MCAware/
 ├── app.py                  # Streamlit dashboard (12 tab, TR/EN)
 ├── requirements.txt        # Python bağımlılıkları
 ├── Dockerfile              # Docker container
@@ -140,8 +138,8 @@ Tubitak/
 
 ### Dashboard (Streamlit)
 ```bash
-git clone https://github.com/kuurtali/Tubitak-2209A-MCAware.git
-cd Tubitak-2209A-MCAware
+git clone https://github.com/kuurtali/MCAware.git
+cd MCAware
 pip install -r requirements.txt
 streamlit run app.py
 ```
@@ -165,7 +163,7 @@ Rscript Kodlar/01_prototypes/mcaware_prototype_BiLSTM_v3_THYAO.R
 
 ## 🇬🇧 English Summary
 
-This project investigates the **Majority Class (MC) trap** in deep learning models for daily stock direction prediction on BIST (Borsa Istanbul). Funded by **TÜBİTAK 2209-A** undergraduate research grant.
+This project investigates the **Majority Class (MC) trap** in deep learning models for daily stock direction prediction on BIST (Borsa Istanbul).
 
 After solving the MC trap with `class_weight=balanced`, we discovered that DL models exhibit **anti-predictive behavior** — systematically predicting the *opposite* direction — due to macroeconomic correlation breakdown between training and test periods.
 
@@ -196,5 +194,5 @@ After solving the MC trap with `class_weight=balanced`, we discovered that DL mo
 
 <p align="center">
   <i>Tüm sonuçlar gerçek deneylerden elde edilmiştir. Yatırım tavsiyesi değildir.</i><br>
-  <b>TÜBİTAK 2209-A · Hacettepe Üniversitesi · 2026</b>
+  <b>MC-AWARE · Independent Research · 2026</b>
 </p>
