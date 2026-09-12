@@ -21,16 +21,16 @@ Independent research project by **Mehmet Ali Kurt** · Hacettepe University — 
 </p>
 
 <p align="center">
-  <code>30+ Deney</code> · <code>6 DL Mimarisi</code> · <code>27 Varlık</code> · <code>700+ Konfigürasyon</code> · <code>130 CSV</code> · <code>p < 0.0001</code>
+  <code>30+ Deney</code> · <code>7 DL Mimarisi</code> · <code>27 Varlık</code> · <code>700+ Konfigürasyon</code> · <code>130 CSV</code> · <code>Bonferroni p = 0.00012</code>
 </p>
 
 ---
 
 ## 🔬 Proje Özeti
 
-BIST (Borsa İstanbul) günlük yön tahmininde **6 farklı derin öğrenme mimarisi** ile **700+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
+BIST (Borsa İstanbul) günlük yön tahmininde **7 farklı derin öğrenme mimarisi** ile **700+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
 
-Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) eğitim ve test dönemleri arasındaki korelasyon kırılmasından kaynaklanmaktadır. 11 BIST hissesinden 5'inde (THYAO, PGSUS, HEKTS, SASA, KRDMD) sistematik anti-prediktif davranış tespit edilmiştir. **Bonferroni-düzeltilmiş p = 0.00012**.
+Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) eğitim ve test dönemleri arasındaki korelasyon kırılmasıyla ilişkilidir. 21 BIST hissesinden 7'sinde (THYAO, PGSUS, HEKTS, SASA, KRDMD, AKGRT, ANSGR) anti-prediktif davranış tespit edilmiştir. **Bonferroni-düzeltilmiş p = 0.00012**.
 
 ---
 
@@ -117,21 +117,22 @@ MCAware/
 ├── requirements.txt        # Python bağımlılıkları
 ├── Dockerfile              # Docker container
 ├── README.md               # Bu dosya
-├── Kodlar/                 # 59 kod dosyası (R + Python)
-│   ├── 01_prototypes/      # BiLSTM v1-v6, multi-arch (12)
-│   ├── 02_ablation/        # Feature, IN_LEN, korelasyon (5)
-│   ├── 03_validation/      # Walk-forward, NASDAQ, multi-stock (5)
-│   ├── 04_baseline/        # Klasik ML ve Ensemble (4)
-│   ├── 05_diagnostic/      # MI, teşhis testleri (2)
-│   ├── 06_ek_deneyler/     # Sektörel karşılaştırma (5)
-│   └── 07_araclar/         # Python araçları, rapor üretici (26)
+├── Kodlar/                 # 63 kod dosyası (R + Python + PowerShell)
+│   ├── 01_prototypes/      # BiLSTM v1-v6 ve multi-architecture deneyleri
+│   ├── 02_ablation/        # Feature, IN_LEN ve korelasyon analizleri
+│   ├── 03_validation/      # Walk-forward, NASDAQ ve multi-stock doğrulaması
+│   ├── 04_baseline/        # Klasik ML ve ensemble karşılaştırmaları
+│   ├── 05_diagnostic/      # MI ve tanı testleri
+│   ├── 06_ek_deneyler/     # Sektörel karşılaştırmalar
+│   └── 07_araclar/         # Analiz ve raporlama araçları
 ├── Sonuclar/               # 130 CSV dosyası
 │   ├── summaries/   (71)   # Deney özet tabloları
 │   ├── predictions/ (19)   # Ham tahmin serileri
 │   ├── diagnostics/ (26)   # İstatistiksel tanı verileri
 │   └── thresholds/  (14)   # Eşik grid sonuçları
-├── Gorseller/              # 62 makale kalitesinde grafik (PNG)
-└── Docs/                   # TÜBİTAK raporu, kişisel rapor, şablonlar
+├── Gorseller/              # Makale kalitesinde grafikler (PNG)
+├── Docs/                   # Dashboard ve kişisel araştırma raporu
+└── Archive/                # Tarihsel başvuru materyalleri
 ```
 
 ---
