@@ -110,7 +110,7 @@ for fname in scan_files:
 print("\n[6/10] DOCX rapor kontrol...")
 try:
     from docx import Document
-    for docname in ["Docs/TUBITAK_2209A_Sonuc_Raporu.docx", "Docs/MC_AWARE_Kisisel_Rapor.docx"]:
+    for docname in ["Docs/MC_AWARE_Kisisel_Rapor.docx"]:
         doc = Document(docname)
         text = " ".join([p.text for p in doc.paragraphs])
         short = os.path.basename(docname)

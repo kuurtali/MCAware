@@ -2,6 +2,8 @@
 
 Independent research project by **Mehmet Ali Kurt** · Hacettepe University — Actuarial Sciences
 
+> **Project history:** MC-AWARE originated alongside a TÜBİTAK 2209-A application attempt that was not pursued to completion. The research continued independently without TÜBİTAK funding or support. Historical application materials are preserved in [`Archive/TUBITAK-2209A-Application`](Archive/TUBITAK-2209A-Application/README.md).
+
 <p align="center">
   <img src="https://img.shields.io/badge/Python-3776AB?style=for-the-badge&logo=python&logoColor=white" />
   <img src="https://img.shields.io/badge/R-276DC3?style=for-the-badge&logo=r&logoColor=white" />
