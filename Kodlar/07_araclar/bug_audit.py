@@ -201,7 +201,7 @@ if len(r_issues) > 15:
 # ============================================================
 print("\n[10/10] Ceviri tamam mi...")
 t_calls = set(re.findall(r't\("([^"]+)"\)', src))
-texts_keys = set(re.findall(r'"([^"]+)":\s*\{[^}]*"tr"', src))
+texts_keys = set(re.findall(r'"([^"]+)":\s*\{[^}]*"TR"', src))
 missing_translations = t_calls - texts_keys
 # This is approximate due to regex limitations
 print(f"  t() unique keys: {len(t_calls)}")

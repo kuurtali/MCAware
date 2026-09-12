@@ -10,3 +10,7 @@ TÜBİTAK-supported project.
 The files in this directory are retained only for project-history and provenance
 purposes. They are not part of the active MC-AWARE documentation or workflow.
 
+`Generators/` contains the two historical scripts that produced the application
+and result-report drafts. They intentionally retain the terminology and metrics
+of that earlier snapshot and must not be used to generate current MC-AWARE
+documentation.

@@ -117,7 +117,7 @@ MCAware/
 ├── requirements.txt        # Python bağımlılıkları
 ├── Dockerfile              # Docker container
 ├── README.md               # Bu dosya
-├── Kodlar/                 # 63 kod dosyası (R + Python + PowerShell)
+├── Kodlar/                 # 61 aktif kod dosyası (R + Python + PowerShell)
 │   ├── 01_prototypes/      # BiLSTM v1-v6 ve multi-architecture deneyleri
 │   ├── 02_ablation/        # Feature, IN_LEN ve korelasyon analizleri
 │   ├── 03_validation/      # Walk-forward, NASDAQ ve multi-stock doğrulaması
