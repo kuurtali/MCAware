@@ -1,5 +1,8 @@
 # MC-AWARE — Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
 
+[Portfolio](https://github.com/kuurtali) · [Report an issue](https://github.com/kuurtali/MCAware/issues)
+
+
 Independent research project by **Mehmet Ali Kurt** · Hacettepe University — Actuarial Sciences
 
 > **Project history:** MC-AWARE originated alongside a TÜBİTAK 2209-A application attempt that was not pursued to completion. The research continued independently without TÜBİTAK funding or support. Historical application materials are preserved in [`Archive/TUBITAK-2209A-Application`](Archive/TUBITAK-2209A-Application/README.md).
@@ -27,6 +30,8 @@ Independent research project by **Mehmet Ali Kurt** · Hacettepe University — 
 ---
 
 ## 🔬 Proje Özeti
+
+> **Kapsam:** Bulgular depodaki deneylerin varlıklarına, dönemlerine ve veri ayrımlarına aittir. Bu belge güncellemesinde deneyler yeniden çalıştırılmadı. Bir NASDAQ karşılaştırması, davranışın bütün gelişmekte olan piyasalara özgü olduğunu veya gelecekte işlem getirisi sağlayacağını kanıtlamaz.
 
 BIST (Borsa İstanbul) günlük yön tahmininde **7 farklı derin öğrenme mimarisi** ile **700+ konfigürasyon** test edilmiştir. Tüm mimarilerde modellerin rastgeleden daha kötü tahmin yaptığı, ancak tahminlerin ters çevrilmesiyle rastgeleden daha iyi sonuç elde edildiği gözlemlenmiştir.
 
@@ -69,7 +74,7 @@ Bu **anti-prediktif davranış**, makro değişkenlerin (USD/TRY, petrol, faiz) 
 | **Walk-Forward v2** | 7-fold CV × 7 mimari × 3 seed — Fold 2 (COVID) ve Fold 7 (enflasyon) dönemlerinde tetikleniyor |
 | **Mekanizma** | Makro korelasyon kırılması (USDTRY: train 0.91 → test 0.41) |
 | **Makro Değişken Rolü** | USDTRY + Oil + TCMB çıkarılınca anti-prediktif tamamen kayboluyor |
-| **Cross-Market** | NASDAQ'ta normal davranış — gelişmekte olan piyasaya özgü |
+| **Cross-Market** | İncelenen NASDAQ karşılaştırmasında aynı örüntü görülmedi |
 | **Klasik ML** | Rule-based baseline'larda anti-prediktif davranış yok — yalnızca DL'de |
 
 ---
@@ -168,7 +173,7 @@ Rscript Kodlar/01_prototypes/mcaware_prototype_BiLSTM_v3_THYAO.R
 
 This project investigates the **Majority Class (MC) trap** in deep learning models for daily stock direction prediction on BIST (Borsa Istanbul).
 
-After solving the MC trap with `class_weight=balanced`, we discovered that DL models exhibit **anti-predictive behavior** — systematically predicting the *opposite* direction — due to macroeconomic correlation breakdown between training and test periods.
+After solving the MC trap with `class_weight=balanced`, we discovered that DL models exhibit **anti-predictive behavior** — systematically predicting the *opposite* direction — associated with macroeconomic correlation changes between training and test periods.
 
 | Finding | Detail |
 |---------|--------|
@@ -177,7 +182,7 @@ After solving the MC trap with `class_weight=balanced`, we discovered that DL mo
 | **Architecture-Independent** | 7 DL architectures — all show same pattern in walk-forward |
 | **Window Length** | IN_LEN ≤ 5 → anti-predictive; IN_LEN = 10 → normal |
 | **Mechanism** | Macro-variable correlation breakdown (USDTRY: train 0.91 → test 0.41) |
-| **Cross-Market** | NASDAQ shows normal behavior — emerging-market specific |
+| **Cross-Market** | The tested NASDAQ comparison did not show the same pattern |
 | **Feature Ablation** | Removing macro variables completely eliminates anti-predictive behavior |
 
 **Live Dashboard:** [mcaware.streamlit.app](https://mcaware.streamlit.app) — 12 tabs, 130 CSV sources, 62 visuals, no mock data.
