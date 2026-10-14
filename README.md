@@ -1,7 +1,9 @@
 # MC-AWARE — Anti-Prediktif Davranışın Derin Öğrenme ile Tespiti
 
-[Portfolio](https://github.com/kuurtali) · [Report an issue](https://github.com/kuurtali/MCAware/issues)
+[Portföy](https://github.com/kuurtali) · [Tüm projeler](https://github.com/kuurtali#projects) · [Sorun bildir](https://github.com/kuurtali/MCAware/issues)
 
+
+[Türkçe özet](#-proje-özeti) · [English summary](#-english-summary)
 
 Independent research project by **Mehmet Ali Kurt** · Hacettepe University — Actuarial Sciences
 
